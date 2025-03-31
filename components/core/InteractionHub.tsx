@@ -39,7 +39,8 @@ export default function InteractionHub() {
             setAiResponse(responseText); // Update the display state with processed text
 
             // Optional: Invalidate history query if sending a message should update history display
-            // queryClient.invalidateQueries({ queryKey: ['conversationHistory'] });
+            queryClient.invalidateQueries({ queryKey: ['creditBalance'] });
+            queryClient.invalidateQueries({ queryKey: ['conversationHistory'] });
         },
         onError: (error: Error) => {
             console.error("Mutation Error:", error);
