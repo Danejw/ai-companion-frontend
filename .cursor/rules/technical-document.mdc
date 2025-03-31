@@ -1,0 +1,180 @@
+---
+description: This is the overview of the application that were are building. The Technical Document to refer to when needed.
+globs: 
+alwaysApply: false
+---
+Okay, let's lay out the Technical Design Document for the frontend of your AI Companion application. This document will serve as a reference point for architecture, technology choices, and component responsibilities.
+
+---
+
+**Technical Design Document: AI Companion Frontend**
+
+**Version:** 1.0
+**Date:** [Current Date]
+
+**1. Introduction & Overview**
+
+This document outlines the technical design for the frontend application of the AI Companion project. The frontend provides the primary user interface for interacting with the AI companion, managing user accounts, handling credits, and configuring settings.
+
+The core philosophy emphasizes:
+*   **Minimalism:** A clean, uncluttered interface focusing on the interaction.
+*   **Elegance:** High-quality visuals, smooth transitions, refined typography.
+*   **Usability:** Intuitive controls and clear feedback.
+*   **AI-Centric Design:** The UI adapts and responds to AI directives, creating an ambient, intelligent feel. The primary interaction mode is designed around voice/chat in an "Interaction Space" rather than a traditional message log. Secondary functions are accessed via overlays.
+
+**2. Technology Stack**
+
+| Category           | Technology                             | Rationale                                                                                                |
+| :----------------- | :------------------------------------- | :------------------------------------------------------------------------------------------------------- |
+| **Framework**      | Next.js (App Router)                   | SSR/SSG, Server/Client Components, file-based routing, API routes, performance optimizations.            |
+| **Styling**        | Tailwind CSS                           | Utility-first CSS for rapid development, consistency, and maintainability. Easily customizable.          |
+| **UI Components**  | Shadcn/ui                              | Accessible, unstyled component primitives built on Radix UI & Tailwind. Copy-paste ownership, elegant base. |
+| **State Mgmt**     | Zustand                                | Minimal, lightweight global state management for UI state (overlays, modes, etc.). Unopinionated.      |
+| **Server State**   | React Query (TanStack Query)           | Fetching, caching, synchronizing backend data (AI responses, user info, credits). Handles loading/errors. |
+| **Authentication** | NextAuth.js                            | Simplifies auth flows (Credentials, OAuth), session management, secure integration with Next.js.          |
+| **Forms**          | React Hook Form (Likely needed in overlays) | Efficient form handling and validation.                                                                  |
+| **Icons**          | Lucide Icons (or similar)              | Clean, comprehensive icon set fitting the minimal aesthetic.                                             |
+| **Voice Input**    | Web Speech API (`SpeechRecognition`)   | Browser-native API for capturing user speech.                                                            |
+| **Voice Output**   | Web Speech API (`SpeechSynthesis`)     | Browser-native API for AI voice output.                                                                  |
+| **Audio Viz**      | Web Audio API (`AudioContext`, `AnalyserNode`) + SVG/Canvas | Native browser APIs for analyzing audio data. SVG/Canvas for rendering the visualizer.        |
+| **Payments**       | Stripe (React Stripe.js, Stripe Elements) | Industry standard for payments, secure pre-built UI elements for card details.                         |
+| **Language**       | TypeScript                             | Static typing for improved developer experience and code robustness.                                       |
+
+**3. Architecture Overview**
+
+The application follows a client-server architecture:
+*   **Frontend (Next.js):** Handles UI rendering, user interaction, state management, and communication with the backend. Utilizes Server Components for static parts and Client Components for interactive elements.
+*   **Backend API:** A separate service (already created by you) that provides endpoints for:
+    *   AI interaction (text/voice processing, response generation).
+    *   AI UI directives (`uiAction`, `proposedUserAction`).
+    *   User authentication & management.
+    *   Credit management & payment processing hooks.
+    *   Storing/retrieving conversation history and user preferences.
+*   **External Services:**
+    *   Authentication Provider (e.g., Google via NextAuth).
+    *   Payment Gateway (Stripe).
+
+**4. Folder Structure (Next.js App Router)**
+
+```
+/
+├── app/                      # Next.js App Router directory
+│   ├── (auth)/               # Group for auth routes (login, signup) - Minimal pages/modals
+│   │   ├── layout.tsx        # Auth-specific layout (optional)
+│   │   └── login/page.tsx    # Or could be triggered via modal from landing
+│   ├── (app)/                # Group for authenticated app routes
+│   │   ├── layout.tsx        # Main app layout (contains core elements, overlays)
+│   │   └── page.tsx          # PRIMARY Ambient Interface / Interaction Space
+│   ├── layout.tsx            # Root layout (providers, HTML shell)
+│   ├── page.tsx              # Landing page (or redirect to /login or /app)
+│   └── api/                  # Next.js API Routes (primarily for NextAuth)
+│       └── auth/[...nextauth]/route.ts
+├── components/               # Reusable React components
+│   ├── ui/                   # Shadcn/ui components (Button, Dialog, Sheet, Input, etc.)
+│   ├── auth/                 # Authentication-related components (LoginForm - if needed)
+│   ├── core/                 # Core interaction components
+│   │   ├── InteractionHub.tsx # Central voice/text input manager
+│   │   └── AudioVisualizer.tsx # CUSTOM audio visualization component
+│   ├── overlays/             # Components rendering inside Shadcn Dialog/Sheet
+│   │   ├── HistoryOverlay.tsx
+│   │   ├── CreditsOverlay.tsx
+│   │   ├── SettingsOverlay.tsx
+│   │   └── ConfirmationModal.tsx
+│   └── common/               # General shared components (Loaders, ErrorDisplays)
+├── hooks/                    # Custom React hooks (e.g., useAudioInput, useRequireAuth)
+├── lib/                      # Utility functions, API client setup, constants
+│   ├── api.ts                # Centralized API fetching functions (used by React Query)
+│   ├── auth.ts               # NextAuth configuration options
+│   ├── stripe.ts             # Stripe client-side setup (if needed)
+│   ├── utils.ts              # General utility functions (formatting, etc.)
+│   └── types.ts              # Shared TypeScript types/interfaces
+├── store/                    # Zustand state management stores
+│   └── index.ts              # Main store definition (or separate stores like uiStore, userStore)
+├── public/                   # Static assets (images, fonts, icons)
+├── styles/                   # Global styles and Tailwind configuration
+│   └── globals.css
+├── middleware.ts             # Next.js middleware (route protection)
+├── tailwind.config.js        # Tailwind configuration
+├── next.config.js            # Next.js configuration
+└── tsconfig.json             # TypeScript configuration
+```
+
+**5. Core Components & Modules Description**
+
+*   **`app/(app)/layout.tsx`**:
+    *   **Purpose:** The main container for the authenticated user experience. Persists across navigation within `(app)`.
+    *   **Contains:** Root structure, necessary context providers (React Query Client, Zustand Provider), renders the corner UI elements (Credits, History, Settings triggers), and crucially, renders the various Overlay components (`HistoryOverlay`, `CreditsOverlay`, etc.) whose visibility is controlled by global state. Does *not* typically re-route.
+*   **`app/(app)/page.tsx`**:
+    *   **Purpose:** The primary view after login - the "Ambient Interface".
+    *   **Contains:** Minimal background, the central `InteractionHub` component. It's mostly a container setting the scene.
+*   **`components/core/InteractionHub.tsx`**:
+    *   **Purpose:** The focal point for user interaction. Manages the state between voice and text input.
+    *   **Contains:**
+        *   `<AudioVisualizer />`: Displays voice activity.
+        *   Microphone Button: Triggers `SpeechRecognition`.
+        *   Minimal Text Input: Appears when text mode is active or as fallback. Sends message via React Query mutation.
+        *   Temporary AI Response Display: Shows the latest text response briefly.
+*   **`components/core/AudioVisualizer.tsx`**:
+    *   **Purpose:** Provides visual feedback for user speech and AI synthesis. Key branding element.
+    *   **Implementation:** Custom component using Web Audio API to get frequency/amplitude data from mic input (`MediaStream`) and synth output (`SpeechSynthesis`). Renders visualization using SVG or Canvas. Needs careful performance optimization.
+*   **`components/overlays/*.tsx`**:
+    *   **Purpose:** Encapsulate the UI for secondary functions (History, Credits, Settings, Confirmations).
+    *   **Implementation:** Each component typically wraps a Shadcn/ui `Dialog` or `Sheet`. Fetches necessary data using React Query (e.g., history, balance) or displays forms (e.g., settings, credit purchase). Triggered by user clicks on corner icons or by AI `uiAction` via Zustand state change.
+*   **`lib/api.ts`**:
+    *   **Purpose:** Centralizes all communication logic with the backend API.
+    *   **Implementation:** Exports async functions (e.g., `sendChatMessage`, `fetchHistory`, `purchaseCredits`) that handle `fetch` requests, headers (including auth tokens), request bodies, and basic response handling/error wrapping. These functions are consumed by React Query hooks.
+*   **`store/index.ts` (Zustand Store)**:
+    *   **Purpose:** Manages global client-side UI state.
+    *   **Contains State:** `isHistoryOpen`, `isCreditsOpen`, `isSettingsOpen` (booleans), `confirmationAction` (object | null), `interactionMode` ('voice' | 'text'), potentially `creditBalance` (though React Query might own this).
+    *   **Contains Actions:** Functions to modify the state (e.g., `toggleHistoryOverlay`, `setConfirmationAction`).
+
+**6. State Management Strategy**
+
+*   **Global UI State (Zustand):** Manages state that affects multiple disconnected parts of the UI, primarily the visibility of overlays, the current interaction mode (voice/text), and data for transient modals like AI action confirmations.
+*   **Server Cache State (React Query):** Manages data fetched from the backend. Handles caching, background updates, stale-while-revalidate logic for user data, credits, history, and AI responses. Manages loading and error states for async operations.
+*   **Local Component State (`useState`, `useReducer`):** Used for state confined to a single component (e.g., controlled inputs within a form in an overlay).
+
+**7. API Interaction**
+
+*   Primary communication via HTTPS requests to the backend REST API.
+*   React Query hooks (`useQuery` for reads, `useMutation` for writes) are used in components to trigger API calls defined in `lib/api.ts`.
+*   Authentication tokens (handled by NextAuth.js) are automatically included in relevant API requests.
+*   **AI Directives:** The frontend expects specific structures in API responses (`uiAction`, `proposedUserAction`) to trigger overlay visibility or confirmation modals via Zustand state changes.
+
+**8. Authentication**
+
+*   Handled by NextAuth.js. Configuration resides in `lib/auth.ts` and the handler in `app/api/auth/[...nextauth]/route.ts`.
+*   Supports chosen providers (e.g., Credentials, Google).
+*   Session state managed by NextAuth, accessible via its hooks/helpers.
+*   Route protection implemented using `middleware.ts` to redirect unauthenticated users from `(app)` routes.
+
+**9. Styling**
+
+*   Tailwind CSS utility classes are used directly in components for styling.
+*   Base styles, fonts, and CSS variables defined in `styles/globals.css`.
+*   Shadcn/ui components provide the structural and accessible base, styled using Tailwind.
+*   Focus on achieving the minimal and elegant aesthetic through careful use of spacing, typography, color palette (defined in `tailwind.config.js`), and subtle animations/transitions.
+
+**10. Key Feature Implementation Notes**
+
+*   **Audio Visualizer:** Requires careful integration of Web Audio API with both microphone input and potentially synthesized speech output. Performance is key.
+*   **Overlays:** Relies on Shadcn/ui `Dialog`/`Sheet` components controlled by Zustand state. Ensure smooth entry/exit transitions.
+*   **AI-Driven UI:** Backend API response structure is critical. Frontend logic translates `uiAction` into Zustand state changes. `proposedUserAction` populates the `ConfirmationModal` via Zustand.
+
+**11. Deployment**
+
+*   Recommended platform: **Vercel** (natively supports Next.js features).
+*   Build process handled by `next build`.
+*   Environment variables needed for backend API URL, NextAuth secrets, Stripe keys, etc.
+
+**12. Future Considerations / Roadmap**
+
+*   **Enhanced Voice Interaction:** Deeper integration, potentially wake words, more complex voice commands.
+*   **Video Interaction:** Integration of WebRTC for video streams.
+*   **Multiple Conversations:** If needed, update routing/state to handle distinct chat threads.
+*   **Offline Support / Local Caching:** Service workers, IndexedDB (if required).
+*   **Accessibility Audit:** Thorough review for WCAG compliance.
+
+---
+
+This document provides the foundational technical plan. It should be considered a living document and updated as the project evolves.

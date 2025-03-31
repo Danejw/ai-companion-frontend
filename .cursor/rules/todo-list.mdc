@@ -1,0 +1,179 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+Okay, let's break down the development process into a sequential, actionable to-do list based on our technical design document. This will help keep the project organized and ensure we build features logically.
+
+**Phase 1: Project Setup & Foundation**
+
+*   **[x] 1. Initialize Next.js Project:**
+    *   Use `npx create-next-app@latest --typescript --tailwind --eslint --app`
+    *   Name the project appropriately.
+*   **[x] 2. Install Core Dependencies:**
+    *   `npm install zustand @tanstack/react-query next-auth react-hook-form zod`
+    *   `npm install @stripe/react-stripe-js @stripe/stripe-js` (for later)
+    *   `npm install lucide-react` (or chosen icon library)
+*   **[x] 3. Setup Shadcn/ui:**
+    *   `npx shadcn-ui@latest init`
+    *   Configure `globals.css`, `tailwind.config.js` as per its instructions.
+    *   Choose a base theme color that aligns with the "elegant" goal.
+*   **[x] 4. Add Essential Shadcn Components:**
+    *   `npx shadcn-ui@latest add button input dialog sheet card toast sonner` (Add more as needed later)
+*   **[x] 5. Configure TypeScript:**
+    *   Review `tsconfig.json`, ensure paths/aliases are set up if desired (e.g., `@/*`).
+*   **[x] 6. Basic Git Setup:**
+    *   `git init`, create initial commit, set up remote repository.
+
+**Phase 2: Authentication & Basic Layout**
+
+*   **[ ] 7. Setup NextAuth.js:**
+    *   Create `app/api/auth/[...nextauth]/route.ts`.
+    *   Configure providers (e.g., Credentials, Google) in `lib/auth.ts`.
+    *   Add required environment variables (`NEXTAUTH_URL`, `NEXTAUTH_SECRET`, provider keys).
+*   **[ ] 8. Create Basic Login UI:**
+    *   Implement a simple login page (`app/(auth)/login/page.tsx`) or a modal triggered from the landing page (`app/page.tsx`). Use Shadcn `Card`, `Input`, `Button`.
+    *   Connect UI to NextAuth `signIn` function.
+*   **[ ] 9. Implement Route Protection:**
+    *   Create `middleware.ts` to protect the `(app)` routes, redirecting unauthenticated users to login.
+*   **[ ] 10. Setup Root & App Layouts:**
+    *   Configure `app/layout.tsx` with HTML shell, body, theme providers (if any).
+    *   Configure `app/(app)/layout.tsx`:
+        *   Add React Query Provider (`QueryClientProvider`).
+        *   Add basic structure (e.g., full-height container).
+        *   Add placeholders for corner icons (History, Credits, Settings). Use `lucide-react` icons wrapped in Shadcn `Button` (variant="ghost").
+        *   **(Defer Overlay Rendering):** We'll add the actual overlay components here later.
+*   **[ ] 11. Create Main Ambient Page:**
+    *   Setup `app/(app)/page.tsx`. This will eventually hold the `InteractionHub`. For now, it can be a simple placeholder.
+*   **[ ] 12. Setup Zustand Store:**
+    *   Create `store/index.ts` (or `store/uiStore.ts`).
+    *   Define initial state for overlay visibility (`isHistoryOpen: false`, etc.).
+    *   Define basic actions to toggle these states.
+*   **[ ] 13. Connect Corner Icons to State:**
+    *   Make the placeholder corner icons trigger the corresponding Zustand actions (`onClick={() => toggleHistoryOverlay()}`).
+
+**Phase 3: Core Interaction - Text Chat**
+
+*   **[ ] 14. Setup React Query:**
+    *   Configure `QueryClient` in `app/(app)/layout.tsx`.
+*   **[ ] 15. Define API Client Functions:**
+    *   Create `lib/api.ts`.
+    *   Implement `sendTextMessage(message: string): Promise<AIResponse>` function (define `AIResponse` type based on your backend). This function should handle fetching from your AI endpoint. Include logic to handle auth headers if needed.
+*   **[ ] 16. Build `InteractionHub` Component (Text Only First):**
+    *   Create `components/core/InteractionHub.tsx`.
+    *   Add a minimal Shadcn `Input` or `Textarea` for user input.
+    *   Add a Send `Button`.
+    *   Use `useState` for the input field value.
+*   **[ ] 17. Implement Text Sending Mutation:**
+    *   In `InteractionHub`, use React Query's `useMutation` hook, calling the `sendTextMessage` function.
+    *   Trigger the mutation on Send button click or Enter key press.
+*   **[ ] 18. Display Temporary AI Response:**
+    *   Add a state variable in `InteractionHub` to hold the latest AI text response.
+    *   On mutation success, update this state.
+    *   Render the response text above the input area.
+    *   **(Optional):** Add simple fade-in/fade-out animation using CSS or Framer Motion.
+*   **[ ] 19. Basic Loading/Error Handling:**
+    *   Use `useMutation`'s `isLoading` state to disable the input/button while waiting for response.
+    *   Use `isError` state to show a basic error message (e.g., using Shadcn `Toast`/`Sonner`).
+
+**Phase 4: Implementing Overlays**
+
+*   **[ ] 20. Create Overlay Components:**
+    *   Create files: `components/overlays/HistoryOverlay.tsx`, `CreditsOverlay.tsx`, `SettingsOverlay.tsx`.
+*   **[ ] 21. Integrate Overlays into App Layout:**
+    *   In `app/(app)/layout.tsx`, import and render the overlay components.
+    *   Control their `open` prop using the corresponding state from the Zustand store (`isHistoryOpen`, etc.).
+    *   Pass the Zustand action function (e.g., `toggleHistoryOverlay`) down to allow closing from within the overlay. Use Shadcn `Dialog`/`Sheet`.
+*   **[ ] 22. Implement History Overlay:**
+    *   Define `fetchHistory` function in `lib/api.ts`.
+    *   Use `useQuery` in `HistoryOverlay` to fetch data when the overlay opens.
+    *   Render the history (user/AI messages) in a scrollable area (`ScrollArea` if needed).
+*   **[ ] 23. Implement Credits Overlay (Display):**
+    *   Define `fetchCreditBalance` in `lib/api.ts`.
+    *   Fetch balance using `useQuery` (perhaps fetch globally in layout or context).
+    *   Display balance clearly in the corner element.
+    *   Inside `CreditsOverlay`, display the balance again.
+*   **[ ] 24. Implement Credit Purchase (Stripe):**
+    *   Set up Stripe account and get keys.
+    *   Configure Stripe provider (`Elements` from `@stripe/react-stripe-js`) likely wrapping the `CreditsOverlay`.
+    *   Use Stripe Elements (`CardElement`, etc.) for secure input.
+    *   Define backend endpoints for creating Payment Intents.
+    *   Define `purchaseCredits` function in `lib/api.ts` to call your backend.
+    *   Implement purchase logic using `useMutation` and `stripe.confirmCardPayment`.
+    *   Add feedback on success/failure (Toasts).
+*   **[ ] 25. Implement Settings Overlay:**
+    *   Define API functions (`fetchUserSettings`, `updateUserSettings`) in `lib/api.ts`.
+    *   Use `useQuery` to fetch settings.
+    *   Use `react-hook-form` to manage editable fields (e.g., profile name, preferences).
+    *   Use `useMutation` to save changes.
+
+**Phase 5: Voice Interaction & Visualizer**
+
+*   **[ ] 26. Basic Audio Visualizer Component:**
+    *   Create `components/core/AudioVisualizer.tsx`.
+    *   Implement basic Web Audio API setup (`AudioContext`, `AnalyserNode`).
+    *   Use `navigator.mediaDevices.getUserMedia` to request mic permission and get audio stream. **Handle permissions gracefully.**
+    *   Connect stream to `AnalyserNode`.
+    *   Use `requestAnimationFrame` loop to get data (`getByteFrequencyData`).
+    *   Render a *very simple* visualization (e.g., scaling circle/bar) using SVG or Canvas based on the data. **Focus on the pipeline first, not aesthetics.**
+*   **[ ] 27. Integrate Visualizer into `InteractionHub`:**
+    *   Render the `<AudioVisualizer />`.
+    *   Control its activity based on listening state.
+*   **[ ] 28. Implement Voice Input (`SpeechRecognition`):**
+    *   Add Mic button functionality in `InteractionHub`.
+    *   Use `window.SpeechRecognition` API. Handle browser compatibility/prefixes.
+    *   Start/stop recognition on button press.
+    *   On result (`onresult` event), get the transcript.
+    *   Feed the transcript into the existing text `useMutation` flow.
+    *   Ensure the visualizer reacts to the microphone input stream.
+*   **[ ] 29. Implement Voice Output (`SpeechSynthesis`):**
+    *   When the AI response is received (text), use `window.speechSynthesis.speak()` to read it aloud.
+    *   Select voice, handle different languages if needed.
+*   **[ ] 30. Connect Speech Synthesis to Visualizer (Advanced):**
+    *   **Research Required:** Route the audio output of `SpeechSynthesis` through your `AudioContext` so the `AnalyserNode` can process it for visualization. This is non-trivial and may require specific techniques or workarounds depending on browser support.
+*   **[ ] 31. Refine Audio Visualizer Aesthetics:**
+    *   Now that the pipeline works, implement the desired elegant/branded visual style using SVG/Canvas animations.
+    *   Differentiate visualization for user vs. AI speech (e.g., color, pattern).
+
+**Phase 6: AI-Driven UI & Polish**
+
+*   **[ ] 32. Define AI Action API Structure:**
+    *   Finalize the JSON structure for `uiAction` and `proposedUserAction` with the backend team.
+*   **[ ] 33. Implement AI Action Handler:**
+    *   Modify the AI response handling logic (likely where the `useMutation` updates state).
+    *   Check for `uiAction` in the response. If present, call the appropriate Zustand action (e.g., `setHistoryOpen(true)`).
+    *   Check for `proposedUserAction`. If present:
+        *   Create `<ConfirmationModal />` component (`components/overlays/ConfirmationModal.tsx`) using Shadcn `Dialog`.
+        *   Update Zustand state (`setConfirmationAction(actionData)`) to show the modal and populate it with description/buttons from `proposedUserAction`.
+        *   Handle Confirm/Deny clicks within the modal, triggering necessary API calls via `useMutation`.
+*   **[ ] 34. Styling and Theme Refinement:**
+    *   Review all components against the "elegant," "minimal" goals.
+    *   Refine Tailwind config (colors, fonts, spacing).
+    *   Ensure consistency across the application.
+*   **[ ] 35. Add Transitions & Micro-interactions:**
+    *   Implement smooth transitions for overlay appearances (Shadcn/Radix often handle this well, enhance if needed).
+    *   Add subtle hover/focus states.
+*   **[ ] 36. Responsive Design:**
+    *   Test and adjust layout/components for different screen sizes (mobile, tablet, desktop). Tailwind makes this easier.
+*   **[ ] 37. Comprehensive Error Handling:**
+    *   Ensure all API calls (`useQuery`, `useMutation`) have robust error handling, providing user feedback via Toasts/Sonner or inline messages. Handle edge cases (e.g., payment failure, API offline).
+*   **[ ] 38. Accessibility (A11y) Check:**
+    *   Perform basic accessibility checks: keyboard navigation, focus management (especially in overlays), semantic HTML, ARIA attributes where needed (Shadcn helps here), color contrast.
+
+**Phase 7: Testing & Deployment**
+
+*   **[ ] 39. Cross-Browser Testing:**
+    *   Test core functionality on major browsers (Chrome, Firefox, Safari, Edge). Pay attention to Web Speech & Web Audio APIs.
+*   **[ ] 40. Final Code Review & Refactoring:**
+    *   Clean up code, remove console logs, ensure consistency.
+*   **[ ] 41. Build Optimization:**
+    *   Analyze bundle size (`@next/bundle-analyzer`). Ensure efficient loading.
+*   **[ ] 42. Setup Deployment Environment (Vercel Recommended):**
+    *   Connect Git repository to Vercel.
+    *   Configure environment variables in Vercel dashboard.
+*   **[ ] 43. Deploy to Production:**
+    *   Trigger production build and deployment.
+*   **[ ] 44. Post-Deployment Monitoring:**
+    *   Monitor logs and performance.
+
+This checklist provides a structured path. Remember to commit frequently and potentially break down larger tasks further as you go! Good luck!
