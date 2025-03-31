@@ -4,11 +4,7 @@ import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useUIStore } from '@/store';
-import { History, Settings, CreditCard, LogIn, LogOut, Loader2 } from 'lucide-react';
-
-
-
-
+import { History, Settings, CreditCard, LogIn, LogOut, Loader2, Brain } from 'lucide-react';
 
 
 export default function Header() {
@@ -17,11 +13,12 @@ export default function Header() {
     const toggleCreditsOverlay = useUIStore((state) => state.toggleCreditsOverlay);
     const toggleSettingsOverlay = useUIStore((state) => state.toggleSettingsOverlay);
     const toggleHistoryOverlay = useUIStore((state) => state.toggleHistoryOverlay);
+    const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
 
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-14 items-center">
-                <div className="mr-4 flex"> {/* Changed md:flex to flex */}
+                <div className="mr-4 flex ml-6">
                     <Link href="/" className="mr-6 flex items-center space-x-2">
                         {/* <YourLogoIcon /> */}
                         <span className="font-bold">AI Companion</span>
@@ -56,6 +53,10 @@ export default function Header() {
                             {/* --- Overlay Trigger Buttons (Icon only) --- */}
                             <Button variant="ghost" size="icon" onClick={toggleHistoryOverlay} title="Conversation History">
                                 <History className="h-4 w-4" />
+                            </Button>
+
+                            <Button variant="ghost" size="icon" onClick={() => toggleKnowledgeOverlay(true)} title="Learned Knowledge">
+                                <Brain className="h-4 w-4" />
                             </Button>
 
                             <Button

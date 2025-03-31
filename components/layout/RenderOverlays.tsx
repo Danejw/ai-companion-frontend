@@ -12,6 +12,8 @@ import { useSession } from 'next-auth/react'; // Import useSession
 import AuthOverlay from '@/components/overlays/AuthOverlay';
 import CreditsOverlay from '@/components/overlays/CreditsOverlay';
 import HistoryOverlay from '@/components/overlays/HistoryOverlay';
+import KnowledgeOverlay from '@/components/overlays/KnowledgeOverlay';
+
 // import SettingsOverlay from '@/components/overlays/SettingsOverlay'; // Uncomment when ready
 
 export function RenderOverlays() {
@@ -20,12 +22,13 @@ export function RenderOverlays() {
     const isCreditsOpen = useUIStore((state) => state.isCreditsOpen);
     const isSettingsOpen = useUIStore((state) => state.isSettingsOpen);
     const isHistoryOpen = useUIStore((state) => state.isHistoryOpen);
+    const isKnowledgeOpen = useUIStore((state) => state.isKnowledgeOpen);
 
     const toggleAuthOverlay = useUIStore((state) => state.toggleAuthOverlay);
     const toggleCreditsOverlay = useUIStore((state) => state.toggleCreditsOverlay);
     const toggleSettingsOverlay = useUIStore((state) => state.toggleSettingsOverlay);
     const toggleHistoryOverlay = useUIStore((state) => state.toggleHistoryOverlay);
-    // --- ---
+    const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
 
     // Get session status
     const { status } = useSession(); // Only need status here
@@ -59,6 +62,8 @@ export function RenderOverlays() {
 
             <CreditsOverlay open={isCreditsOpen} onOpenChange={toggleCreditsOverlay} />
             <HistoryOverlay open={isHistoryOpen} onOpenChange={toggleHistoryOverlay} />
+            <KnowledgeOverlay open={isKnowledgeOpen} onOpenChange={toggleKnowledgeOverlay} />
+
             {/* <SettingsOverlay open={isSettingsOpen} onOpenChange={toggleSettingsOverlay} /> */}
         </>
     );

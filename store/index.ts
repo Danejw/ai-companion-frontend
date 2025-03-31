@@ -6,6 +6,8 @@ interface UIState {
     isCreditsOpen: boolean;
     isSettingsOpen: boolean;
     isAuthOverlayOpen: boolean;
+    isKnowledgeOpen: boolean;
+
     // Add state for confirmation modal later
     // confirmationAction: null | object;
 
@@ -13,6 +15,7 @@ interface UIState {
     toggleCreditsOverlay: () => void;
     toggleSettingsOverlay: () => void;
     toggleAuthOverlay: (isOpen: boolean) => void;
+    toggleKnowledgeOverlay: (isOpen: boolean) => void;
 
     // setConfirmationAction: (action: object | null) => void;
 }
@@ -23,6 +26,7 @@ export const useUIStore = create<UIState>((set, get) => ({
     isCreditsOpen: false,
     isSettingsOpen: false,
     isAuthOverlayOpen: false,
+    isKnowledgeOpen: false,
     // confirmationAction: null,
 
     // Actions
@@ -30,7 +34,6 @@ export const useUIStore = create<UIState>((set, get) => ({
         set((state) => { 
             const newState = !state.isHistoryOpen;
             set({isHistoryOpen: newState});
-            console.log(`--- DEBUG: Setting isHistoryOpen to: ${newState} ---`);
             return { isHistoryOpen: newState };
         });
     },    
@@ -39,7 +42,6 @@ export const useUIStore = create<UIState>((set, get) => ({
         set((state) => {
             const newState = !state.isCreditsOpen;
             set({isCreditsOpen: newState});
-            console.log(`--- DEBUG: Setting isCreditsOpen to: ${newState} ---`);
             return { isCreditsOpen: newState };
         });
     },    
@@ -48,7 +50,6 @@ export const useUIStore = create<UIState>((set, get) => ({
         set((state) => {
             const newState = !state.isSettingsOpen;
             set({isSettingsOpen: newState});
-            console.log(`--- DEBUG: Setting isSettingsOpen to: ${newState} ---`);
             return { isSettingsOpen: newState };
         });
     },
@@ -57,10 +58,11 @@ export const useUIStore = create<UIState>((set, get) => ({
         set((state) => {
             const newState = !state.isAuthOverlayOpen;
             set({isAuthOverlayOpen: newState});
-            console.log(`--- DEBUG: Setting isAuthOverlayOpen to: ${newState} ---`);
             return { isAuthOverlayOpen: newState };
         });
     },
+
+    toggleKnowledgeOverlay: (isOpen) => set((state) => ({ isKnowledgeOpen: isOpen !== undefined ? isOpen : !state.isKnowledgeOpen }))
 
     // setConfirmationAction: (action) => set({ confirmationAction: action }),
 }));
