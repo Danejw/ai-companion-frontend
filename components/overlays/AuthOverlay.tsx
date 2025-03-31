@@ -3,9 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation'; // Use App Router's router
-// Removed direct useUIStore import
-
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner'; // For feedback
 import { Loader2, ChromeIcon } from 'lucide-react'; // Example icons
 
-// Simple Spinner component
+// Simple Spinner component (or use one from a library)
 const Spinner = () => <Loader2 className="mr-2 h-4 w-4 animate-spin" />;
 
 // --- Define Props Interface ---
@@ -32,22 +30,35 @@ interface AuthOverlayProps {
 // --- Use Props in Component Definition ---
 export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
     const router = useRouter();
+    // --- REMOVED useUIStore call ---
 
-    const [activeTab, setActiveTab] = useState('login');
+    const [activeTab, setActiveTab] = useState('login'); // 'login' or 'signup'
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Form States (Credentials)
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    // const [name, setName] = useState(''); // Uncomment if using name for signup
 
-    // Clear form state/errors when tab changes or overlay opens/closes
+    // Clear form state and errors when tab changes or overlay visibility changes
     useEffect(() => {
+        // Always clear fields/errors when tab changes OR visibility changes (open prop)
         setEmail('');
         setPassword('');
+        // setName(''); // Uncomment if using name
         setError(null);
-        setIsLoading(false); // Reset loading state
-        // Optionally reset tab to login when it opens, if desired
-        // if (open) { setActiveTab('login'); }
-    }, [activeTab, open]); // Dependencies
+        setIsLoading(false); // Reset loading state as well
+
+        // Optionally reset to login tab when overlay re-opens after being closed
+        // if (open && !prevOpen) { // Need to track previous open state for this
+        //    setActiveTab('login');
+        // }
+        // Simple approach: Reset to login only if tab changes
+        // If you want to reset tab on re-open, requires more state logic
+        // For now, just clearing fields is safer.
+
+    }, [activeTab, open]); // Dependency array includes activeTab and open
 
     // --- Handlers ---
     const handleCredentialsSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -56,79 +67,110 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
         setError(null);
 
         if (activeTab === 'login') {
-            // LOGIN LOGIC
+            // --- LOGIN LOGIC ---
             try {
-                const result = await signIn('credentials', { redirect: false, email, password });
+                const result = await signIn('credentials', {
+                    redirect: false, // Handle redirect manually
+                    email,
+                    password,
+                });
+
                 if (result?.error) {
                     const errorMessage = result.error === 'CredentialsSignin' ? 'Invalid email or password.' : result.error;
                     setError(errorMessage);
                     toast.error('Login Failed', { description: errorMessage });
                 } else if (result?.ok) {
                     toast.success('Login Successful!');
-                    onOpenChange(false); // Close overlay programmatically on success
-                    router.refresh();
-                } else { /* ... handle unknown error ... */ }
-            } catch (err) { /* ... handle unexpected error ... */ }
-            finally { setIsLoading(false); }
-        } else {
-            // SIGN UP LOGIC
-            try {
-                const response = await fetch('/api/auth/register', { /* ... */ body: JSON.stringify({ email, password }) });
-                const data = await response.json();
-                if (!response.ok) { /* ... handle signup error ... */ }
-                else {
-                    toast.success('Sign Up Successful!', { description: 'Please log in.' });
-                    setActiveTab('login');
-                    setEmail(email); // Pre-fill email
-                    setPassword(''); // Clear password
-                    // Do NOT close overlay here
+                    onOpenChange(false); // <-- Use prop function to close
+                    router.refresh(); // Refresh server components to reflect login state
+                } else {
+                    setError('An unknown error occurred during login.');
+                    toast.error('Login Failed', { description: 'An unknown error occurred.' });
                 }
-            } catch (err) { /* ... handle unexpected error ... */ }
-            finally { setIsLoading(false); }
+            } catch (err) {
+                console.error("Login submit error:", err);
+                setError('An unexpected error occurred.');
+                toast.error('Login Failed', { description: 'An unexpected error occurred.' });
+            } finally {
+                setIsLoading(false);
+            }
+
+        } else {
+            // --- SIGN UP LOGIC ---
+            try {
+                const response = await fetch('/api/auth/register', { // ADJUST YOUR API ROUTE
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    // Include name if using: body: JSON.stringify({ name, email, password }),
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    const errorMessage = data.message || 'Sign up failed.';
+                    setError(errorMessage);
+                    toast.error('Sign Up Failed', { description: errorMessage });
+                } else {
+                    toast.success('Sign Up Successful!', { description: 'Please log in with your new account.' });
+                    setActiveTab('login'); // Switch to login tab after successful signup
+                    // Keep email for easy login, clear password
+                    setEmail(email);
+                    setPassword('');
+                    // Don't close overlay automatically, let them log in
+                }
+            } catch (err) {
+                console.error("Signup submit error:", err);
+                setError('An unexpected network error occurred during sign up.');
+                toast.error('Sign Up Failed', { description: 'A network error occurred.' });
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
-    const handleOAuthSignIn = async (provider: 'google') => {
+    const handleOAuthSignIn = async (provider: 'google' /* | 'github' | etc */) => {
         setIsLoading(true);
-        setError(null);
+        setError(null); // Clear previous errors
         try {
-            // Let NextAuth handle redirect, which implicitly closes overlay
-            await signIn(provider, { callbackUrl: '/app' });
-        } catch (err) { /* ... handle error ... */ }
-        // Don't setIsLoading(false) on success path due to redirect
-    };
-
-    // This handler is passed to the Dialog, but we prevent user-triggered closing below
-    const handleOpenChange = (isOpen: boolean) => {
-        // Only allow programmatic closing (e.g., after login) or if not loading
-        if (!isLoading || !isOpen) { // Allow closing if not loading, OR if opening
-            onOpenChange(isOpen);
+            await signIn(provider, { callbackUrl: '/app' }); // Redirect to app after successful OAuth
+            // On success, NextAuth redirects, overlay will close as page changes/refreshes
+        } catch (err) {
+            console.error("OAuth signin error:", err);
+            const message = `Failed to sign in with ${provider}.`;
+            setError(message);
+            toast.error('OAuth Sign In Failed', { description: message });
+            setIsLoading(false); // Only reached if signIn itself throws before redirect
         }
+        // Don't set isLoading false here if successful, as redirect should happen
     };
 
+    // --- Use Props for the Dialog ---
     return (
-        // Use handleOpenChange, but prevent user dismissal via interaction/escape handlers
-        <Dialog open={open} onOpenChange={handleOpenChange}>
+        <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
                 className="sm:max-w-[450px]"
                 onInteractOutside={(e) => {
-                    // --- ALWAYS prevent closing via outside click for Auth ---
-                    e.preventDefault();
+                    // Prevent closing by clicking outside only if loading
+                    if (isLoading) {
+                        e.preventDefault();
+                    }
                 }}
                 onEscapeKeyDown={(e) => {
-                    // --- ALWAYS prevent closing via Escape key for Auth ---
-                    e.preventDefault();
+                    // Prevent closing via Escape key only if loading
+                    if (isLoading) {
+                        e.preventDefault();
+                    }
                 }}
-            // Add className="hide-auth-close" if you want to hide the X via CSS
-            // In globals.css: .hide-auth-close > [data-radix-dialog-close] { display: none; }
             >
                 <DialogHeader className="mb-4">
                     <DialogTitle className="text-center text-2xl">
                         {activeTab === 'login' ? 'Welcome Back!' : 'Create Account'}
                     </DialogTitle>
                     <DialogDescription className="text-center">
-                        {/* ... Description ... */}
-                        {activeTab === 'login' ? 'Sign in to access your AI Companion.' : 'Sign up to get started.'}
+                        {activeTab === 'login'
+                            ? 'Sign in to access your AI Companion.'
+                            : 'Sign up to get started.'}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -141,49 +183,86 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
                     {/* --- LOGIN TAB --- */}
                     <TabsContent value="login">
                         <form onSubmit={handleCredentialsSubmit} className="space-y-4">
-                            {/* ... Email Input ... */}
                             <div className="grid gap-2">
                                 <Label htmlFor="login-email">Email</Label>
-                                <Input id="login-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} autoComplete="email" />
+                                <Input
+                                    id="login-email" type="email" placeholder="you@example.com"
+                                    value={email} onChange={(e) => setEmail(e.target.value)}
+                                    required disabled={isLoading} autoComplete="email"
+                                />
                             </div>
-                            {/* ... Password Input ... */}
                             <div className="grid gap-2">
                                 <Label htmlFor="login-password">Password</Label>
-                                <Input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isLoading} autoComplete="current-password" />
+                                <Input
+                                    id="login-password" type="password"
+                                    value={password} onChange={(e) => setPassword(e.target.value)}
+                                    required disabled={isLoading} autoComplete="current-password"
+                                />
                             </div>
-                            {/* ... Error Display ... */}
-                            {error && activeTab === 'login' && (<p className="text-sm text-center text-destructive">{error}</p>)}
-                            {/* ... Submit Button ... */}
-                            <Button type="submit" className="w-full" disabled={isLoading}>{isLoading ? <Spinner /> : 'Login'}</Button>
+                            {error && activeTab === 'login' && (
+                                <p className="text-sm text-center text-destructive">{error}</p>
+                            )}
+                            <Button type="submit" className="w-full" disabled={isLoading}>
+                                {isLoading ? <Spinner /> : 'Login'}
+                            </Button>
                         </form>
-                        {/* ... OAuth Separator ... */}
-                        <div className="relative my-6"><div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div><div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Or continue with</span></div></div>
-                        {/* ... OAuth Buttons ... */}
-                        <div className="grid grid-cols-1 gap-2"><Button variant="outline" onClick={() => handleOAuthSignIn('google')} disabled={isLoading}>{isLoading ? <Spinner /> : <ChromeIcon className="mr-2 h-4 w-4" />} Google</Button></div>
+
+                        {/* OAuth Separator */}
+                        <div className="relative my-6">
+                            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+                            <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Or continue with</span></div>
+                        </div>
+
+                        {/* OAuth Buttons */}
+                        <div className="grid grid-cols-1 gap-2">
+                            <Button variant="outline" onClick={() => handleOAuthSignIn('google')} disabled={isLoading}>
+                                {isLoading ? <Spinner /> : <ChromeIcon className="mr-2 h-4 w-4" />} Google
+                            </Button>
+                        </div>
                     </TabsContent>
 
                     {/* --- SIGN UP TAB --- */}
                     <TabsContent value="signup">
                         <form onSubmit={handleCredentialsSubmit} className="space-y-4">
-                            {/* ... Email Input ... */}
+                            {/* Uncomment if using name
+                             <div className="grid gap-2">
+                                <Label htmlFor="signup-name">Name</Label>
+                                <Input id="signup-name" placeholder="Your Name" value={name} onChange={(e)=>setName(e.target.value)} required disabled={isLoading} autoComplete="name"/>
+                            </div> */}
                             <div className="grid gap-2">
                                 <Label htmlFor="signup-email">Email</Label>
-                                <Input id="signup-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} autoComplete="email" />
+                                <Input
+                                    id="signup-email" type="email" placeholder="you@example.com"
+                                    value={email} onChange={(e) => setEmail(e.target.value)}
+                                    required disabled={isLoading} autoComplete="email"
+                                />
                             </div>
-                            {/* ... Password Input ... */}
                             <div className="grid gap-2">
                                 <Label htmlFor="signup-password">Password</Label>
-                                <Input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isLoading} minLength={8} autoComplete="new-password" />
+                                <Input
+                                    id="signup-password" type="password"
+                                    value={password} onChange={(e) => setPassword(e.target.value)}
+                                    required disabled={isLoading} minLength={8} autoComplete="new-password"
+                                />
                             </div>
-                            {/* ... Error Display ... */}
-                            {error && activeTab === 'signup' && (<p className="text-sm text-center text-destructive">{error}</p>)}
-                            {/* ... Submit Button ... */}
-                            <Button type="submit" className="w-full" disabled={isLoading}>{isLoading ? <Spinner /> : 'Create Account'}</Button>
+                            {error && activeTab === 'signup' && (
+                                <p className="text-sm text-center text-destructive">{error}</p>
+                            )}
+                            <Button type="submit" className="w-full" disabled={isLoading}>
+                                {isLoading ? <Spinner /> : 'Create Account'}
+                            </Button>
                         </form>
-                        {/* ... OAuth Separator ... */}
-                        <div className="relative my-6"><div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div><div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Or sign up with</span></div></div>
-                        {/* ... OAuth Buttons ... */}
-                        <div className="grid grid-cols-1 gap-2"><Button variant="outline" onClick={() => handleOAuthSignIn('google')} disabled={isLoading}>{isLoading ? <Spinner /> : <ChromeIcon className="mr-2 h-4 w-4" />} Google</Button></div>
+
+                        {/* OAuth Options on Signup Tab */}
+                        <div className="relative my-6">
+                            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+                            <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Or sign up with</span></div>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2">
+                            <Button variant="outline" onClick={() => handleOAuthSignIn('google')} disabled={isLoading}>
+                                {isLoading ? <Spinner /> : <ChromeIcon className="mr-2 h-4 w-4" />} Google
+                            </Button>
+                        </div>
                     </TabsContent>
                 </Tabs>
             </DialogContent>
