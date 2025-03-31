@@ -14,11 +14,16 @@ export interface ConversationMessage {
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
     const session = await getSession();
-    // Adjust based on how your backend expects the token (e.g., Bearer)
-    // Use type assertion (as any) for accessToken - Augment Session type for a better fix
-    if (session && (session as any).accessToken) {
+    console.log('--- DEBUG: getAuthHeaders - Session:', session); // Keep this log
+
+    // --- CORRECT WAY to access the token based on corrected callbacks/types ---
+    const accessToken = (session as any)?.accessToken;
+
+    // Check if accessToken exists directly on session
+    if (accessToken) { // Check the variable directly
+        console.log('--- DEBUG: getAuthHeaders - Sending Authorization Header ---');
         return {
-            'Authorization': `Bearer ${(session as any).accessToken}`,
+            'Authorization': `Bearer ${accessToken}`, // Use the variable
             'Content-Type': 'application/json',
         };
     }
@@ -29,32 +34,33 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
 export async function fetchConversationHistory(): Promise<ConversationMessage[]> {
     // Get session within this function to access user ID
     const session = await getSession();
+    console.log('--- DEBUG: getAuthHeaders - Session:', session); // Log the whole session
+
     if (!session?.user) {
         throw new Error('User not authenticated');
     }
-    // --- IMPORTANT: Adjust how you get the user ID ---
-    // Check your NextAuth session/jwt/database callbacks to see where the ID is stored.
-    // Common possibilities: session.user.id, session.userId, session.user.sub, session.user.Id
-    // Using 'as any' for now, but augmenting the Session type is better long-term.
-    const userId = (session.user as any).id || (session as any).userId || (session.user as any).Id;
-    // ------------------------------------------------
 
-    if (!userId) {
-        throw new Error('User ID not found in session');
+    const userId = (session.user as any).id;
+
+    if (!userId || typeof userId !== 'string') { // Add a type check for safety
+        console.error('--- ERROR: User ID not found or not a string in session:', session.user);
+        throw new Error('User ID not found or invalid in session');
     }
 
-    const headers = await getAuthHeaders(); // Get auth headers if needed
-    // Construct the URL using the retrieved userId
-    const response = await fetch(`${BACKEND_URL}/conversations/${userId}/history`, {
+    console.log('--- DEBUG: fetchConversationHistory - User ID:', userId); // Log the userId variable directly
+
+    const headers = await getAuthHeaders();
+    const url = `${BACKEND_URL}/conversations/${userId}/history`; // <-- Use the userId variable DIRECTLY
+
+    // Add this log right before fetch to be 100% sure
+    console.log('--- DEBUG: fetchConversationHistory - FINAL Fetch URL:', url);
+
+    const response = await fetch(url, {
         method: 'GET',
         headers: headers,
     });
 
-    if (!response.ok) {
-        // Try to get more specific error from backend if possible
-        const errorData = await response.json().catch(() => ({ message: 'Failed to fetch conversation history' }));
-        throw new Error(errorData.message || 'Failed to fetch conversation history');
-    }
+    console.log('--- DEBUG: fetchConversationHistory - Response:', response);
 
     // Expecting an array of messages
     const data = await response.json();

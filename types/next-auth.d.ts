@@ -9,6 +9,7 @@ declare module "next-auth/jwt" {
     interface JWT extends DefaultJWT {
         /** User ID from Supabase */
         id?: string;
+        accessToken?: string; // <-- Add the 'accessToken' property here
         // Add any other properties you added in the jwt callback (e.g., role)
     }
 }
@@ -22,12 +23,14 @@ declare module "next-auth" {
         user: {
             /** The user's unique ID from Supabase */
             id?: string; // <-- Add the 'id' property here
+            accessToken?: string; // <-- Add the 'accessToken' property here
         } & DefaultSession["user"]; // Combine with default properties (name, email, image)
     }
 
     // Optional: Extend the User type (usually matches the object returned by authorize)
     interface User extends DefaultUser {
         id: string; // Ensure the User type also reflects the ID from authorize
+        accessToken?: string; // <-- Add the 'accessToken' property here
         // Add any other properties returned from authorize (e.g., role)
     }
 }

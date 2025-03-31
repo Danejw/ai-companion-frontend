@@ -27,12 +27,18 @@ export const authOptions: NextAuthOptions = {
             // `credentials` is used to generate a form on the built-in sign-in page.
             // You can specify which fields should be submitted. The property names MUST match
             // what you expect in the `authorize` function's `credentials` object.
+            
+
+            
             credentials: {
                 email: { label: "Email", type: "email", placeholder: "your@email.com" },
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials, req) {
                 // Validate that credentials exist (NextAuth already does some validation)
+
+                console.log("✅ HI");
+
                 if (!credentials?.email || !credentials?.password) {
                     console.log('Missing email or password in authorize');
                     return null; // Returning null indicates failure
@@ -65,9 +71,12 @@ export const authOptions: NextAuthOptions = {
                     // If successful, return an object representing the authenticated user.
                     // This object will be encoded in the JWT. It MUST have at least `id`.
                     console.log("✅ Supabase Sign-In Success for:", data.user.email);
+
+                    console.log("✅ Supabase Sign-In Success for:", data.session.access_token);
                     return {
                         id: data.user.id,
                         email: data.user.email,
+                        accessToken: data.session.access_token,
                         // You can add other relevant, non-sensitive user data here if needed
                         // e.g., name: data.user.user_metadata?.full_name,
                         // e.g., role: data.user.role, // If you have custom roles
@@ -88,11 +97,12 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         // The `jwt` callback is invoked when a JWT is created or updated.
         // `user` is only passed on initial sign-in.
-        async jwt({ token, user }) {
+        async jwt({ token, user, account }) {
             // If `user` object exists (passed from authorize on successful login),
             // persist its details (like the id) to the JWT token.
             if (user) {
                 token.id = user.id;
+                token.accessToken = (user as any).accessToken;
                 // Add any other properties from the user object you returned in authorize
                 // token.role = user.role;
             }
@@ -109,6 +119,10 @@ export const authOptions: NextAuthOptions = {
             }
             if (session.user && token.email) {
                 session.user.email = token.email;
+            }
+
+            if (session.user && token.accessToken) {
+                (session as any).accessToken = token.accessToken;
             }
             // Add any other properties from the token you want accessible in the client session
             // if (session.user && token.role) {
