@@ -11,18 +11,20 @@ interface CheckoutSessionResponse {
 }
 
 
-// --- Helper to get auth headers ---
 async function getAuthHeaders(): Promise<Record<string, string>> {
     const session = await getSession();
-    // Adjust based on how your backend expects the token (e.g., Bearer)
-    // Use type assertion (as any) for accessToken - Augment Session type for a better fix
-    if (session && (session as any).accessToken) {
-        return {
-            'Authorization': `Bearer ${(session as any).accessToken}`,
-            'Content-Type': 'application/json',
-        };
+    const accessToken = (session as any)?.accessToken; // Adjust path if necessary
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+    };
+
+    if (accessToken) {
+        headers['Authorization'] = `Bearer ${accessToken}`;
+    } else {
+        console.warn('--- WARN: getAuthHeaders - No Access Token Found for request ---');
+
     }
-    return { 'Content-Type': 'application/json' };
+    return headers;
 }
 
 // --- Fetch Credit Balance ---
@@ -34,14 +36,18 @@ export async function fetchCreditBalance(): Promise<{ credits: number }> {
     }
     // Assuming user ID is on session.user.Id as per the original code
     // Adjust session.user.Id property name if needed (e.g., session.user.id)
-    const userId = (session.user as any).Id; 
+    const userId = (session.user as any).id; 
+
     if (!userId) {
         throw new Error('User ID not found in session');
     }
+    
+    console.log('--- DEBUG: fetchCreditBalance - User ID:', userId);
+
 
     const headers = await getAuthHeaders();
     // Use the retrieved userId in the URL
-    const response = await fetch(`${BACKEND_URL}/users/${userId}/credits`, { // **ADJUST YOUR CREDITS ENDPOINT**
+    const response = await fetch(`${BACKEND_URL}/profiles/users/credits`, {
         method: 'GET',
         headers: headers,
     });

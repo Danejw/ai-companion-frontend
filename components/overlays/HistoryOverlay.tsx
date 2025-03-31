@@ -3,100 +3,116 @@
 
 import React, { useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchConversationHistory, ConversationMessage } from '@/lib/api/conversation_history'; // Adjust path
+// Import the updated fetch function - now returns string[]
+import { fetchConversationHistory } from '@/lib/api/conversation_history'; // Adjust path
 
-import { Button } from '@/components/ui/button';
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-    SheetFooter, // If needed for actions like clear history
-    SheetClose, // Button to close the sheet
-} from '@/components/ui/sheet';
-import { ScrollArea } from '@/components/ui/scroll-area'; // For scrollable content
+// UI Imports remain the same
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'; // For role icons
-import { Bot, User, Info, MessageSquare } from 'lucide-react'; // Icons
-import { Separator } from '@/components/ui/separator'; // To separate messages
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Bot, User, Info, MessageSquare, NotebookText } from 'lucide-react'; // Added NotebookText for Summary
+import { Separator } from '@/components/ui/separator';
 
-// Define Props Interface
+// Props Interface remains the same
 interface HistoryOverlayProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }
 
+// Helper function to parse role and content from history string
+const parseHistoryString = (item: string): { role: 'user' | 'assistant' | 'summary' | 'unknown', content: string } => {
+    if (item.startsWith("Summary:")) {
+        return { role: 'summary', content: item.substring("Summary:".length).trim() };
+    } else if (item.includes(':')) {
+        const parts = item.split(':', 1); // Split only on the first colon
+        const speaker = parts[0].trim();
+        const content = item.substring(parts[0].length + 1).trim();
+        // Basic check for speaker name - adjust if needed
+        if (speaker.toLowerCase().includes('astra') || speaker.toLowerCase().includes('ai')) {
+            return { role: 'assistant', content: content };
+        } else {
+            // Assume user otherwise, could refine later
+            return { role: 'user', content: content };
+        }
+    }
+    // If no colon or prefix recognized
+    return { role: 'unknown', content: item };
+};
+
 export default function HistoryOverlay({ open, onOpenChange }: HistoryOverlayProps) {
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-    // --- Fetch History ---
+    // --- Fetch History (useQuery now expects string[]) ---
     const {
-        data: historyData,
+        data: historyData, // This will be string[] | undefined
         isLoading: isLoadingHistory,
         error: historyError,
-        isFetched, // Use isFetched to know when data is available
+        isFetched,
     } = useQuery({
-        queryKey: ['conversationHistory'], // Unique key
-        queryFn: fetchConversationHistory,
-        enabled: open, // Only fetch when the sheet is open
-        staleTime: 5 * 60 * 1000, // Refetch after 5 mins if stale
-        refetchOnWindowFocus: false, // Don't refetch just on window focus for history
+        queryKey: ['conversationHistory'],
+        queryFn: fetchConversationHistory, // Fetch function returns string[]
+        enabled: open,
+        staleTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: false,
     });
 
-    // --- Scroll to bottom when history loads or updates ---
+    // --- Scroll to bottom effect remains the same ---
     useEffect(() => {
+        // ... (scroll effect code is unchanged) ...
         if (isFetched && historyData && historyData.length > 0) {
-            // Access the viewport element within ScrollArea
             const viewport = scrollAreaRef.current?.querySelector<HTMLDivElement>('[data-radix-scroll-area-viewport]');
             if (viewport) {
-                // Use setTimeout to ensure rendering is complete before scrolling
-                setTimeout(() => {
-                    viewport.scrollTop = viewport.scrollHeight;
-                }, 0);
+                setTimeout(() => { viewport.scrollTop = viewport.scrollHeight; }, 0);
             }
         }
-    }, [isFetched, historyData]); // Dependency array
+    }, [isFetched, historyData]);
 
+    // --- Updated Render Message Helper ---
+    // Now accepts the raw string and index
+    const renderHistoryItem = (itemString: string, index: number) => {
+        const { role, content } = parseHistoryString(itemString);
 
-    // Helper to render message bubble
-    const renderMessage = (message: ConversationMessage) => (
-        <div className="mb-4 flex flex-col">
-            <div className={`flex items-start space-x-3 ${message.role === 'user' ? 'justify-end' : ''}`}>
-                {/* Icon/Avatar */}
-                {message.role === 'assistant' && (
-                    <Avatar className="h-8 w-8">
-                        {/* Optional: Add assistant image <AvatarImage src="/path/to/ai-avatar.png" /> */}
-                        <AvatarFallback><Bot className="h-4 w-4" /></AvatarFallback>
-                    </Avatar>
-                )}
-
-                {/* Content Bubble */}
-                <div
-                    className={`max-w-[75%] rounded-lg px-3 py-2 ${message.role === 'user'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted'
-                        }`}
-                >
-                    {/* Basic text display, consider markdown rendering library later if needed */}
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+        // Special rendering for summary or unknown
+        if (role === 'summary' || role === 'unknown') {
+            return (
+                <div key={index} className="my-4 p-3 bg-amber-50 dark:bg-amber-900/30 border-l-4 border-amber-400 rounded-md text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                    {role === 'summary' ? <NotebookText className="h-4 w-4 mt-0.5 flex-shrink-0" /> : <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />}
+                    <p className="whitespace-pre-wrap">{content}</p>
                 </div>
+            );
+        }
 
-                {/* Icon/Avatar for User */}
-                {message.role === 'user' && (
-                    <Avatar className="h-8 w-8">
-                        {/* Optional: Add user image <AvatarImage src={session?.user?.image || undefined} /> */}
-                        <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
-                    </Avatar>
-                )}
+        // Standard bubble rendering for user/assistant
+        return (
+            <div key={index} className="mb-4 flex flex-col">
+                <div className={`flex items-start space-x-3 ${role === 'user' ? 'justify-end' : ''}`}>
+                    {/* Icon/Avatar */}
+                    {role === 'assistant' && (
+                        <Avatar className="h-8 w-8">
+                            <AvatarFallback><Bot className="h-4 w-4" /></AvatarFallback>
+                        </Avatar>
+                    )}
+
+                    {/* Content Bubble */}
+                    <div className={`max-w-[75%] rounded-lg px-3 py-2 ${role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                        <p className="text-sm whitespace-pre-wrap">{content}</p>
+                    </div>
+
+                    {/* Icon/Avatar for User */}
+                    {role === 'user' && (
+                        <Avatar className="h-8 w-8">
+                            <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
+                        </Avatar>
+                    )}
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     return (
-        // Use side="left" or "right" as preferred
         <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent side="left" className="sm:max-w-md md:max-w-lg flex flex-col"> {/* Make sheet flex column */}
+            <SheetContent side="left" className="sm:max-w-md md:max-w-lg flex flex-col">
                 <SheetHeader>
                     <SheetTitle className="flex items-center">
                         <MessageSquare className="mr-2 h-5 w-5" /> Conversation History
@@ -108,44 +124,36 @@ export default function HistoryOverlay({ open, onOpenChange }: HistoryOverlayPro
 
                 <Separator className="my-4" />
 
-                {/* Scrollable History Area */}
-                {/* Use flex-grow to make ScrollArea fill available space */}
-                <ScrollArea className="flex-grow pr-4" ref={scrollAreaRef}> {/* Added padding-right */}
-                    {isLoadingHistory && (
-                        // Show skeletons while loading
-                        <div className="space-y-4 p-4">
-                            <Skeleton className="h-16 w-3/4" />
-                            <Skeleton className="h-12 w-2/3 ml-auto" />
-                            <Skeleton className="h-20 w-4/5" />
-                        </div>
-                    )}
-
-                    {historyError && (
-                        <div className="p-4 text-center text-destructive flex flex-col items-center justify-center h-full">
-                            <Info className="mb-2 h-6 w-6" />
-                            <p>Failed to load history.</p>
-                            <p className="text-sm text-muted-foreground">{historyError.message}</p>
-                        </div>
-                    )}
-
-                    {!isLoadingHistory && !historyError && historyData && (
-                        historyData.length > 0 ? (
-                            historyData.map(renderMessage)
-                        ) : (
-                            <div className="p-4 text-center text-muted-foreground flex items-center justify-center h-full">
-                                No history yet. Start chatting!
+                <ScrollArea 
+                    className="flex-grow pr-4 h-[calc(100vh-180px)]" 
+                    ref={scrollAreaRef}
+                    style={{ scrollBehavior: 'smooth' }}
+                >
+                    <div className="space-y-2 pb-4">
+                        {/* Loading/Error states remain the same */}
+                        {isLoadingHistory && (
+                            <div className="space-y-4 p-4">
+                                <Skeleton className="h-16 w-3/4" />
+                                <Skeleton className="h-12 w-2/3 ml-auto" />
+                                <Skeleton className="h-20 w-4/5" />
                             </div>
-                        )
-                    )}
-                </ScrollArea>
+                        )}
+                        {historyError && (<div className="p-4 text-center text-destructive flex flex-col items-center justify-center h-full"> {/* ... Error Info ... */} <Info className="mb-2 h-6 w-6" /> <p>Failed to load history.</p> <p className="text-sm text-muted-foreground">{historyError.message}</p> </div>)}
 
-                {/* Optional Footer */}
-                {/* <SheetFooter className="mt-4">
-                    <Button variant="destructive">Clear History</Button>
-                    <SheetClose asChild>
-                        <Button variant="outline">Close</Button>
-                    </SheetClose>
-                </SheetFooter> */}
+                        {/* Map over the string array (historyData) */}
+                        {!isLoadingHistory && !historyError && historyData && (
+                            historyData.length > 0 ? (
+                                // Pass the string item and index to the render function
+                                historyData.map(renderHistoryItem)
+                            ) : (
+                                <div className="p-4 text-center text-muted-foreground flex items-center justify-center h-full">
+                                    No history yet. Start chatting!
+                                </div>
+                            )
+                        )}
+                    </div>
+                </ScrollArea>
+                {/* Footer remains commented out */}
             </SheetContent>
         </Sheet>
     );

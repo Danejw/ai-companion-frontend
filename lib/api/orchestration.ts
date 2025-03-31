@@ -1,35 +1,27 @@
 // lib/api/orchestration.ts
 // Or keep in lib/api.ts
 
-import { getSession } from 'next-auth/react'; // Needed for getAuthHeaders
+import { getSession } from 'next-auth/react';
 
 // Define Backend URL (or import from a central config file)
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ai-companion-backend-opuh.onrender.com";
 
-// --- Helper to get auth headers (ensure this is defined or imported) ---
-// Make sure this function correctly retrieves your actual access token
+
 async function getAuthHeaders(): Promise<Record<string, string>> {
     const session = await getSession();
-    // console.log('--- DEBUG: getAuthHeaders - Session:', session); // Optional log
-
-    // --- Access token retrieval based on your corrected NextAuth setup ---
     const accessToken = (session as any)?.accessToken; // Adjust path if necessary
-
     const headers: Record<string, string> = {
-        'Content-Type': 'application/json' // Default Content-Type
+        'Content-Type': 'application/json'
     };
 
     if (accessToken) {
-        // console.log('--- DEBUG: getAuthHeaders - Sending Authorization Header ---'); // Optional log
-        headers['Authorization'] = `Bearer ${accessToken}`; // Add Bearer token
+        headers['Authorization'] = `Bearer ${accessToken}`;
     } else {
         console.warn('--- WARN: getAuthHeaders - No Access Token Found for request ---');
-        // Handle cases where token might be missing but request should proceed,
-        // or let the backend handle the missing token error.
+
     }
     return headers;
 }
-// --- ---
 
 // --- Define expected payload for sending a message ---
 interface SendMessagePayload {
