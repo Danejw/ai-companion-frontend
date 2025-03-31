@@ -47,7 +47,7 @@ export async function fetchCreditBalance(): Promise<{ credits: number }> {
 
     const headers = await getAuthHeaders();
     // Use the retrieved userId in the URL
-    const response = await fetch(`${BACKEND_URL}/profiles/users/credits`, {
+    const response = await fetch(`${BACKEND_URL}/profiles/credits`, {
         method: 'GET',
         headers: headers,
     });

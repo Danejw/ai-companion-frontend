@@ -26,25 +26,26 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { Loader2, Info, CreditCard } from 'lucide-react';
 
-// Define your credit packages - Using 'name' as the tier identifier
+
+// Define credit packages - Using 'name' as the tier identifier
 const creditPackages = [
     {
-        name: 'basic', // This is the tier name sent to backend
+        name: 'basic',
         credits: 2000,
         price: '$5',
-        title: 'Starter Pack', // Added a display title
+        title: 'Starter Pack', 
     },
     {
-        name: 'standard', // This is the tier name sent to backend
+        name: 'standard',
         credits: 6000,
         price: '$30',
-        title: 'Value Pack', // Added a display title
+        title: 'Value Pack',
     },
     {
-        name: 'premium', // This is the tier name sent to backend
+        name: 'premium',
         credits: 10000,
         price: '$50',
-        title: 'Pro Pack', // Added a display title
+        title: 'Pro Pack',
     },
 ];
 
@@ -73,12 +74,6 @@ interface CreditsOverlayProps {
 // --- Use Props in Component Definition ---
 export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayProps) {
     const queryClient = useQueryClient();
-
-    // --- REMOVED Zustand reading ---
-    // const { isCreditsOpen, toggleCreditsOverlay } = useUIStore((state) => ({
-    //     isCreditsOpen: state.isCreditsOpen,
-    //     toggleCreditsOverlay: state.toggleCreditsOverlay,
-    // }));
 
     // Local state for managing which purchase is processing (using tier name as ID)
     const [processingTier, setProcessingTier] = useState<string | null>(null);
@@ -133,11 +128,6 @@ export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayPro
 
     // Add a console log to check received props
     console.log(`--- DEBUG: CreditsOverlay receiving props: open=${open} ---`);
-
-    // No need to render anything if not open (Dialog handles this, but checking avoids unnecessary work)
-    // if (!open) {
-    //    return null;
-    // }
 
     // --- Use Props for the Dialog ---
     return (
