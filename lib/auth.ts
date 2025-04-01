@@ -1,5 +1,5 @@
 // lib/auth.ts
-import NextAuth, { type NextAuthOptions } from "next-auth";
+import { type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { createClient } from '@supabase/supabase-js';
 
@@ -34,7 +34,7 @@ export const authOptions: NextAuthOptions = {
                 email: { label: "Email", type: "email", placeholder: "your@email.com" },
                 password: { label: "Password", type: "password" }
             },
-            async authorize(credentials, req) {
+            async authorize(credentials) {
                 // Validate that credentials exist (NextAuth already does some validation)
 
                 console.log("✅ HI");
@@ -97,7 +97,7 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         // The `jwt` callback is invoked when a JWT is created or updated.
         // `user` is only passed on initial sign-in.
-        async jwt({ token, user, account }) {
+        async jwt({ token, user }) {
             // If `user` object exists (passed from authorize on successful login),
             // persist its details (like the id) to the JWT token.
             if (user) {

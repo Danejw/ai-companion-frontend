@@ -72,7 +72,7 @@ export async function sendTextMessage(payload: SendMessagePayload): Promise<Send
             errorDetail = errorData.detail || errorData.message || errorDetail;
         } catch (e) {
             // If error response is not JSON or empty, keep the status-based message
-            console.warn(`--- WARN: sendTextMessage - Could not parse error response as JSON.`);
+            console.warn(`--- WARN: sendTextMessage - Error Data:`, e);
         }
         throw new Error(errorDetail);
     }

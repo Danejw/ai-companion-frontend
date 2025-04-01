@@ -73,7 +73,7 @@ interface CreditsOverlayProps {
 
 // --- Use Props in Component Definition ---
 export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayProps) {
-    const queryClient = useQueryClient();
+    //const queryClient = useQueryClient();
 
     // Local state for managing which purchase is processing (using tier name as ID)
     const [processingTier, setProcessingTier] = useState<string | null>(null);

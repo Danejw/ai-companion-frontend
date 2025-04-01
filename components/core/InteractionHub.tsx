@@ -112,7 +112,7 @@ export default function InteractionHub() {
                 }
             }
 
-            setInputText(prevInput => {
+            setInputText(() => {
                     let fullText = '';
                     for (let i = 0; i < event.results.length; ++i) { // Loop all results so far in this session
                         fullText += event.results[i][0].transcript;

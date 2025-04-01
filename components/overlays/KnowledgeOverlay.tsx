@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { fetchKnowledgeVectors, fetchSlangVectors, removeKnowledgeVector, KnowledgeVector } from '@/lib/api/knowledge';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -54,7 +54,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
     // --- Mutation for Removing a Vector ---
     const removeMutation = useMutation({
         mutationFn: removeKnowledgeVector,
-        onSuccess: (data, variables) => {
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['knowledgeVectors'] });
             queryClient.invalidateQueries({ queryKey: ['slangVectors'] });
             toast.success('Knowledge Removed', {

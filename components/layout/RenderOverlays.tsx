@@ -20,13 +20,13 @@ export function RenderOverlays() {
     // --- Select state and actions individually ---
     const isAuthOverlayOpen = useUIStore((state) => state.isAuthOverlayOpen);
     const isCreditsOpen = useUIStore((state) => state.isCreditsOpen);
-    const isSettingsOpen = useUIStore((state) => state.isSettingsOpen);
+    //const isSettingsOpen = useUIStore((state) => state.isSettingsOpen);
     const isHistoryOpen = useUIStore((state) => state.isHistoryOpen);
     const isKnowledgeOpen = useUIStore((state) => state.isKnowledgeOpen);
 
     const toggleAuthOverlay = useUIStore((state) => state.toggleAuthOverlay);
     const toggleCreditsOverlay = useUIStore((state) => state.toggleCreditsOverlay);
-    const toggleSettingsOverlay = useUIStore((state) => state.toggleSettingsOverlay);
+    //const toggleSettingsOverlay = useUIStore((state) => state.toggleSettingsOverlay);
     const toggleHistoryOverlay = useUIStore((state) => state.toggleHistoryOverlay);
     const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
 
@@ -35,8 +35,6 @@ export function RenderOverlays() {
 
     // --- Effect to automatically open AuthOverlay if unauthenticated ---
     useEffect(() => {
-        // Check status: 'unauthenticated' means loading is finished and user is not logged in
-        // Check status !== 'loading' to prevent brief flash while session is checked
         if (status !== 'loading' && status === 'unauthenticated') {
             // Open the overlay if it's not already marked as open
             if (!isAuthOverlayOpen) {
