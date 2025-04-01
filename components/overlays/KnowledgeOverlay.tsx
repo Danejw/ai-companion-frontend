@@ -104,7 +104,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                             <AlertDialogDescription>
                                 <span style={{color: 'darkred'}}>This action cannot be undone. The AI will forget this specific piece of information:</span> <br />
-                                <AlertDialogTitle className="mt-2 block font-normal text-sm text-gray-900 font-bold">"{vector.text}"</AlertDialogTitle>
+                                <AlertDialogTitle className="mt-2 block font-normal text-sm text-gray-900 font-bold">{vector.text}</AlertDialogTitle>
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

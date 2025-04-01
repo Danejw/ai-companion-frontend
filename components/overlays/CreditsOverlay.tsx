@@ -51,7 +51,6 @@ const creditPackages = [
 // Stripe loading logic remains the same
 let stripePromise: Promise<Stripe | null> | null = null;
 const getStripe = () => {
-    // ... (getStripe function remains unchanged) ...
     if (!stripePromise) {
         const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
         if (stripeKey) {
