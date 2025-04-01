@@ -11,8 +11,7 @@ import {
     DialogContent,
     DialogDescription,
     DialogHeader,
-    DialogTitle,
-    DialogFooter
+    DialogTitle
 } from '@/components/ui/dialog';
 import {
     Card,
