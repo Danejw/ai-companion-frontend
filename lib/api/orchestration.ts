@@ -9,7 +9,7 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ai-companion
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
     const session = await getSession();
-    const accessToken = (session as any)?.accessToken; // Adjust path if necessary
+    const accessToken = session?.user?.accessToken; // Adjust path if necessary
     const headers: Record<string, string> = {
         'Content-Type': 'application/json'
     };

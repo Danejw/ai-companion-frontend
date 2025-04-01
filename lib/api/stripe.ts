@@ -13,7 +13,7 @@ interface CheckoutSessionResponse {
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
     const session = await getSession();
-    const accessToken = (session as any)?.accessToken; // Adjust path if necessary
+    const accessToken = session?.user?.accessToken; // Adjust path if necessary
     const headers: Record<string, string> = {
         'Content-Type': 'application/json'
     };
@@ -36,7 +36,7 @@ export async function fetchCreditBalance(): Promise<{ credits: number }> {
     }
     // Assuming user ID is on session.user.Id as per the original code
     // Adjust session.user.Id property name if needed (e.g., session.user.id)
-    const userId = (session.user as any).id; 
+    const userId = session.user.id; 
 
     if (!userId) {
         throw new Error('User ID not found in session');

@@ -11,7 +11,7 @@ export interface ConversationMessage {
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
     const session = await getSession();
-    const accessToken = (session as any)?.accessToken; // Adjust path if necessary
+    const accessToken = session?.user?.accessToken; // Adjust path if necessary
     const headers: Record<string, string> = {
         'Content-Type': 'application/json'
     };

@@ -102,7 +102,9 @@ export const authOptions: NextAuthOptions = {
             // persist its details (like the id) to the JWT token.
             if (user) {
                 token.id = user.id;
-                token.accessToken = (user as any).accessToken;
+                if ('accessToken' in user && user.accessToken) {
+                    token.accessToken = user.accessToken;
+                }
                 // Add any other properties from the user object you returned in authorize
                 // token.role = user.role;
             }
@@ -122,7 +124,7 @@ export const authOptions: NextAuthOptions = {
             }
 
             if (session.user && token.accessToken) {
-                (session as any).accessToken = token.accessToken;
+                session.user.accessToken = token.accessToken as string; 
             }
             // Add any other properties from the token you want accessible in the client session
             // if (session.user && token.role) {
