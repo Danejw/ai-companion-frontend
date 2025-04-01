@@ -89,7 +89,6 @@ export default function InteractionHub() {
         const recognition = recognitionRef.current;
 
         recognition.lang = 'en-US';
-        recognition.interimResults = false;
         recognition.maxAlternatives = 1;
         recognition.continuous = true;
         recognition.interimResults = true;
@@ -97,21 +96,6 @@ export default function InteractionHub() {
         recognition.start();
 
         recognition.onresult = (event: SpeechRecognitionEvent) => {
-            let interimTranscript = '';
-            let finalTranscript = '';
-
-            // Loop through all results received in this event
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                const transcriptPart = event.results[i][0].transcript;
-                // Check if this part is final
-                if (event.results[i].isFinal) {
-                    finalTranscript += transcriptPart;
-                } else {
-                    // Otherwise, it's interim
-                    interimTranscript += transcriptPart;
-                }
-            }
-
             setInputText(() => {
                     let fullText = '';
                     for (let i = 0; i < event.results.length; ++i) { // Loop all results so far in this session
