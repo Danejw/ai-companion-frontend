@@ -32,7 +32,7 @@ export default function InteractionHub() {
                 responseText = data;
             } else if (data && typeof data === 'object') {
                 // Try common properties, customize based on your actual backend response
-                responseText = data.reply || data.message || data.text || JSON.stringify(data);
+                responseText = JSON.stringify(data);
             } else {
                 // Fallback for unexpected types
                 responseText = String(data);
