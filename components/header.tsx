@@ -45,7 +45,7 @@ export default function Header() {
                     {/* --- Authenticated State --- */}
                     {status === 'authenticated' && (
                         <>
-                            {/* Optional: Welcome message hidden on small screens */}
+                            {/*Welcome message hidden on small screens */}
                             <span className="text-sm text-muted-foreground hidden sm:inline-block mr-2">
                                 {session?.user?.name || session?.user?.email}
                             </span>
