@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'; // Import u
 import { sendTextMessage } from '@/lib/api/orchestration'; // Adjust path as needed
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Mic, Send, Loader2, Ear, EarOff } from 'lucide-react'; // Added Loader2
+import { Send, Loader2, Ear, EarOff } from 'lucide-react'; // Added Loader2
 import { toast } from 'sonner'; // For error feedback
 
 // Simple Spinner component reused
@@ -123,7 +123,6 @@ export default function InteractionHub() {
 
             recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
                 console.error("Speech recognition error:", event.error);
-                // ... (Error handling logic) ...
                 // Make sure to clean up state and ref even with continuous
                 if (recognitionRef.current) { recognitionRef.current = null; }
                 setIsListening(false);
@@ -163,7 +162,6 @@ export default function InteractionHub() {
             </div>
 
             {/* 2. AI Response Area */}
-            {/* Added min-height and better loading/display logic */}
             <div className="min-h-[40px] text-center text-muted-foreground flex items-center justify-center px-2">
                 {mutation.isPending ? (
                     <Spinner /> // Show spinner while mutation is pending
@@ -204,7 +202,6 @@ export default function InteractionHub() {
                         }}
                         disabled={mutation.isPending} // Disable textarea while loading
                     />
-                    {/* Hidden submit button for accessibility / form submission */}
                     <button type="submit" disabled={mutation.isPending} className="hidden" />
                 </form>
 
@@ -218,7 +215,6 @@ export default function InteractionHub() {
                     // Disable if no text OR if loading
                     disabled={!inputText.trim() || mutation.isPending}
                 >
-                    {/* Show spinner on button if loading, otherwise Send icon */}
                     {mutation.isPending ? <Spinner /> : <Send className="h-5 w-5" />}
                 </Button>
             </div>

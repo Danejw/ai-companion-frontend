@@ -3,7 +3,6 @@
 import React, { useState } from 'react'; // Removed useEffect
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
-// import { useUIStore } from '@/store';
 import { fetchCreditBalance, createCheckoutSession } from '../../lib/api/stripe';
 
 import { Button } from '@/components/ui/button';
@@ -73,7 +72,6 @@ interface CreditsOverlayProps {
 
 // --- Use Props in Component Definition ---
 export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayProps) {
-    //const queryClient = useQueryClient();
 
     // Local state for managing which purchase is processing (using tier name as ID)
     const [processingTier, setProcessingTier] = useState<string | null>(null);
@@ -83,7 +81,6 @@ export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayPro
         data: balanceData,
         isLoading: isLoadingBalance,
         error: balanceError,
-        // refetch: refetchBalance // Keep if needed elsewhere
     } = useQuery({
         queryKey: ['creditBalance'],
         queryFn: fetchCreditBalance,
@@ -97,7 +94,6 @@ export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayPro
     const checkoutMutation = useMutation({
         mutationFn: createCheckoutSession, // Should expect tier: string
         onSuccess: async (data) => {
-            // ... (onSuccess logic remains unchanged) ...
             const stripe = await getStripe();
             if (!stripe) {
                 toast.error("Stripe configuration error.", { description: "Could not initialize Stripe." });
@@ -112,7 +108,6 @@ export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayPro
             }
         },
         onError: (error: Error) => {
-            // ... (onError logic remains unchanged) ...
             console.error("Checkout session creation error:", error);
             toast.error("Checkout Failed", { description: error.message || "Could not initiate purchase." });
             setProcessingTier(null);
