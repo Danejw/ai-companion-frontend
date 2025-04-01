@@ -169,7 +169,7 @@ export default function InteractionHub() {
                     <Spinner /> // Show spinner while mutation is pending
                 ) : (
                     <p className="animate-in fade-in duration-500 ease-out"> {/* Simple fade-in */}
-                        {aiResponse || <span className="opacity-50">How are you today?</span>} {/* Show placeholder if no response */}
+                        {aiResponse || <span className="opacity-90">How are you today?</span>} {/* Show placeholder if no response */}
                     </p>
                 )}
             </div>

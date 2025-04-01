@@ -28,7 +28,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {/* ClientProviders MUST wrap everything needing client context */}
         <ClientProviders>
           <Header /> {/* Header is inside Providers */}
-          <main className="flex-1 pt-14"> {/* Adjust pt-14 if header height changes */}
+          <main className="flex-1"> {/* Adjust pt-14 if header height changes */}
             {children}
           </main>
           <RenderOverlays /> {/* <-- Render the wrapper here, also inside Providers */}

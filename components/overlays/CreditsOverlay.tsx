@@ -32,7 +32,7 @@ const creditPackages = [
     {
         name: 'basic',
         credits: 2000,
-        price: '$5',
+        price: '$10',
         title: 'Starter Pack', 
     },
     {
