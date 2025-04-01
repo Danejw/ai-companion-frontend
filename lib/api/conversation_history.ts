@@ -25,7 +25,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
     return headers;
 }
 
-export async function fetchConversationHistory(): Promise<any> {
+export async function fetchConversationHistory(): Promise<string[]> {
     // Get session within this function to access user ID
     const session = await getSession();
 

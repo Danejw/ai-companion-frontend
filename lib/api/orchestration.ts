@@ -28,9 +28,8 @@ interface SendMessagePayload {
     message: string;
 }
 
-// --- Define expected response type ---
-// Using 'any' as requested, defining a more specific type is better practice.
-type SendMessageResponse = any; // Could be: string | { reply: string } | etc.
+// --- Define expected response type --- TODO: this will need to be updated to handle the the response from the backend gets more complex
+type SendMessageResponse = string;
 
 /**
  * Sends a text message to the backend orchestration endpoint.
