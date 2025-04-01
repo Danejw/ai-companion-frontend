@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react'; // Removed useEffect
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { fetchCreditBalance, createCheckoutSession } from '../../lib/api/stripe';
 

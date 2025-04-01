@@ -46,9 +46,9 @@ export default function Header() {
                     {status === 'authenticated' && (
                         <>
                             {/* Optional: Welcome message hidden on small screens */}
-                            {/* <span className="text-sm text-muted-foreground hidden sm:inline-block mr-2">
+                            <span className="text-sm text-muted-foreground hidden sm:inline-block mr-2">
                                 {session?.user?.name || session?.user?.email}
-                            </span> */}
+                            </span>
 
                             {/* --- Overlay Trigger Buttons (Icon only) --- */}
                             <Button variant="ghost" size="icon" onClick={toggleHistoryOverlay} title="Conversation History">
