@@ -21,7 +21,7 @@ export default function Header() {
                 <div className="mr-4 flex ml-6">
                     <Link href="/" className="mr-6 flex items-center space-x-2">
                         {/* <YourLogoIcon /> */}
-                        <span className="font-bold">Knowell</span>
+                        <span className="font-bold">Knolia</span>
                     </Link>
                 </div>
                 <div className="flex flex-1 items-center justify-end space-x-1 sm:space-x-2"> {/* Added space-x-1 for mobile */}

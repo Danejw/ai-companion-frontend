@@ -120,3 +120,112 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .bg-size-200 {
+    background-size: 200% 200%;
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes drift1 {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+
+  25% {
+    transform: translate(80px, -50px) rotate(2deg) scale(1.02);
+  }
+
+  50% {
+    transform: translate(200px, 60px) rotate(-1deg) scale(1.04);
+  }
+
+  75% {
+    transform: translate(120px, -90px) rotate(3deg) scale(0.98);
+  }
+
+  100% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes drift2 {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(-100px, 120px);
+  }
+
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes drift3 {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(100px, 600px);
+  }
+
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes drift4 {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(-120px, -400px);
+  }
+
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+.animate-gradientShift {
+  animation: gradientShift 1s ease infinite;
+}
+
+.animate-drift1 {
+  animation: drift1 2s ease-in-out infinite;
+}
+
+.animate-drift2 {
+  animation: drift2 3s ease-in-out infinite;
+}
+
+.animate-drift3 {
+  animation: drift3 1s ease-in-out infinite;
+}
+
+.animate-drift4 {
+  animation: drift4 4s ease-in-out infinite;
+}
