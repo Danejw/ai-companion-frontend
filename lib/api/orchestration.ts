@@ -29,7 +29,13 @@ interface SendMessagePayload {
 }
 
 // --- Define expected response type --- TODO: this will need to be updated to handle the the response from the backend gets more complex
-type SendMessageResponse = string;
+type SendMessageResponse = {
+    response?: string;
+    error?: {
+        error: boolean;
+        message: string;
+    };
+};
 
 /**
  * Sends a text message to the backend orchestration endpoint.
@@ -81,7 +87,7 @@ export async function sendTextMessage(payload: SendMessagePayload): Promise<Send
         // Assumption: Backend sends JSON, even if it's just wrapping a string
         const data = await response.json();
         console.log("--- DEBUG: sendTextMessage - Response JSON data:", data);
-        return data; // Return the parsed data directly (could be string, object, etc.)
+        return data as SendMessageResponse; // Return the parsed data directly (could be string, object, etc.)
 
     } catch (jsonError) {
         // Fallback if JSON parsing fails (maybe plain text response?)
@@ -91,7 +97,7 @@ export async function sendTextMessage(payload: SendMessagePayload): Promise<Send
             console.log("--- DEBUG: sendTextMessage - Response text data:", textData);
             // If plain text was expected, return it. Otherwise, might still be an issue.
             if (response.headers.get("content-type")?.includes("text/plain")) {
-                return textData;
+                return textData as SendMessageResponse;
             } else {
                 // If it wasn't supposed to be plain text, re-throw or handle differently
                 console.error("--- ERROR: sendTextMessage - Received non-JSON response when JSON was expected.");
@@ -104,4 +110,3 @@ export async function sendTextMessage(payload: SendMessagePayload): Promise<Send
     }
 }
 
-// You might add other orchestration-related API functions here later

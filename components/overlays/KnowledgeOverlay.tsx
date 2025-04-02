@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Brain, Info, Trash2, Layers, MessageSquareWarning } from 'lucide-react';
+import { Brain, Info, Trash2, Layers, MessageSquareWarning, PersonStanding, User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 import { fetchKnowledgeVectors, fetchSlangVectors, removeKnowledgeVector, KnowledgeVector } from '@/lib/api/knowledge';
@@ -14,7 +14,10 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
+import { fetchMBTI, type MBTIData } from '@/lib/api/mbti';
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
+import { fetchOcean, type Ocean } from '@/lib/api/ocean';
 
 // Props Interface remains the same
 interface KnowledgeOverlayProps {
@@ -68,6 +71,34 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
         },
     });
 
+
+    // --- Fetch MBTI Data ---  
+    const {
+        data: mbtiData,
+        isLoading: isLoadingMBTI,
+        error: mbtiError,
+        isError: isMBTIError
+    } = useQuery<MBTIData, Error>({
+        queryKey: ['mbtiData'], // Unique query key
+        queryFn: fetchMBTI,    // Use the imported function
+        enabled: open,         // Only fetch when the sheet is open
+        staleTime: 15 * 60 * 1000, // MBTI might not change often, cache for 15 mins
+        retry: 1, // Retry once on failure
+    });
+
+    // --- Fetch OCEAN Data ---
+    const {
+        data: oceanData,
+        isLoading: isLoadingOcean,
+        error: oceanError,
+        isError: isOceanError
+    } = useQuery<Ocean, Error>({
+        queryKey: ['oceanData'],
+        queryFn: fetchOcean,
+        enabled: open,
+        staleTime: 15 * 60 * 1000,
+        retry: 1,
+    });
 
     // --- Helper to Render a Single Knowledge Card ---
     const renderVectorCard = (vector: KnowledgeVector) => (
@@ -176,6 +207,29 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
         );
     };
 
+    // Add render function for OCEAN traits
+    const renderOceanTrait = (label: string, value: number) => {
+        const percentage = Math.round(value * 100);
+        return (
+            <div key={label} className="space-y-2">
+                <div className="flex justify-between items-center">
+                    <Label className="text-sm font-medium capitalize">
+                        {label}
+                    </Label>
+                    <span className="text-sm text-muted-foreground">
+                        {percentage}%
+                    </span>
+                </div>
+                <Slider 
+                    value={[percentage]}
+                    max={100}
+                    step={1}
+                    disabled
+                    className="w-full"
+                />
+            </div>
+        );
+    };
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
@@ -191,12 +245,18 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
 
                 {/* Use Tabs component */}
                 <Tabs defaultValue="knowledge" className="flex-grow flex flex-col overflow-hidden pl-6 pr-6">
-                    <TabsList className="grid w-full grid-cols-2">
+                    <TabsList className="grid w-full grid-cols-4">
                         <TabsTrigger value="knowledge">
                             <Layers className="mr-1.5 h-4 w-4" /> Knowledge
                         </TabsTrigger>
                         <TabsTrigger value="slang">
                             <MessageSquareWarning className="mr-1.5 h-4 w-4" /> Terms
+                        </TabsTrigger>
+                        <TabsTrigger value="mbti">
+                            <PersonStanding className="mr-1.5 h-4 w-4" /> MBTI
+                        </TabsTrigger>
+                        <TabsTrigger value="ocean">
+                            <User className="mr-1.5 h-4 w-4" /> OCEAN
                         </TabsTrigger>
                     </TabsList>
 
@@ -209,6 +269,108 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                     <TabsContent value="slang" className="flex-grow overflow-hidden px-2">
                         <ScrollArea className="h-full pr-4 pl-4">
                             {renderTabContent(slangData, isLoadingSlang, isSlangError, slangError, 'slang')}
+                        </ScrollArea>
+                    </TabsContent>
+
+                    <TabsContent value="mbti" className="flex-grow overflow-hidden px-2">
+                        <ScrollArea className="h-full pr-4 pl-4">
+                            {isLoadingMBTI ? (
+                                <div className="space-y-3 pt-4">{renderSkeletons(1)}</div>
+                            ) : isMBTIError ? (
+                                <div className="mt-4 p-4 text-destructive flex items-center gap-2 bg-destructive/10 rounded-md border border-destructive/30">
+                                    <Info className="h-5 w-5 flex-shrink-0" />
+                                    <span>Failed to load MBTI: {mbtiError?.message || 'Unknown error'}</span>
+                                </div>
+                            ) : mbtiData ? (
+                                <div className="pt-4 space-y-6">
+                                    <div className="text-center">
+                                        <h3 className="text-2xl font-bold mb-2">Your MBTI Type</h3>
+                                        <div className="text-4xl font-mono bg-primary/10 p-4 rounded-lg">
+                                            {mbtiData.type}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="space-y-4">
+                                        {Object.entries(mbtiData).map(([key, value]) => {
+                                            if (key === 'type') return null;
+                                            const [leftTrait, rightTrait] = key.split('_').reverse();
+                                            const percentage = Math.round(value * 100);
+
+                                            return (
+                                                <div key={key} className="space-y-2">
+                                                    {/* Trait Labels and Percentage */}
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-sm font-medium capitalize">
+                                                            {leftTrait.charAt(0).toUpperCase() + leftTrait.slice(1)}
+                                                        </span>
+                                                        <div className="relative flex justify-center w-16">
+                                                            <span className="text-sm font-medium text-muted-foreground">
+                                                                {percentage}%
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-sm font-medium capitalize">
+                                                            {rightTrait.charAt(0).toUpperCase() + rightTrait.slice(1)}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Slider */}
+                                                    <div className="relative pt-2">
+                                                        <Slider 
+                                                            value={[percentage]} 
+                                                            max={100} 
+                                                            step={1} 
+                                                            disabled
+                                                            className="w-full"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="pt-10 text-center text-muted-foreground">
+                                    <Brain className="h-10 w-10 mb-3 mx-auto text-gray-400" />
+                                    <p className="font-semibold">MBTI Analysis Pending</p>
+                                    <p className="text-sm">Keep chatting for personality insights</p>
+                                </div>
+                            )}
+                        </ScrollArea>
+                    </TabsContent>
+
+                    <TabsContent value="ocean" className="flex-grow overflow-hidden px-2">
+                        <ScrollArea className="h-full pr-4 pl-4">
+                            {isLoadingOcean ? (
+                                <div className="space-y-3 pt-4">{renderSkeletons(1)}</div>
+                            ) : isOceanError ? (
+                                <div className="mt-4 p-4 text-destructive flex items-center gap-2 bg-destructive/10 rounded-md border border-destructive/30">
+                                    <Info className="h-5 w-5 flex-shrink-0" />
+                                    <span>Failed to load OCEAN: {oceanError?.message || 'Unknown error'}</span>
+                                </div>
+                            ) : oceanData ? (
+                                <div className="pt-4 space-y-6">
+                                    <div className="text-center">
+                                        <h3 className="text-2xl font-bold mb-2">OCEAN Personality Traits</h3>
+                                        <div className="text-sm text-muted-foreground mb-4">
+                                            Based on {oceanData.response_count} interactions
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="space-y-4">
+                                        {renderOceanTrait('Openness', oceanData.openness)}
+                                        {renderOceanTrait('Conscientiousness', oceanData.conscientiousness)}
+                                        {renderOceanTrait('Extraversion', oceanData.extraversion)}
+                                        {renderOceanTrait('Agreeableness', oceanData.agreeableness)}
+                                        {renderOceanTrait('Neuroticism', oceanData.neuroticism)}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="pt-10 text-center text-muted-foreground">
+                                    <Brain className="h-10 w-10 mb-3 mx-auto text-gray-400" />
+                                    <p className="font-semibold">Personality Analysis Pending</p>
+                                    <p className="text-sm">Keep chatting for deeper insights</p>
+                                </div>
+                            )}
                         </ScrollArea>
                     </TabsContent>
                 </Tabs>

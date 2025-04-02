@@ -18,7 +18,7 @@ import KnowledgeOverlay from '@/components/overlays/KnowledgeOverlay';
 
 export function RenderOverlays() {
     // --- Select state and actions individually ---
-    const isAuthOverlayOpen = useUIStore((state) => state.isAuthOverlayOpen);
+    const isAuthOverlayOpen = useUIStore((state) => state.isAuthOpen);
     const isCreditsOpen = useUIStore((state) => state.isCreditsOpen);
     //const isSettingsOpen = useUIStore((state) => state.isSettingsOpen);
     const isHistoryOpen = useUIStore((state) => state.isHistoryOpen);

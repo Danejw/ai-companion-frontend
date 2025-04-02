@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, Loader2, Ear, EarOff } from 'lucide-react'; // Added Loader2
 import { toast } from 'sonner'; // For error feedback
+import { useUIStore } from '@/store'; // Add this import
 
 // Simple Spinner component reused
 const Spinner = () => <Loader2 className="h-4 w-4 animate-spin" />;
@@ -23,21 +24,17 @@ export default function InteractionHub() {
     const mutation = useMutation({
         mutationFn: sendTextMessage, // The API function to call
         onSuccess: (data) => {
-            // Data is the response from sendTextMessage (type SendMessageResponse = any)
-            console.log("Mutation Success, Data:", data);
-
-            // Process the response to get displayable text
-            let responseText = '';
-            if (typeof data === 'string') {
-                responseText = data;
-            } else if (data && typeof data === 'object') {
-                // Try common properties, customize based on your actual backend response
-                responseText = JSON.stringify(data);
-            } else {
-                // Fallback for unexpected types
-                responseText = String(data);
+            // Handle NO_CREDITS error case
+            if (typeof data === 'object' && data?.error?.message === 'NO_CREDITS') {
+                useUIStore.getState().toggleCreditsOverlay();
+                toast.error('Out of credits', {
+                    description: 'Please purchase more to continue chatting'
+                });
+                return;
             }
 
+            // Handle successful responses
+            const responseText = typeof data === 'string' ? data : data?.response || '';
             setAiResponse(responseText); // Update the display state with processed text
 
             // Invalidate history query if sending a message should update history display
@@ -141,9 +138,10 @@ export default function InteractionHub() {
         <div className="flex flex-col items-center gap-6 w-full max-w-xl px-4">
 
             {/* 1. Audio Visualizer Placeholder */}
-            <div className="w-32 h-32 md:w-40 md:h-40 bg-muted rounded-full flex items-center justify-center mb-4 transition-all p-2 gap-2"> {/* Adjusted size */}
+            {/* TODO: Add audio visualizer */}
+            {/* <div className="w-32 h-32 md:w-40 md:h-40 bg-muted rounded-full flex items-center justify-center mb-4 transition-all p-2 gap-2">
                 <span className="text-muted-foreground text-sm">Visualizer</span>
-            </div>
+            </div> */}
 
             {/* 2. AI Response Area */}
             <div className="min-h-[40px] text-center text-muted-foreground flex items-center justify-center px-2">

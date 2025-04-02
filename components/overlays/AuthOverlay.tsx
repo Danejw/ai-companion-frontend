@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner'; // For feedback
-import { Loader2, ChromeIcon } from 'lucide-react'; // Example icons
+import { Loader2 } from 'lucide-react'; // Example icons
 
 // Simple Spinner component (or use one from a library)
 const Spinner = () => <Loader2 className="mr-2 h-4 w-4 animate-spin" />;
@@ -30,8 +30,6 @@ interface AuthOverlayProps {
 // --- Use Props in Component Definition ---
 export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
     const router = useRouter();
-    // --- REMOVED useUIStore call ---
-
     const [activeTab, setActiveTab] = useState('login'); // 'login' or 'signup'
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -97,32 +95,48 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
 
         } else {
             // --- SIGN UP LOGIC ---
+            // Client-side validation (optional but recommended)
+            if (password.length < 8) {
+                setError("Password must be at least 8 characters long.");
+                toast.warning("Password Too Short", { description: "Password must be at least 8 characters long." });
+                setIsLoading(false);
+                return;
+            }
+
             try {
-                const response = await fetch('/api/auth/register', { // ADJUST YOUR API ROUTE
+                console.log(`Attempting signup via fetch to /api/auth/register for: ${email}`);
+                // Call the dedicated API route we created
+                const response = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // Include name if using: body: JSON.stringify({ name, email, password }),
                     body: JSON.stringify({ email, password }),
                 });
 
+                // Always try to parse the JSON body, even for errors
                 const data = await response.json();
+                console.log("Signup API response:", { status: response.status, body: data });
 
                 if (!response.ok) {
-                    const errorMessage = data.message || 'Sign up failed.';
+                    // Use the message from the API response if available, otherwise generic error
+                    const errorMessage = data?.message || `Sign up failed (Status: ${response.status})`;
                     setError(errorMessage);
                     toast.error('Sign Up Failed', { description: errorMessage });
                 } else {
-                    toast.success('Sign Up Successful!', { description: 'Please log in with your new account.' });
-                    setActiveTab('login'); // Switch to login tab after successful signup
-                    // Keep email for easy login, clear password
+                    // Use the success message from the API response
+                    toast.success('Sign Up Request Successful!', {
+                        description: data?.message || 'Account created. Check email or login.',
+                        duration: 7000 // Give more time to read confirmation messages
+                    });
+                    setActiveTab('login'); // Switch to login tab
+                    // Keep email populated for convenience, clear password
                     setEmail(email);
                     setPassword('');
-                    // Don't close overlay automatically, let them log in
+                    // Do not close the overlay, prompt user to check email or log in
                 }
-            } catch (err) {
-                console.error("Signup submit error:", err);
+            } catch (err) { // Catch network errors during fetch itself
+                console.error("Signup fetch network error:", err);
                 setError('An unexpected network error occurred during sign up.');
-                toast.error('Sign Up Failed', { description: 'A network error occurred.' });
+                toast.error('Sign Up Failed', { description: 'A network error occurred. Please check your connection.' });
             } finally {
                 setIsLoading(false);
             }
@@ -208,17 +222,17 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
                         </form>
 
                         {/* OAuth Separator */}
-                        <div className="relative my-6">
+                        {/* <div className="relative my-6">
                             <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
                             <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Or continue with</span></div>
-                        </div>
+                        </div> */}
 
                         {/* OAuth Buttons */}
-                        <div className="grid grid-cols-1 gap-2">
+                        {/* <div className="grid grid-cols-1 gap-2">
                             <Button variant="outline" onClick={() => handleOAuthSignIn('google')} disabled={isLoading}>
                                 {isLoading ? <Spinner /> : <ChromeIcon className="mr-2 h-4 w-4" />} Google
                             </Button>
-                        </div>
+                        </div> */}
                     </TabsContent>
 
                     {/* --- SIGN UP TAB --- */}
@@ -229,6 +243,7 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
                                 <Label htmlFor="signup-name">Name</Label>
                                 <Input id="signup-name" placeholder="Your Name" value={name} onChange={(e)=>setName(e.target.value)} required disabled={isLoading} autoComplete="name"/>
                             </div> */}
+
                             <div className="grid gap-2">
                                 <Label htmlFor="signup-email">Email</Label>
                                 <Input
@@ -237,6 +252,7 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
                                     required disabled={isLoading} autoComplete="email"
                                 />
                             </div>
+
                             <div className="grid gap-2">
                                 <Label htmlFor="signup-password">Password</Label>
                                 <Input
@@ -245,24 +261,29 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
                                     required disabled={isLoading} minLength={8} autoComplete="new-password"
                                 />
                             </div>
+
                             {error && activeTab === 'signup' && (
                                 <p className="text-sm text-center text-destructive">{error}</p>
                             )}
+
                             <Button type="submit" className="w-full" disabled={isLoading}>
                                 {isLoading ? <Spinner /> : 'Create Account'}
                             </Button>
+
                         </form>
 
                         {/* OAuth Options on Signup Tab */}
-                        <div className="relative my-6">
+                        {/* <div className="relative my-6">
                             <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
                             <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Or sign up with</span></div>
                         </div>
+
                         <div className="grid grid-cols-1 gap-2">
                             <Button variant="outline" onClick={() => handleOAuthSignIn('google')} disabled={isLoading}>
                                 {isLoading ? <Spinner /> : <ChromeIcon className="mr-2 h-4 w-4" />} Google
                             </Button>
-                        </div>
+                        </div> */}
+
                     </TabsContent>
                 </Tabs>
             </DialogContent>

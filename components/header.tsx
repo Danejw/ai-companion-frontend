@@ -21,7 +21,7 @@ export default function Header() {
                 <div className="mr-4 flex ml-6">
                     <Link href="/" className="mr-6 flex items-center space-x-2">
                         {/* <YourLogoIcon /> */}
-                        <span className="font-bold">AI Companion</span>
+                        <span className="font-bold">Known Well</span>
                     </Link>
                 </div>
                 <div className="flex flex-1 items-center justify-end space-x-1 sm:space-x-2"> {/* Added space-x-1 for mobile */}
@@ -51,7 +51,7 @@ export default function Header() {
                             </span>
 
                             {/* --- Overlay Trigger Buttons (Icon only) --- */}
-                            <Button variant="ghost" size="icon" onClick={toggleHistoryOverlay} title="Conversation History">
+                            <Button variant="ghost" size="icon" onClick={() => toggleHistoryOverlay(true)} title="Conversation History">
                                 <History className="h-4 w-4" />
                             </Button>
 
@@ -63,17 +63,17 @@ export default function Header() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => {
-                                    console.log('--- DEBUG: Credits Button Clicked ---'); // <-- ADD THIS LINE
-                                    toggleCreditsOverlay();
+                                    console.log('--- DEBUG: Credits Button Clicked ---');
+                                    toggleCreditsOverlay(true);
                                 }}
                                 title="Credits"
                             >
                                 <CreditCard className="h-4 w-4" />
                             </Button>
                             
-                            <Button variant="ghost" size="icon" onClick={toggleSettingsOverlay} title="Settings">
+                            {/* <Button variant="ghost" size="icon" onClick={toggleSettingsOverlay} title="Settings">
                                 <Settings className="h-4 w-4" />
-                            </Button>
+                            </Button> */}
 
                             {/* --- Logout Button (Icon only) --- */}
                             <Button
