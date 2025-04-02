@@ -9,6 +9,7 @@ export interface MBTIData {
     sensing_intuition: number;
     thinking_feeling: number;
     judging_perceiving: number;
+    message_count: number;
 }
 
 

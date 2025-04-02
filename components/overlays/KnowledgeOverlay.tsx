@@ -252,6 +252,37 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
         );
     };
 
+    // Add a render function for MBTI traits similar to the OCEAN one
+    const renderMBTITrait = (leftTrait: string, rightTrait: string, value: number) => {
+        const percentage = Math.round(value * 100);
+        return (
+            <div key={`${leftTrait}-${rightTrait}`} className="space-y-2">
+                <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium capitalize">
+                        {leftTrait}
+                    </span>
+                    <div className="relative flex justify-center w-16">
+                        <span className="text-sm font-medium text-muted-foreground">
+                            {percentage}%
+                        </span>
+                    </div>
+                    <span className="text-sm font-medium capitalize">
+                        {rightTrait}
+                    </span>
+                </div>
+                <div className="relative pt-2">
+                    <Slider 
+                        value={[percentage]} 
+                        max={100} 
+                        step={1} 
+                        disabled
+                        className="w-full"
+                    />
+                </div>
+            </div>
+        );
+    };
+
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent side="right" className="sm:max-w-md md:max-w-lg lg:max-w-xl flex flex-col !p-0">
@@ -271,7 +302,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                             <Layers className="mr-1.5 h-4 w-4" /> Knowledge
                         </TabsTrigger>
                         <TabsTrigger value="slang">
-                            <MessageSquareWarning className="mr-1.5 h-4 w-4" /> Terms
+                            <MessageSquareWarning className="mr-1.5 h-4 w-4" /> TermsBased on
                         </TabsTrigger>
                         <TabsTrigger value="mbti">
                             <PersonStanding className="mr-1.5 h-4 w-4" /> MBTI
@@ -309,44 +340,16 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                                         <div className="text-4xl font-mono bg-primary/10 p-4 rounded-lg">
                                             {mbtiData.type}
                                         </div>
+                                        <div className="text-sm text-muted-foreground mt-2">
+                                            Based on {mbtiData.message_count} interactions
+                                        </div>
                                     </div>
                                     
                                     <div className="space-y-4">
-                                        {Object.entries(mbtiData).map(([key, value]) => {
-                                            if (key === 'type') return null;
-                                            const [leftTrait, rightTrait] = key.split('_').reverse();
-                                            const percentage = Math.round(value * 100);
-
-                                            return (
-                                                <div key={key} className="space-y-2">
-                                                    {/* Trait Labels and Percentage */}
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="text-sm font-medium capitalize">
-                                                            {leftTrait.charAt(0).toUpperCase() + leftTrait.slice(1)}
-                                                        </span>
-                                                        <div className="relative flex justify-center w-16">
-                                                            <span className="text-sm font-medium text-muted-foreground">
-                                                                {percentage}%
-                                                            </span>
-                                                        </div>
-                                                        <span className="text-sm font-medium capitalize">
-                                                            {rightTrait.charAt(0).toUpperCase() + rightTrait.slice(1)}
-                                                        </span>
-                                                    </div>
-
-                                                    {/* Slider */}
-                                                    <div className="relative pt-2">
-                                                        <Slider 
-                                                            value={[percentage]} 
-                                                            max={100} 
-                                                            step={1} 
-                                                            disabled
-                                                            className="w-full"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
+                                        {renderMBTITrait('Introversion', 'Extraversion', mbtiData.extraversion_introversion)}
+                                        {renderMBTITrait('Intuition', 'Sensing', mbtiData.sensing_intuition)}
+                                        {renderMBTITrait('Feeling', 'Thinking', mbtiData.thinking_feeling)}
+                                        {renderMBTITrait('Perceiving', 'Judging', mbtiData.judging_perceiving)}
                                     </div>
                                 </div>
                             ) : (
