@@ -329,7 +329,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                     </TabsContent>
 
                     <TabsContent value="mbti" className="flex-grow overflow-hidden px-2">
-                        <ScrollArea className="h-full pr-4 pl-4">
+                        <ScrollArea className="h-full pr-1 pl-1">
                             {isLoadingMBTI ? (
                                 <div className="space-y-3 pt-4">{renderSkeletons(1)}</div>
                             ) : isMBTIError ? (

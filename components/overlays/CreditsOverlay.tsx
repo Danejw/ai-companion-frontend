@@ -130,7 +130,7 @@ export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayPro
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-sm sm:max-w-lg md:max-w-xl p-3 sm:p-4 max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [&]:scrollbar-width-none">
+            <DialogContent className="max-w-sm sm:max-w-lg md:max-w-xl p-3 sm:p-4 overflow-y-auto [&::-webkit-scrollbar]:hidden [&]:scrollbar-width-none w-[95vw] max-h-[90vh] sm:max-h-[85vh] !top-[10%] !translate-y-0">
                 <DialogHeader className="pb-2">
                     <DialogTitle className="text-lg sm:text-xl">
                         Buy one-time credits
