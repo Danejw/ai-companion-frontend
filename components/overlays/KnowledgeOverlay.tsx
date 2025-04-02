@@ -33,10 +33,10 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
         data: knowledgeData,
         isLoading: isLoadingKnowledge,
         error: knowledgeError,
-        isError: isKnowledgeError // Explicit boolean for easier checks
+        isError: isKnowledgeError
     } = useQuery<KnowledgeVector[], Error>({
         queryKey: ['knowledgeVectors'],
-        queryFn: () => fetchKnowledgeVectors(50),
+        queryFn: () => fetchKnowledgeVectors(20),
         enabled: open,
         staleTime: 5 * 60 * 1000,
     });
@@ -46,10 +46,10 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
         data: slangData,
         isLoading: isLoadingSlang,
         error: slangError,
-        isError: isSlangError // Explicit boolean
+        isError: isSlangError
     } = useQuery<KnowledgeVector[], Error>({
         queryKey: ['slangVectors'],
-        queryFn: () => fetchSlangVectors(50),
+        queryFn: () => fetchSlangVectors(20),
         enabled: open,
         staleTime: 5 * 60 * 1000,
     });

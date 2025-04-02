@@ -24,7 +24,6 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
         headers['Authorization'] = `Bearer ${accessToken}`;
     } else {
         console.warn('--- WARN: getAuthHeaders - No Access Token Found for request ---');
-
     }
     return headers;
 }
