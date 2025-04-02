@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Brain, Info, Trash2, Layers, MessageSquareWarning, PersonStanding, User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
-import { fetchKnowledgeVectors, fetchSlangVectors, removeKnowledgeVector, KnowledgeVector } from '@/lib/api/knowledge';
+import { fetchKnowledgeVectors, fetchSlangVectors, removeKnowledgeVector, removeSlangVector, KnowledgeVector } from '@/lib/api/knowledge';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -55,11 +55,10 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
     });
 
     // --- Mutation for Removing a Vector ---
-    const removeMutation = useMutation({
+    const removeKnowledgeMutation = useMutation({
         mutationFn: removeKnowledgeVector,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['knowledgeVectors'] });
-            queryClient.invalidateQueries({ queryKey: ['slangVectors'] });
             toast.success('Knowledge Removed', {
                 description: "The AI will no longer recall this specific piece of information."
             });
@@ -71,6 +70,20 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
         },
     });
 
+    const removeSlangMutation = useMutation({
+        mutationFn: removeSlangVector,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['slangVectors'] });
+            toast.success('Slang Term Removed', {
+                description: "The AI will no longer recognize this slang term."
+            });
+        },
+        onError: (error) => {
+            toast.error('Error Removing Slang', {
+                description: error.message || "Could not remove the slang term. Please try again."
+            });
+        },
+    });
 
     // --- Fetch MBTI Data ---  
     const {
@@ -101,7 +114,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
     });
 
     // --- Helper to Render a Single Knowledge Card ---
-    const renderVectorCard = (vector: KnowledgeVector) => (
+    const renderVectorCard = (vector: KnowledgeVector, type: 'knowledge' | 'slang') => (
         <Card key={vector.id} className="overflow-hidden"> 
             {/* Main text content with appropriate padding */}
             <CardContent className=""> 
@@ -124,7 +137,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                             variant="ghost"
                             size="icon"
                             className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 w-7" 
-                            disabled={removeMutation.isPending}
+                            disabled={type === 'knowledge' ? removeKnowledgeMutation.isPending : removeSlangMutation.isPending}
                             title="Forget this"
                         >
                             <Trash2 className="h-4 w-4" />
@@ -141,8 +154,10 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                         <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                             <AlertDialogAction
-                                className="bg-red-800 text-white hover:bg-red-900/90 focus-visible:ring-red-700 focus-visible:ring-offset-2" // Even darker red, white text, adjusted hover/focus
-                                onClick={() => removeMutation.mutate(vector.id)}
+                                className="bg-red-800 text-white hover:bg-red-900/90 focus-visible:ring-red-700 focus-visible:ring-offset-2"
+                                onClick={() => type === 'knowledge' 
+                                    ? removeKnowledgeMutation.mutate(vector.id) 
+                                    : removeSlangMutation.mutate(vector.id)}
                             >
                                 Yes, Forget It
                             </AlertDialogAction>
@@ -202,7 +217,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
         }
         return (
             <div className="space-y-3 pt-4">
-                {data.map(vector => renderVectorCard(vector))}
+                {data.map(vector => renderVectorCard(vector, type))}
             </div>
         );
     };

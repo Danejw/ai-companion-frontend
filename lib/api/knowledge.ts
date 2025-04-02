@@ -4,7 +4,7 @@ import { getSession } from 'next-auth/react'; // Or your preferred way to get to
 const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ai-companion-backend-opuh.onrender.com"; // Ensure this env var is set
 
 
-export interface KnowledgeVector {
+export interface Vector {
     id: string;
     text: string; // Assuming backend sends 'text' now
     last_updated: string; // ISO date string ideally
@@ -30,7 +30,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
 }
 
 // --- Fetch Knowledge Vectors ---
-export async function fetchKnowledgeVectors(limit: number = 10): Promise<KnowledgeVector[]> {
+export async function fetchKnowledgeVectors(limit: number = 10): Promise<Vector[]> {
     const headers = await getAuthHeaders();
     const url = `${API_BASE_URL}/vectors/get-knowledge-vectors?limit=${limit}`;
     const response = await fetch(url, {
@@ -44,7 +44,7 @@ export async function fetchKnowledgeVectors(limit: number = 10): Promise<Knowled
 }
 
 // --- Fetch Slang Vectors ---
-export async function fetchSlangVectors(limit: number = 10): Promise<KnowledgeVector[]> {
+export async function fetchSlangVectors(limit: number = 10): Promise<Vector[]> {
     const headers = await getAuthHeaders();
     const url = `${API_BASE_URL}/vectors/get-slang-vectors?limit=${limit}`;
     const response = await fetch(url, {
@@ -76,6 +76,7 @@ export async function removeKnowledgeVector(knowledge_id: string): Promise<void>
 // --- Remove Slang Vector ---
 export async function removeSlangVector(slang_id: string): Promise<void> {
     const headers = await getAuthHeaders();
+    console.log("Removing slang vector:", slang_id);
     const url = `${API_BASE_URL}/vectors/remove-slang-vector/?slang_id=${slang_id}`;
     const response = await fetch(url, {
         method: 'DELETE',
