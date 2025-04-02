@@ -22,7 +22,7 @@ export default function Header() {
                     <Link href="/" className="mr-6 flex items-center space-x-2">
                         {/* <YourLogoIcon /> */}
                         <AnimatedBlobLogo />
-                        <span className="font-bold">Knolia</span>
+                        <span className="font-bold text-xl text-gray-700">Knolia</span>
                     </Link>
                 </div>
                 <div className="flex flex-1 items-center justify-end space-x-1 sm:space-x-2"> {/* Added space-x-1 for mobile */}
