@@ -4,19 +4,9 @@ import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { fetchCreditBalance, createCheckoutSession } from '../../lib/api/stripe'; // Adjust path if needed
-
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle
-} from '@/components/ui/dialog';
-import {
-    Card,
-    CardContent,
-} from '@/components/ui/card';
+import {Dialog,DialogContent,DialogDescription,DialogHeader,DialogTitle} from '@/components/ui/dialog';
+import {Card, CardContent} from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { Loader2, Info, Zap } from 'lucide-react';
@@ -24,15 +14,16 @@ import { cn } from '@/lib/utils';
 
 // Define credit packages
 const creditPackages = [
-    { name: 'basic', credits: 2000, price: '$10', title: 'Starter Pack' },
-    { name: 'standard', credits: 6000, price: '$30', title: 'Value Pack' },
-    { name: 'premium', credits: 10000, price: '$50', title: 'Pro Pack' },
+    { name: 'tier1', credits: 100, price: '$2', title: '$2 for 100 Credits'},
+    { name: 'tier2', credits: 320, price: '$6', title: '$6 for 320 Credits' },
+    { name: 'tier3', credits: 660, price: '$12', title: '$12 for 660 Credits', isDefault: true },
+    { name: 'tier4', credits: 1400, price: '$24', title: '$24 for 1400 Credits' },
+    { name: 'tier5', credits: 3000, price: '$48', title: '$48 for 3000 Credits' }
 ];
 
 // Stripe loading logic
 let stripePromise: Promise<Stripe | null> | null = null;
 const getStripe = () => {
-    // ... existing code ...
     if (!stripePromise) {
         const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
         if (stripeKey) {
@@ -55,7 +46,7 @@ interface CreditsOverlayProps {
 export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayProps) {
 
     const [processingTier, setProcessingTier] = useState<string | null>(null);
-    const [selectedPackage, setSelectedPackage] = useState<string>('standard'); // Default to standard package
+    const [selectedPackage, setSelectedPackage] = useState<string>('Tier 3'); // Default to Tier 3 package
 
     // Fetch credit balance query
     const {
@@ -75,7 +66,6 @@ export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayPro
     const checkoutMutation = useMutation({
         mutationFn: createCheckoutSession,
         onSuccess: async (data) => {
-            // ... existing code ...
             const stripe = await getStripe();
             if (!stripe) {
                 toast.error("Stripe configuration error.", { description: "Could not initialize Stripe." });
@@ -90,7 +80,6 @@ export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayPro
             }
         },
         onError: (error: Error) => {
-            // ... existing code ...
             console.error("Checkout session creation error:", error);
             toast.error("Checkout Failed", { description: error.message || "Could not initiate purchase." });
             setProcessingTier(null);
@@ -106,18 +95,37 @@ export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayPro
     // Get bolt icons based on package tier
     const getBoltIcons = (packageName: string) => {
         switch (packageName) {
-            case 'basic':
+            case 'Tier 1':
                 return <Zap className="h-5 w-5" />;
-            case 'standard':
+            case 'Tier 2':
                 return (
                     <>
                         <Zap className="h-5 w-5" />
                         <Zap className="h-5 w-5" />
                     </>
                 );
-            case 'premium':
+            case 'Tier 3':
                 return (
                     <>
+                        <Zap className="h-5 w-5" />
+                        <Zap className="h-5 w-5" />
+                        <Zap className="h-5 w-5" />
+                    </>
+                );
+            case 'Tier 4':
+                return (
+                    <>
+                        <Zap className="h-5 w-5" />
+                        <Zap className="h-5 w-5" />
+                        <Zap className="h-5 w-5" />
+                        <Zap className="h-5 w-5" />
+                    </>
+                );
+            case 'Tier 5':
+                return (
+                    <>
+                        <Zap className="h-5 w-5" />
+                        <Zap className="h-5 w-5" />
                         <Zap className="h-5 w-5" />
                         <Zap className="h-5 w-5" />
                         <Zap className="h-5 w-5" />
