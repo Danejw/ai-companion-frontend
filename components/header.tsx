@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useUIStore } from '@/store';
 import { History, CreditCard, LogIn, LogOut, Loader2, Brain } from 'lucide-react';
-
+import AnimatedBlobLogo from '@/components/Logo';
 
 export default function Header() {
     const { data: session, status } = useSession();
@@ -21,6 +21,7 @@ export default function Header() {
                 <div className="mr-4 flex ml-6">
                     <Link href="/" className="mr-6 flex items-center space-x-2">
                         {/* <YourLogoIcon /> */}
+                        <AnimatedBlobLogo />
                         <span className="font-bold">Knolia</span>
                     </Link>
                 </div>

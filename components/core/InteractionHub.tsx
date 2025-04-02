@@ -18,6 +18,8 @@ export default function InteractionHub() {
     const [aiResponse, setAiResponse] = useState('');
     const [isListening, setIsListening] = useState(false);
     const recognitionRef = useRef<SpeechRecognition | null>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null)
+
 
     // --- Setup Mutation ---
     const queryClient = useQueryClient(); // Get query client if needed for invalidation later
@@ -144,7 +146,7 @@ export default function InteractionHub() {
             </div> */}
 
             {/* 2. AI Response Area */}
-            <div className="min-h-[40px] text-center text-muted-foreground flex items-center justify-center px-2">
+            <div className="min-h-[40px] text-center text-gray-500 flex items-center justify-center px-2">
                 {mutation.isPending ? (
                     <Spinner /> // Show spinner while mutation is pending
                 ) : (
@@ -155,7 +157,7 @@ export default function InteractionHub() {
             </div>
 
             {/* 3. Input Area */}
-            <div className={`flex w-full items-center gap-2 rounded-full border p-2 shadow-sm bg-background transition-opacity ${mutation.isPending ? 'opacity-70 cursor-not-allowed' : 'opacity-100'}`}>
+            <div className={`flex w-full items-start gap-2 rounded-full border p-2 shadow-sm bg-background transition-opacity ${mutation.isPending ? 'opacity-70 cursor-not-allowed' : 'opacity-100'}`}>
                 <Button
                     variant="ghost"
                     size="icon"
@@ -170,19 +172,19 @@ export default function InteractionHub() {
                 {/* Text Input Area */}
                 <form onSubmit={handleSendText} className="flex-1 flex">
                     <Textarea
+                        ref={textareaRef}
                         placeholder="Ask anything..."
-                        className="focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none resize-none min-h-[40px] text-md bg-transparent rounded-lg px-4 py-2 overflow-hidden border-none" 
+                        className="w-full focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none resize-none min-h-[40px] max-h-[200px] text-md bg-transparent rounded-lg px-4 py-2 border-none scrollbar-hide overflow-y-scroll"
                         rows={1}
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         onKeyDown={(e) => {
-                            // Submit on Enter unless Shift is pressed
                             if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault(); // Prevent newline
-                                handleSendText();
+                                e.preventDefault()
+                                handleSendText()
                             }
                         }}
-                        disabled={mutation.isPending} // Disable textarea while loading
+                        disabled={mutation.isPending}
                     />
                     <button type="submit" disabled={mutation.isPending} className="hidden" />
                 </form>
