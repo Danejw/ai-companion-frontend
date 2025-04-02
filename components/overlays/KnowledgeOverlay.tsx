@@ -318,7 +318,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
 
                     {/* Add padding and ScrollArea INSIDE each TabsContent */}
                     <TabsContent value="knowledge" className="flex-grow overflow-hidden">
-                        <ScrollArea className="h-full pr-4 pl-4">
+                        <ScrollArea className="h-full pr-1 pl-1">
                             {renderTabContent(knowledgeData, isLoadingKnowledge, isKnowledgeError, knowledgeError, 'knowledge')}
                         </ScrollArea>
                     </TabsContent>
