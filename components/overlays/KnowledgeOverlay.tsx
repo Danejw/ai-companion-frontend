@@ -298,17 +298,21 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                 {/* Use Tabs component */}
                 <Tabs defaultValue="knowledge" className="flex-grow flex flex-col overflow-hidden pl-6 pr-6">
                     <TabsList className="grid w-full grid-cols-4">
-                        <TabsTrigger value="knowledge">
-                            <Layers className="mr-1.5 h-4 w-4" /> Knowledge
+                        <TabsTrigger value="knowledge" className="flex items-center justify-center">
+                            <Layers className="h-4 w-4 sm:mr-1.5" /> 
+                            <span className="hidden sm:inline">Knowledge</span>
                         </TabsTrigger>
-                        <TabsTrigger value="slang">
-                            <MessageSquareWarning className="mr-1.5 h-4 w-4" /> TermsBased on
+                        <TabsTrigger value="slang" className="flex items-center justify-center">
+                            <MessageSquareWarning className="h-4 w-4 sm:mr-1.5" /> 
+                            <span className="hidden sm:inline">Terms</span>
                         </TabsTrigger>
-                        <TabsTrigger value="mbti">
-                            <PersonStanding className="mr-1.5 h-4 w-4" /> MBTI
+                        <TabsTrigger value="mbti" className="flex items-center justify-center">
+                            <PersonStanding className="h-4 w-4 sm:mr-1.5" /> 
+                            <span className="hidden sm:inline">MBTI</span>
                         </TabsTrigger>
-                        <TabsTrigger value="ocean">
-                            <User className="mr-1.5 h-4 w-4" /> OCEAN
+                        <TabsTrigger value="ocean" className="flex items-center justify-center">
+                            <User className="h-4 w-4 sm:mr-1.5" /> 
+                            <span className="hidden sm:inline">OCEAN</span>
                         </TabsTrigger>
                     </TabsList>
 
@@ -341,7 +345,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                                             {mbtiData.type}
                                         </div>
                                         <div className="text-sm text-muted-foreground mt-2">
-                                            Based on {mbtiData.message_count} interactions
+                                            Based on {mbtiData?.message_count} interactions
                                         </div>
                                     </div>
                                     
