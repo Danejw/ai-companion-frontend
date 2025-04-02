@@ -4,14 +4,14 @@ import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useUIStore } from '@/store';
-import { History, Settings, CreditCard, LogIn, LogOut, Loader2, Brain } from 'lucide-react';
+import { History, CreditCard, LogIn, LogOut, Loader2, Brain } from 'lucide-react';
 
 
 export default function Header() {
     const { data: session, status } = useSession();
     const toggleAuthOverlay = useUIStore((state) => state.toggleAuthOverlay);
     const toggleCreditsOverlay = useUIStore((state) => state.toggleCreditsOverlay);
-    const toggleSettingsOverlay = useUIStore((state) => state.toggleSettingsOverlay);
+    //const toggleSettingsOverlay = useUIStore((state) => state.toggleSettingsOverlay);
     const toggleHistoryOverlay = useUIStore((state) => state.toggleHistoryOverlay);
     const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
 

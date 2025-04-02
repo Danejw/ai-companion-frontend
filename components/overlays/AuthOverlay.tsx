@@ -143,21 +143,21 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
         }
     };
 
-    const handleOAuthSignIn = async (provider: 'google' /* | 'github' | etc */) => {
-        setIsLoading(true);
-        setError(null); // Clear previous errors
-        try {
-            await signIn(provider, { callbackUrl: '/app' }); // Redirect to app after successful OAuth
-            // On success, NextAuth redirects, overlay will close as page changes/refreshes
-        } catch (err) {
-            console.error("OAuth signin error:", err);
-            const message = `Failed to sign in with ${provider}.`;
-            setError(message);
-            toast.error('OAuth Sign In Failed', { description: message });
-            setIsLoading(false); // Only reached if signIn itself throws before redirect
-        }
-        // Don't set isLoading false here if successful, as redirect should happen
-    };
+    // const handleOAuthSignIn = async (provider: 'google' /* | 'github' | etc */) => {
+    //     setIsLoading(true);
+    //     setError(null); // Clear previous errors
+    //     try {
+    //         await signIn(provider, { callbackUrl: '/app' }); // Redirect to app after successful OAuth
+    //         // On success, NextAuth redirects, overlay will close as page changes/refreshes
+    //     } catch (err) {
+    //         console.error("OAuth signin error:", err);
+    //         const message = `Failed to sign in with ${provider}.`;
+    //         setError(message);
+    //         toast.error('OAuth Sign In Failed', { description: message });
+    //         setIsLoading(false); // Only reached if signIn itself throws before redirect
+    //     }
+    //     // Don't set isLoading false here if successful, as redirect should happen
+    // };
 
     // --- Use Props for the Dialog ---
     return (

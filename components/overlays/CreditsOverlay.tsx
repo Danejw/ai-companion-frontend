@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { Loader2, Info, CreditCard, Zap } from 'lucide-react';
+import { Loader2, Info, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Define credit packages
