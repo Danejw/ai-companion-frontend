@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Brain, Info, Trash2, Layers, MessageSquareWarning, PersonStanding, User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
-import { fetchKnowledgeVectors, fetchSlangVectors, removeKnowledgeVector, removeSlangVector, KnowledgeVector } from '@/lib/api/knowledge';
+import { fetchKnowledgeVectors, fetchSlangVectors, removeKnowledgeVector, removeSlangVector, Vector } from '@/lib/api/knowledge';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -34,7 +34,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
         isLoading: isLoadingKnowledge,
         error: knowledgeError,
         isError: isKnowledgeError
-    } = useQuery<KnowledgeVector[], Error>({
+    } = useQuery<Vector[], Error>({
         queryKey: ['knowledgeVectors'],
         queryFn: () => fetchKnowledgeVectors(20),
         enabled: open,
@@ -47,7 +47,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
         isLoading: isLoadingSlang,
         error: slangError,
         isError: isSlangError
-    } = useQuery<KnowledgeVector[], Error>({
+    } = useQuery<Vector[], Error>({
         queryKey: ['slangVectors'],
         queryFn: () => fetchSlangVectors(20),
         enabled: open,
@@ -114,7 +114,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
     });
 
     // --- Helper to Render a Single Knowledge Card ---
-    const renderVectorCard = (vector: KnowledgeVector, type: 'knowledge' | 'slang') => (
+    const renderVectorCard = (vector: Vector, type: 'knowledge' | 'slang') => (
         <Card key={vector.id} className="overflow-hidden"> 
             {/* Main text content with appropriate padding */}
             <CardContent className=""> 
@@ -189,7 +189,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
 
     // --- Helper to render Tab Content (avoids repetition) ---
     const renderTabContent = (
-        data: KnowledgeVector[] | undefined,
+        data: Vector[] | undefined,
         isLoading: boolean,
         isError: boolean,
         error: Error | null,
@@ -217,7 +217,13 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
         }
         return (
             <div className="space-y-3 pt-4">
-                {data.map(vector => renderVectorCard(vector, type))}
+                {data
+                    .slice() // Create a copy to avoid mutating original array
+                    .sort((a, b) => 
+                        new Date(b.last_updated).getTime() - 
+                        new Date(a.last_updated).getTime()
+                    )
+                    .map(vector => renderVectorCard(vector, type))}
             </div>
         );
     };
