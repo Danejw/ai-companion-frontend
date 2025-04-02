@@ -296,7 +296,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                 </SheetHeader>
 
                 {/* Use Tabs component */}
-                <Tabs defaultValue="knowledge" className="flex-grow flex flex-col overflow-hidden pl-6 pr-6">
+                <Tabs defaultValue="knowledge" className="flex-grow flex flex-col overflow-hidden pl-3 pr-3">
                     <TabsList className="grid w-full grid-cols-4">
                         <TabsTrigger value="knowledge" className="flex items-center justify-center">
                             <Layers className="h-4 w-4 sm:mr-1.5" /> 
@@ -316,20 +316,19 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                         </TabsTrigger>
                     </TabsList>
 
-                    {/* Add padding and ScrollArea INSIDE each TabsContent */}
                     <TabsContent value="knowledge" className="flex-grow overflow-hidden">
-                        <ScrollArea className="h-full pr-1 pl-1">
+                        <ScrollArea className="h-full">
                             {renderTabContent(knowledgeData, isLoadingKnowledge, isKnowledgeError, knowledgeError, 'knowledge')}
                         </ScrollArea>
                     </TabsContent>
                     <TabsContent value="slang" className="flex-grow overflow-hidden px-2">
-                        <ScrollArea className="h-full pr-4 pl-4">
+                        <ScrollArea className="h-full">
                             {renderTabContent(slangData, isLoadingSlang, isSlangError, slangError, 'slang')}
                         </ScrollArea>
                     </TabsContent>
 
                     <TabsContent value="mbti" className="flex-grow overflow-hidden px-2">
-                        <ScrollArea className="h-full pr-1 pl-1">
+                        <ScrollArea className="h-full">
                             {isLoadingMBTI ? (
                                 <div className="space-y-3 pt-4">{renderSkeletons(1)}</div>
                             ) : isMBTIError ? (
@@ -367,7 +366,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                     </TabsContent>
 
                     <TabsContent value="ocean" className="flex-grow overflow-hidden px-2">
-                        <ScrollArea className="h-full pr-4 pl-4">
+                        <ScrollArea className="h-full">
                             {isLoadingOcean ? (
                                 <div className="space-y-3 pt-4">{renderSkeletons(1)}</div>
                             ) : isOceanError ? (
