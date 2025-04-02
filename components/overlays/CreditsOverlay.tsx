@@ -16,14 +16,11 @@ import {
 import {
     Card,
     CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { Loader2, Info, CreditCard } from 'lucide-react';
+import { Loader2, Info, CreditCard, Zap } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 // Define credit packages
 const creditPackages = [
@@ -35,7 +32,7 @@ const creditPackages = [
 // Stripe loading logic
 let stripePromise: Promise<Stripe | null> | null = null;
 const getStripe = () => {
-    // ... (stripe loading logic remains the same)
+    // ... existing code ...
     if (!stripePromise) {
         const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
         if (stripeKey) {
@@ -58,6 +55,7 @@ interface CreditsOverlayProps {
 export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayProps) {
 
     const [processingTier, setProcessingTier] = useState<string | null>(null);
+    const [selectedPackage, setSelectedPackage] = useState<string>('standard'); // Default to standard package
 
     // Fetch credit balance query
     const {
@@ -77,7 +75,7 @@ export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayPro
     const checkoutMutation = useMutation({
         mutationFn: createCheckoutSession,
         onSuccess: async (data) => {
-            // ... (onSuccess logic remains the same)
+            // ... existing code ...
             const stripe = await getStripe();
             if (!stripe) {
                 toast.error("Stripe configuration error.", { description: "Could not initialize Stripe." });
@@ -92,7 +90,7 @@ export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayPro
             }
         },
         onError: (error: Error) => {
-            // ... (onError logic remains the same)
+            // ... existing code ...
             console.error("Checkout session creation error:", error);
             toast.error("Checkout Failed", { description: error.message || "Could not initiate purchase." });
             setProcessingTier(null);
@@ -105,69 +103,99 @@ export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayPro
         checkoutMutation.mutate(tier);
     };
 
+    // Get bolt icons based on package tier
+    const getBoltIcons = (packageName: string) => {
+        switch (packageName) {
+            case 'basic':
+                return <Zap className="h-5 w-5" />;
+            case 'standard':
+                return (
+                    <>
+                        <Zap className="h-5 w-5" />
+                        <Zap className="h-5 w-5" />
+                    </>
+                );
+            case 'premium':
+                return (
+                    <>
+                        <Zap className="h-5 w-5" />
+                        <Zap className="h-5 w-5" />
+                        <Zap className="h-5 w-5" />
+                    </>
+                );
+            default:
+                return <Zap className="h-5 w-5" />;
+        }
+    };
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            {/*
-               *** FIX: Added scrollbar hiding classes ***
-               - `[&::-webkit-scrollbar]:hidden`: Hides scrollbar in Chrome, Safari, Edge, Opera
-               - `[&]:scrollbar-width-none`: Hides scrollbar in Firefox (standard property)
-            */}
-            <DialogContent className="max-w-sm sm:max-w-lg md:max-w-2xl lg:max-w-3xl p-4 sm:p-6 max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [&]:scrollbar-width-none">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center text-xl sm:text-2xl">
-                        <CreditCard className="mr-2 h-5 w-5 sm:h-6 sm:w-6" /> Buy Credits
+            <DialogContent className="max-w-sm sm:max-w-lg md:max-w-xl p-3 sm:p-4 max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [&]:scrollbar-width-none">
+                <DialogHeader className="pb-2">
+                    <DialogTitle className="text-lg sm:text-xl">
+                        Buy one-time credits
                     </DialogTitle>
-                    <DialogDescription>
-                        Purchase credits to interact with your AI Companion. Your current balance is shown below.
+                    <DialogDescription className="text-sm pt-1">
+                        Buy credits instantly with a one-time purchase. Credits are added to your account immediately after payment and never expire.
                     </DialogDescription>
                 </DialogHeader>
 
-                {/* Display Current Balance */}
-                <div className="my-4 rounded-md border p-4 mb-6">
-                    <h3 className="mb-2 text-base sm:text-lg font-semibold">Current Balance</h3>
-                    {isLoadingBalance && <Skeleton className="h-8 w-24" />}
-                    {balanceError && <p className="text-sm text-destructive flex items-center"><Info className="mr-1 h-4 w-4" /> Could not load balance.</p>}
+                {/* Compact Current Balance */}
+                <div className="my-2 rounded-md border p-3">
+                    <h3 className="text-sm font-medium">Current Balance</h3>
+                    {isLoadingBalance && <Skeleton className="h-6 w-24" />}
+                    {balanceError && <p className="text-sm text-destructive flex items-center"><Info className="mr-1 h-3 w-3" /> Could not load balance.</p>}
                     {!isLoadingBalance && !balanceError && balanceData && (
-                        <p className="text-xl sm:text-2xl font-bold">
+                        <p className="text-lg font-bold">
                             {balanceData.credits.toLocaleString()} Credits ✨
                         </p>
                     )}
                 </div>
 
-                {/* Display Credit Packages using a responsive grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {creditPackages.map((pkg) => {
-                        const isProcessingThis = processingTier === pkg.name;
-                        return (
-                            <Card key={pkg.name} className="flex flex-col overflow-hidden">
-                                <CardHeader className="p-4">
-                                    <CardTitle className="text-lg sm:text-xl">{pkg.title}</CardTitle>
-                                    <CardDescription>
-                                        Get {pkg.credits.toLocaleString()} credits
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="flex-grow p-4">
-                                    <p className="text-xl sm:text-2xl font-semibold">{pkg.price}</p>
-                                </CardContent>
-                                <CardFooter className="p-4">
-                                    <Button
-                                        className="w-full"
-                                        onClick={() => handlePurchaseClick(pkg.name)}
-                                        disabled={!!processingTier}
-                                    >
-                                        {isProcessingThis ? (
-                                            <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...
-                                            </>
-                                        ) : (
-                                            'Purchase'
-                                        )}
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-                        );
-                    })}
+                {/* More compact Credit Packages */}
+                <div className="space-y-2 my-3">
+                    {creditPackages.map((pkg) => (
+                        <Card 
+                            key={pkg.name}
+                            className={cn(
+                                "cursor-pointer transition-all border",
+                                selectedPackage === pkg.name 
+                                    ? "border-2 border-primary" 
+                                    : "hover:border-primary/50"
+                            )}
+                            onClick={() => setSelectedPackage(pkg.name)}
+                        >
+                            <CardContent className="flex justify-between items-center">
+                                <div className="flex items-center gap-1.5">
+                                    <div className="flex text-amber-500">
+                                        {getBoltIcons(pkg.name)}
+                                    </div>
+                                    <div className="font-medium text-base">
+                                        {pkg.credits.toLocaleString()} credits
+                                    </div>
+                                </div>
+                                <div className="text-right font-bold text-base">
+                                    {pkg.price}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
                 </div>
+
+                {/* Pay now button */}
+                <Button 
+                    className="w-full py-2 mt-1"
+                    onClick={() => handlePurchaseClick(selectedPackage)}
+                    disabled={!!processingTier}
+                >
+                    {processingTier ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...
+                        </>
+                    ) : (
+                        'Pay now →'
+                    )}
+                </Button>
             </DialogContent>
         </Dialog>
     );
