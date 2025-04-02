@@ -16,7 +16,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
         <SessionProvider>
             <QueryClientProvider client={queryClient}>
                 {children}
-                <Toaster richColors position="top-right" />
+                <Toaster richColors position="bottom-right" />
                 {/* <ReactQueryDevtools initialIsOpen={false} /> */}
             </QueryClientProvider>
         </SessionProvider>

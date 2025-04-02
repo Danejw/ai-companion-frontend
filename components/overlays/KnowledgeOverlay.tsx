@@ -349,10 +349,10 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                                     </div>
                                     
                                     <div className="space-y-4">
-                                        {renderMBTITrait('Introversion', 'Extraversion', mbtiData.extraversion_introversion)}
-                                        {renderMBTITrait('Intuition', 'Sensing', mbtiData.sensing_intuition)}
-                                        {renderMBTITrait('Feeling', 'Thinking', mbtiData.thinking_feeling)}
-                                        {renderMBTITrait('Perceiving', 'Judging', mbtiData.judging_perceiving)}
+                                        {renderMBTITrait('Extraversion', 'Introversion', mbtiData.extraversion_introversion)}
+                                        {renderMBTITrait('Sensing', 'Intuition', mbtiData.sensing_intuition)}
+                                        {renderMBTITrait('Thinking', 'Feeling', mbtiData.thinking_feeling)}
+                                        {renderMBTITrait('Judging', 'Perceiving', mbtiData.judging_perceiving)}
                                     </div>
                                 </div>
                             ) : (
