@@ -93,7 +93,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                     <span className="w-8 h-1 bg-primary rounded-full"></span>
                                 </h2>
                                 
-                                <Card className="mb-8 pb-8">
+                                <Card className="mb-8 pb-8 bg-card/50 backdrop-blur-sm">
                                     <CardContent className="pt-6">
                                         <div className="space-y-4">
                                             <p>
@@ -274,7 +274,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                     <span className="w-8 h-1 bg-primary rounded-full"></span>
                                 </h2>
                                 
-                                <Card className="mb-6">
+                                <Card className="mb-6 bg-card/50 backdrop-blur-sm">
                                     <CardContent className="pt-6">
                                         <p className="mb-4">
                                             Each MBTI type uses eight cognitive functions in a specific order (function stack). 
@@ -448,7 +448,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                 </h2>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <Card className="hover:shadow-md transition-all pt-6 pb-6">
+                                    <Card className="hover:shadow-md transition-all pt-6 pb-6 bg-card/50 backdrop-blur-sm">
                                         <CardHeader>
                                             <CardTitle className="flex items-center gap-2">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -468,7 +468,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                         </CardContent>
                                     </Card>
                                     
-                                    <Card className="hover:shadow-md transition-all pt-6 pb-6">
+                                    <Card className="hover:shadow-md transition-all pt-6 pb-6 bg-card/50 backdrop-blur-sm">
                                         <CardHeader>
                                             <CardTitle className="flex items-center gap-2">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -491,7 +491,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                         </CardContent>
                                     </Card>
                                     
-                                    <Card className="hover:shadow-md transition-all pt-6 pb-6">
+                                    <Card className="hover:shadow-md transition-all pt-6 pb-6 bg-card/50 backdrop-blur-sm">
                                         <CardHeader>
                                             <CardTitle className="flex items-center gap-2">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -512,7 +512,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                         </CardContent>
                                     </Card>
                                     
-                                    <Card className="hover:shadow-md transition-all pt-6 pb-6">
+                                    <Card className="hover:shadow-md transition-all pt-6 pb-6 bg-card/50 backdrop-blur-sm">
                                         <CardHeader>
                                             <CardTitle className="flex items-center gap-2">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -546,7 +546,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                     Important Considerations
                                     <span className="w-8 h-1 bg-primary rounded-full"></span>
                                 </h2>
-                                <div className="bg-white border rounded-lg p-6 max-w-3xl mx-auto pt-6 pb-6">
+                                <div className="border rounded-lg p-6 max-w-3xl mx-auto pt-6 pb-6 bg-card/50 backdrop-blur-sm">
                                     <ul className="space-y-4">
                                         <li className="flex items-start gap-3">
                                             <div className="mt-1 min-w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary">

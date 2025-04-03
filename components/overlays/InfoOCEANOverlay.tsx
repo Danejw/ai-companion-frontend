@@ -286,14 +286,14 @@ export default function InfoOCEANOverlay({ open, onOpenChange }: InfoOCEANOverla
                 </Button>
 
                 <ScrollArea className="h-full w-full">
-                    <div className="flex min-h-full w-full justify-center bg-gradient-to-b from-background via-background to-blue-50/30 dark:to-slate-950/40">
+                    <div className="flex min-h-full w-full justify-center">
                         <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-20 pt-24">
 
                             <Background/>
 
                             {/* Hero Section */}
                             <section className="text-center mb-12 sm:mb-16">
-                                <div className="inline-block p-2 px-4 bg-primary/10 rounded-full text-primary font-medium mb-4">
+                                <div className="inline-block p-2 px-4 bg-gray-500/10 backdrop-blur-sm rounded-full text-primary font-medium mb-4">
                                     Personality Framework
                                 </div>
                                 <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-5 sm:mb-6 text-gray-900 dark:text-gray-100 leading-tight tracking-tight">
@@ -312,7 +312,7 @@ export default function InfoOCEANOverlay({ open, onOpenChange }: InfoOCEANOverla
 
                             {/* Visual diagram of the OCEAN model */}
                             <div className="mb-12 flex justify-center">
-                                <div className="w-full max-w-3xl p-6 rounded-xl border bg-card/50 shadow-sm">
+                                <div className="w-full max-w-3xl p-6 rounded-xl border bg-card/40 shadow-sm backdrop-blur-sm">
                                     <h2 className="text-2xl font-semibold text-center mb-6">The Five Dimensions of Personality</h2>
                                     <div className="h-1 w-32 bg-primary/50 mx-auto mb-8 rounded-full"></div>
                                     <div className="grid grid-cols-1 md:grid-cols-5 gap-2 md:gap-4">
@@ -396,7 +396,7 @@ export default function InfoOCEANOverlay({ open, onOpenChange }: InfoOCEANOverla
                                 
                                 <TabsContent value="applications">
                                     <div className="max-w-4xl mx-auto">
-                                        <div className="bg-card border rounded-xl shadow-sm p-6 mb-8">
+                                        <div className="bg-card/50 border rounded-xl shadow-sm p-6 mb-8 backdrop-blur-sm">
                                             <h3 className="text-xl font-semibold mb-4">Applications of the Big Five Model</h3>
                                             <p className="text-muted-foreground mb-6">
                                                 The OCEAN model has been applied in various domains to understand human behavior, 
@@ -418,7 +418,7 @@ export default function InfoOCEANOverlay({ open, onOpenChange }: InfoOCEANOverla
                             </div>
                                         </div>
                                         
-                                        <div className="bg-card border rounded-xl shadow-sm p-6">
+                                        <div className="bg-card/50 border rounded-xl shadow-sm p-6 backdrop-blur-sm">
                                             <h3 className="text-xl font-semibold mb-4">Interactions Between Traits</h3>
                                             <p className="text-muted-foreground mb-6">
                                                 While each of the Big Five traits represents a distinct dimension of personality, 
@@ -449,7 +449,7 @@ export default function InfoOCEANOverlay({ open, onOpenChange }: InfoOCEANOverla
                             {/* Important Considerations */}
                             <section className="mb-16 sm:mb-20">
                                 <h2 className="text-2xl font-bold mb-6 text-center">Important Considerations</h2>
-                                <div className="bg-card border rounded-lg p-6 max-w-3xl mx-auto shadow-sm">
+                                <div className="bg-card/50 border rounded-lg p-8 max-w-3xl mx-auto shadow-sm backdrop-blur-sm">
                                     <ul className="space-y-4">
                                         <li className="flex gap-3 items-start">
                                             <span className="flex-shrink-0 h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">1</span>
