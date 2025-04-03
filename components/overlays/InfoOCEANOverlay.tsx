@@ -19,7 +19,7 @@ export default function InfoOCEANOverlay({ open, onOpenChange }: InfoOCEANOverla
 
             <Button
                 variant="ghost"
-                className="absolute right-20 top-20 sm:right-20 sm:top-20 z-[25]"
+                className="absolute right-6 top-6 sm:right-6 sm:top-6 z-[6]"
                 onClick={() => onOpenChange(false)}
             >
                 <X className="h-5 w-5 sm:h-6 sm:w-6" />

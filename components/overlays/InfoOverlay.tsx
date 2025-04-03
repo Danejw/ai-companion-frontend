@@ -17,7 +17,7 @@ export default function InfoOverlay({ open, onOpenChange }: InfoOverlayProps) {
         <div className="fixed inset-0 bg-background z-[30] overflow-hidden">
             <Button
                 variant="ghost"
-                className="absolute right-4 top-4 sm:right-6 sm:top-6 z-[30]"
+                className="absolute right-6 top-6 sm:right-6 sm:top-6 z-[30]"
                 onClick={() => onOpenChange(false)}
             >
                 <X className="h-5 w-5 sm:h-6 sm:w-6" />
