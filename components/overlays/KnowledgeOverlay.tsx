@@ -291,7 +291,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
         <>
             <InfoOCEANOverlay open={isOceanInfoOpen} onOpenChange={setIsOceanInfoOpen} />
             <InfoMBTIOverlay open={isMbtiInfoOpen} onOpenChange={setIsMbtiInfoOpen} />
-            
+
             <Sheet open={open} onOpenChange={onOpenChange}>
                 <SheetContent side="right" className="sm:max-w-md md:max-w-lg lg:max-w-xl flex flex-col !p-0">
                     <SheetHeader className="ml-2 mr-2 mt-2">
@@ -377,7 +377,10 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                                     variant="ghost"
                                     size="sm"
                                     className="w-full text-muted-foreground"
-                                    onClick={() => setIsMbtiInfoOpen(true)}
+                                    onClick={() => {
+                                        setIsMbtiInfoOpen(true);
+                                        onOpenChange(false);
+                                    }}
                                 >
                                     <Info className="h-4 w-4 mr-2" />
                                     Learn about MBTI
@@ -425,7 +428,10 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                                     variant="ghost"
                                     size="sm"
                                     className="w-full text-muted-foreground"
-                                    onClick={() => setIsOceanInfoOpen(true)}
+                                    onClick={() => {
+                                        setIsOceanInfoOpen(true);
+                                        onOpenChange(false);
+                                    }}
                                 >
                                     <Info className="h-4 w-4 mr-2" />
                                     Learn about OCEAN
