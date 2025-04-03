@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 const NUM_BLOBS = 4
 const BASE_Y = 90
 const DEFAULT_SPEED = 0.05 // default speed for animation
-const colors = ['#f472b6', '#v', '#facc15', '#a78bfa']
+const colors = ['#f472b6', '#818cf8', '#facc15', '#a78bfa']
 const baseX = [30, 70, 110, 150]
 
 export default function AudioVisualizer() {
