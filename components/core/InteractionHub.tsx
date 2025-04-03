@@ -193,7 +193,7 @@ export default function InteractionHub() {
                 <Button
                     type="button"
                     size="icon"
-                    className="rounded-full flex-shrink-0 self-center"
+                    className="rounded-full flex-shrink-0 self-center accent"
                     onClick={handleSendText}
                     title="Send Message"
                     // Disable if no text OR if loading

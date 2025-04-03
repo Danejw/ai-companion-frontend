@@ -170,7 +170,7 @@ export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayPro
                 </div>
 
                 {/* More compact Credit Packages */}
-                <div className="space-y-2 my-3">
+                <div className="space-y-2">
                     {creditPackages.map((pkg) => (
                         <Card 
                             key={pkg.name}
@@ -189,6 +189,9 @@ export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayPro
                                     </div>
                                     <div className="font-medium text-base">
                                         {pkg.credits.toLocaleString()} credits
+                                    </div>
+                                    <div className="flex text-amber-500">
+                                        {pkg.name === 'tier5' ? 'Best Value' : pkg.name === 'tier2' ? 'Most Popular' : ''}
                                     </div>
                                 </div>
                                 <div className="text-right font-bold text-base">

@@ -291,7 +291,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                         <Brain className="mr-2 h-5 w-5" /> AI Memory & Learned Knowledge
                     </SheetTitle>
                     <SheetDescription>
-                        Review and manage what the AI has learned.
+                        Review and manage what your AI has learned.
                     </SheetDescription>
                 </SheetHeader>
 
@@ -336,12 +336,12 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                                     <Info className="h-5 w-5 flex-shrink-0" />
                                     <span>Failed to load MBTI: {mbtiError?.message || 'Unknown error'}</span>
                                 </div>
-                            ) : mbtiData ? (
+                            ) : mbtiData && mbtiData.message_count > 0 ? (
                                 <div className="pt-4 space-y-6">
                                     <div className="text-center">
                                         <h3 className="text-2xl font-bold mb-2">Your MBTI Type</h3>
                                         <div className="text-4xl font-mono bg-primary/10 p-4 rounded-lg">
-                                            {mbtiData.type}
+                                            {mbtiData.type || "NONE"}
                                         </div>
                                         <div className="text-sm text-muted-foreground mt-2">
                                             Based on {mbtiData?.message_count} interactions
@@ -356,10 +356,10 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                                     </div>
                                 </div>
                             ) : (
-                                <div className="pt-10 text-center text-muted-foreground">
-                                    <Brain className="h-10 w-10 mb-3 mx-auto text-gray-400" />
-                                    <p className="font-semibold">MBTI Analysis Pending</p>
-                                    <p className="text-sm">Keep chatting for personality insights</p>
+                                <div className="pt-10 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
+                                    <PersonStanding className="h-10 w-10 mb-3 text-gray-400" />
+                                    <p className="font-semibold">No personality data yet!</p>
+                                    <p className="text-sm">Keep chatting for MBTI insights.</p>
                                 </div>
                             )}
                         </ScrollArea>
@@ -374,7 +374,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                                     <Info className="h-5 w-5 flex-shrink-0" />
                                     <span>Failed to load OCEAN: {oceanError?.message || 'Unknown error'}</span>
                                 </div>
-                            ) : oceanData ? (
+                            ) : oceanData && oceanData.response_count > 0 ? (
                                 <div className="pt-4 space-y-6">
                                     <div className="text-center">
                                         <h3 className="text-2xl font-bold mb-2">OCEAN Personality Traits</h3>
@@ -392,10 +392,10 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                                     </div>
                                 </div>
                             ) : (
-                                <div className="pt-10 text-center text-muted-foreground">
-                                    <Brain className="h-10 w-10 mb-3 mx-auto text-gray-400" />
-                                    <p className="font-semibold">Personality Analysis Pending</p>
-                                    <p className="text-sm">Keep chatting for deeper insights</p>
+                                <div className="pt-10 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
+                                    <User className="h-10 w-10 mb-3 text-gray-400" />
+                                    <p className="font-semibold">No personality data yet!</p>
+                                    <p className="text-sm">Keep chatting for OCEAN insights.</p>
                                 </div>
                             )}
                         </ScrollArea>

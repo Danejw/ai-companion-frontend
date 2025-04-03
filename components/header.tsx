@@ -18,8 +18,8 @@ export default function Header() {
 
     return (
         <header className="sticky top-0 z-50 w-screenf border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="container flex h-14 items-center">
-                <div className="mr-4 flex ml-6">
+            <div className="container flex h-14 items-center pl-6 pr-6">
+                <div className="mr-4 flex ">
                     <Link href="/" className="mr-2 flex items-center space-x-2">
                         <AnimatedBlobLogo />
                         <span className="font-bold text-xl text-gray-700">Knolia</span>
