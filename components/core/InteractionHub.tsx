@@ -200,6 +200,14 @@ export default function InteractionHub() {
                     {mutation.isPending ? <Spinner /> : <Send className="h-5 w-5" />}
                 </Button>
             </div>
+
+            {/* 4. New Disclaimer Area */}
+            <div className="text-xs text-gray-600/60 text-center mt-1 px-4 max-w-md">
+                <p>
+                    Information provided is not professional advice. 
+                    Use at your own discretion.
+                </p>
+            </div>
         </div>
     );
 }
