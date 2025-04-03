@@ -4,7 +4,7 @@ import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useUIStore } from '@/store';
-import { History, CreditCard, LogIn, LogOut, Loader2, Brain } from 'lucide-react';
+import { History, CreditCard, LogIn, LogOut, Loader2, Brain, Info } from 'lucide-react';
 import AnimatedBlobLogo from '@/components/Logo';
 
 export default function Header() {
@@ -14,18 +14,30 @@ export default function Header() {
     //const toggleSettingsOverlay = useUIStore((state) => state.toggleSettingsOverlay);
     const toggleHistoryOverlay = useUIStore((state) => state.toggleHistoryOverlay);
     const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
+    const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
 
     return (
-        <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-50 w-screenf border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-14 items-center">
                 <div className="mr-4 flex ml-6">
-                    <Link href="/" className="mr-6 flex items-center space-x-2">
-                        {/* <YourLogoIcon /> */}
+                    <Link href="/" className="mr-2 flex items-center space-x-2">
                         <AnimatedBlobLogo />
                         <span className="font-bold text-xl text-gray-700">Knolia</span>
                     </Link>
+
+                    {/*Info button*/}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => toggleInfoOverlay(true)}
+                        title="About & Information"
+                    >
+                        <Info className="h-4 w-4" />
+                    </Button>
                 </div>
                 <div className="flex flex-1 items-center justify-end space-x-1 sm:space-x-2"> {/* Added space-x-1 for mobile */}
+
+
                     {/* --- Loading State --- */}
                     {status === 'loading' && (
                         <Button variant="ghost" size="sm" disabled>

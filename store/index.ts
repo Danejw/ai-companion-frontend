@@ -7,6 +7,7 @@ interface UIState {
     isSettingsOpen: boolean;
     isAuthOpen: boolean;
     isKnowledgeOpen: boolean;
+    isInfoOpen: boolean;
 
     // Add state for confirmation modal later
     // confirmationAction: null | object;
@@ -16,6 +17,7 @@ interface UIState {
     toggleSettingsOverlay: (isOpen?: boolean) => void;
     toggleAuthOverlay: (isOpen: boolean) => void;
     toggleKnowledgeOverlay: (isOpen: boolean) => void;
+    toggleInfoOverlay: (isOpen: boolean) => void;
 
     // setConfirmationAction: (action: object | null) => void;
 }
@@ -27,6 +29,7 @@ export const useUIStore = create<UIState>((set, get) => ({
     isSettingsOpen: false,
     isAuthOpen: false,
     isKnowledgeOpen: false,
+    isInfoOpen: false,
     // confirmationAction: null,
 
     // Actions
@@ -48,7 +51,11 @@ export const useUIStore = create<UIState>((set, get) => ({
 
     toggleKnowledgeOverlay: (isOpen) => set((state) => ({ 
         isKnowledgeOpen: isOpen !== undefined ? isOpen : !state.isKnowledgeOpen 
-    }))
+    })),
+
+    toggleInfoOverlay: (isOpen) => set((state) => ({ 
+        isInfoOpen: isOpen !== undefined ? isOpen : !state.isInfoOpen 
+    })),
 
     // setConfirmationAction: (action) => set({ confirmationAction: action }),
 }));
