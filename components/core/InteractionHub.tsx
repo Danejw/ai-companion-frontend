@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Send, Loader2, Ear, EarOff } from 'lucide-react'; // Added Loader2
 import { toast } from 'sonner'; // For error feedback
 import { useUIStore } from '@/store'; // Add this import
+import AudioVisualizer from '../Visualizer';
 
 // Simple Spinner component reused
 const Spinner = () => <Loader2 className="h-4 w-4 animate-spin" />;
@@ -140,10 +141,7 @@ export default function InteractionHub() {
         <div className="flex flex-col items-center gap-6 w-full max-w-xl px-4">
 
             {/* 1. Audio Visualizer Placeholder */}
-            {/* TODO: Add audio visualizer */}
-            {/* <div className="w-32 h-32 md:w-40 md:h-40 bg-muted rounded-full flex items-center justify-center mb-4 transition-all p-2 gap-2">
-                <span className="text-muted-foreground text-sm">Visualizer</span>
-            </div> */}
+            <AudioVisualizer />
 
             {/* 2. AI Response Area */}
             <div className="min-h-[40px] text-center text-gray-500 flex items-center justify-center px-2">
