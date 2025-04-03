@@ -2,11 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { X, Brain, Target, Users, Heart, AlertCircle, ChevronDown, ChevronUp, BookOpen, Briefcase, GraduationCap, Heart as HeartIcon, Sparkles } from 'lucide-react';
+import { X, Brain, Target, Users, Heart, AlertCircle, BookOpen, Briefcase, GraduationCap, Heart as HeartIcon, Sparkles } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import Background from '@/components/Background';
 
 interface InfoOCEANOverlayProps {
     open: boolean;
@@ -267,7 +268,7 @@ export default function InfoOCEANOverlay({ open, onOpenChange }: InfoOCEANOverla
     ];
     
     return (
-        <div className="fixed inset-0 bg-black/50 z-[25] flex items-end justify-center" 
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[25] flex items-end justify-center" 
              onClick={handleClose}>
             <div 
                 className={cn(
@@ -287,6 +288,9 @@ export default function InfoOCEANOverlay({ open, onOpenChange }: InfoOCEANOverla
                 <ScrollArea className="h-full w-full">
                     <div className="flex min-h-full w-full justify-center bg-gradient-to-b from-background via-background to-blue-50/30 dark:to-slate-950/40">
                         <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-20 pt-24">
+
+                            <Background/>
+
                             {/* Hero Section */}
                             <section className="text-center mb-12 sm:mb-16">
                                 <div className="inline-block p-2 px-4 bg-primary/10 rounded-full text-primary font-medium mb-4">

@@ -2,7 +2,7 @@ import FloatingBlob from './FloatingBlob'
 
 export default function Background() {
     return (
-        <div className="absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute inset-0 -z-10 overflow-hidden">
             <div className="absolute w-full h-full bg-gradient-to-br from-[#fdf6f9] via-[#f5f7ff] to-[#fdfaf3] bg-size-200 animate-gradientShift" />
 
             <FloatingBlob size={800} color="#f472b6" initialTop="10%" initialLeft="5%" />

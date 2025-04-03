@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import Background from '@/components/Background';
 
 interface InfoMBTIOverlayProps {
     open: boolean;
@@ -35,7 +36,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
     if (!open) return null;
     
     return (
-        <div className="fixed inset-0 bg-black/50 z-[25] flex items-end justify-center"
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[25] flex items-end justify-center"
              onClick={handleClose}>
             <div 
                 className={cn(
@@ -53,8 +54,11 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                 </Button>
                 
                 <ScrollArea className="h-full w-full">
-                    <div className="flex min-h-full w-full justify-center bg-gradient-to-b from-background via-background to-blue-50/30 dark:to-slate-900/40">
+                    <div className="flex min-h-full w-full justify-center">
                         <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-16 pt-20">
+
+                            <Background/>
+
                             
                             {/* Hero Section - Enhanced with more MBTI information */}
                             <section className="text-center mb-12">
@@ -82,14 +86,14 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                             </section>
                             
                             {/* New History Section */}
-                            <section className="mb-16">
+                            <section className="mb-16 px-6">
                                 <h2 className="text-3xl font-bold mb-8 text-center flex items-center justify-center gap-2">
                                     <span className="w-8 h-1 bg-primary rounded-full"></span>
                                     History & Background
                                     <span className="w-8 h-1 bg-primary rounded-full"></span>
                                 </h2>
                                 
-                                <Card className="mb-8">
+                                <Card className="mb-8 pb-8">
                                     <CardContent className="pt-6">
                                         <div className="space-y-4">
                                             <p>
@@ -120,7 +124,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                 </h2>
                                 
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                    <Card className="overflow-hidden border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-all">
+                                    <Card className="overflow-hidden border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-all pt-6 pb-6">
                                         <CardHeader className="pb-2">
                                             <CardTitle className="flex items-center gap-2">
                                                 <Users className="w-5 h-5 text-blue-500" />
@@ -155,7 +159,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                         </CardContent>
                                     </Card>
 
-                                    <Card className="overflow-hidden border-l-4 border-l-amber-500 shadow-sm hover:shadow-md transition-all">
+                                    <Card className="overflow-hidden border-l-4 border-l-amber-500 shadow-sm hover:shadow-md transition-all pt-6 pb-6">
                                         <CardHeader className="pb-2">
                                             <CardTitle className="flex items-center gap-2">
                                                 <Eye className="w-5 h-5 text-amber-500" />
@@ -190,7 +194,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                         </CardContent>
                                     </Card>
 
-                                    <Card className="overflow-hidden border-l-4 border-l-rose-500 shadow-sm hover:shadow-md transition-all">
+                                    <Card className="overflow-hidden border-l-4 border-l-rose-500 shadow-sm hover:shadow-md transition-all pt-6 pb-6">
                                         <CardHeader className="pb-2">
                                             <CardTitle className="flex items-center gap-2">
                                                 <Heart className="w-5 h-5 text-rose-500" />
@@ -225,7 +229,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                         </CardContent>
                                     </Card>
 
-                                    <Card className="overflow-hidden border-l-4 border-l-green-500 shadow-sm hover:shadow-md transition-all">
+                                    <Card className="overflow-hidden border-l-4 border-l-green-500 shadow-sm hover:shadow-md transition-all pt-6 pb-6">
                                         <CardHeader className="pb-2">
                                             <CardTitle className="flex items-center gap-2">
                                                 <Calendar className="w-5 h-5 text-green-500" />
@@ -280,7 +284,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                 </Card>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <Card className="border-l-4 border-l-purple-500">
+                                    <Card className="border-l-4 border-l-purple-500 pt-6 pb-6">
                                         <CardHeader>
                                             <CardTitle>Perceiving Functions</CardTitle>
                                             <CardDescription>How we gather information</CardDescription>
@@ -307,7 +311,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                         </CardContent>
                                     </Card>
                                     
-                                    <Card className="border-l-4 border-l-teal-500">
+                                    <Card className="border-l-4 border-l-teal-500 pt-6 pb-6">
                                         <CardHeader>
                                             <CardTitle>Judging Functions</CardTitle>
                                             <CardDescription>How we make decisions</CardDescription>
@@ -334,7 +338,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                         </CardContent>
                                     </Card>
                                     
-                                    <Card className="md:col-span-2 border-l-4 border-l-indigo-500">
+                                    <Card className="md:col-span-2 border-l-4 border-l-indigo-500 pt-6 pb-6">
                                         <CardHeader>
                                             <CardTitle>Function Stack</CardTitle>
                                             <CardDescription>How cognitive functions work together in each type</CardDescription>
@@ -373,7 +377,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                 
                                 <Tabs defaultValue="analysts" className="w-full">
                                     <div className="flex justify-center w-full mb-6">
-                                        <TabsList className="grid grid-cols-4">
+                                        <TabsList className="grid grid-cols-4 bg-gray-500/20">
                                             <TabsTrigger value="analysts" className="text-xs sm:text-sm">Analysts (NT)</TabsTrigger>
                                             <TabsTrigger value="diplomats" className="text-xs sm:text-sm">Diplomats (NF)</TabsTrigger>
                                             <TabsTrigger value="sentinels" className="text-xs sm:text-sm">Sentinels (SJ)</TabsTrigger>
@@ -384,10 +388,10 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                     <TabsContent value="analysts" className="mt-0">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                             {[
-                                                { type: "INTJ", name: "The Architect", traits: "Strategic, innovative, independent", color: "bg-indigo-100 dark:bg-indigo-950/40", accent: "border-indigo-500" },
-                                                { type: "INTP", name: "The Logician", traits: "Logical, curious, analytical", color: "bg-indigo-100 dark:bg-indigo-950/40", accent: "border-indigo-500" },
-                                                { type: "ENTJ", name: "The Commander", traits: "Decisive, efficient, strategic", color: "bg-indigo-100 dark:bg-indigo-950/40", accent: "border-indigo-500" },
-                                                { type: "ENTP", name: "The Debater", traits: "Innovative, argumentative, curious", color: "bg-indigo-100 dark:bg-indigo-950/40", accent: "border-indigo-500" },
+                                                { type: "INTJ", name: "The Architect", traits: "Strategic, innovative, independent", color: "bg-indigo-100 dark:bg-indigo-950/20", accent: "border-indigo-500" },
+                                                { type: "INTP", name: "The Logician", traits: "Logical, curious, analytical", color: "bg-indigo-100 dark:bg-indigo-950/20", accent: "border-indigo-500" },
+                                                { type: "ENTJ", name: "The Commander", traits: "Decisive, efficient, strategic", color: "bg-indigo-100 dark:bg-indigo-950/20", accent: "border-indigo-500" },
+                                                { type: "ENTP", name: "The Debater", traits: "Innovative, argumentative, curious", color: "bg-indigo-100 dark:bg-indigo-950/20", accent: "border-indigo-500" },
                                             ].map(personality => (
                                                 <PersonalityCard key={personality.type} personality={personality} />
                                             ))}
@@ -397,10 +401,10 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                     <TabsContent value="diplomats" className="mt-0">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                             {[
-                                                { type: "INFJ", name: "The Advocate", traits: "Insightful, principled, inspiring", color: "bg-green-100 dark:bg-green-950/40", accent: "border-green-500" },
-                                                { type: "INFP", name: "The Mediator", traits: "Idealistic, compassionate, creative", color: "bg-green-100 dark:bg-green-950/40", accent: "border-green-500" },
-                                                { type: "ENFJ", name: "The Protagonist", traits: "Charismatic, empathetic, inspiring", color: "bg-green-100 dark:bg-green-950/40", accent: "border-green-500" },
-                                                { type: "ENFP", name: "The Campaigner", traits: "Enthusiastic, creative, sociable", color: "bg-green-100 dark:bg-green-950/40", accent: "border-green-500" },
+                                                { type: "INFJ", name: "The Advocate", traits: "Insightful, principled, inspiring", color: "bg-green-100 dark:bg-green-950/20", accent: "border-green-500" },
+                                                { type: "INFP", name: "The Mediator", traits: "Idealistic, compassionate, creative", color: "bg-green-100 dark:bg-green-950/20", accent: "border-green-500" },
+                                                { type: "ENFJ", name: "The Protagonist", traits: "Charismatic, empathetic, inspiring", color: "bg-green-100 dark:bg-green-950/20", accent: "border-green-500" },
+                                                { type: "ENFP", name: "The Campaigner", traits: "Enthusiastic, creative, sociable", color: "bg-green-100 dark:bg-green-950/20", accent: "border-green-500" },
                                             ].map(personality => (
                                                 <PersonalityCard key={personality.type} personality={personality} />
                                             ))}
@@ -410,10 +414,10 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                     <TabsContent value="sentinels" className="mt-0">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                             {[
-                                                { type: "ISTJ", name: "The Inspector", traits: "Practical, reliable, systematic", color: "bg-blue-100 dark:bg-blue-950/40", accent: "border-blue-500" },
-                                                { type: "ISFJ", name: "The Protector", traits: "Nurturing, loyal, traditional", color: "bg-blue-100 dark:bg-blue-950/40", accent: "border-blue-500" },
-                                                { type: "ESTJ", name: "The Director", traits: "Organized, practical, logical", color: "bg-blue-100 dark:bg-blue-950/40", accent: "border-blue-500" },
-                                                { type: "ESFJ", name: "The Caregiver", traits: "Warm, responsible, cooperative", color: "bg-blue-100 dark:bg-blue-950/40", accent: "border-blue-500" },
+                                                { type: "ISTJ", name: "The Inspector", traits: "Practical, reliable, systematic", color: "bg-blue-100 dark:bg-blue-950/20", accent: "border-blue-500" },
+                                                { type: "ISFJ", name: "The Protector", traits: "Nurturing, loyal, traditional", color: "bg-blue-100 dark:bg-blue-950/20", accent: "border-blue-500" },
+                                                { type: "ESTJ", name: "The Director", traits: "Organized, practical, logical", color: "bg-blue-100 dark:bg-blue-950/20", accent: "border-blue-500" },
+                                                { type: "ESFJ", name: "The Caregiver", traits: "Warm, responsible, cooperative", color: "bg-blue-100 dark:bg-blue-950/20", accent: "border-blue-500" },
                                             ].map(personality => (
                                                 <PersonalityCard key={personality.type} personality={personality} />
                                             ))}
@@ -423,10 +427,10 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                     <TabsContent value="explorers" className="mt-0">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                             {[
-                                                { type: "ISTP", name: "The Virtuoso", traits: "Practical, logical, spontaneous", color: "bg-amber-100 dark:bg-amber-950/40", accent: "border-amber-500" },
-                                                { type: "ISFP", name: "The Adventurer", traits: "Artistic, sensitive, experimental", color: "bg-amber-100 dark:bg-amber-950/40", accent: "border-amber-500" },
-                                                { type: "ESTP", name: "The Entrepreneur", traits: "Energetic, analytical, perceptive", color: "bg-amber-100 dark:bg-amber-950/40", accent: "border-amber-500" },
-                                                { type: "ESFP", name: "The Entertainer", traits: "Enthusiastic, friendly, spontaneous", color: "bg-amber-100 dark:bg-amber-950/40", accent: "border-amber-500" },
+                                                { type: "ISTP", name: "The Virtuoso", traits: "Practical, logical, spontaneous", color: "bg-amber-100 dark:bg-amber-950/20", accent: "border-amber-500" },
+                                                { type: "ISFP", name: "The Adventurer", traits: "Artistic, sensitive, experimental", color: "bg-amber-100 dark:bg-amber-950/20", accent: "border-amber-500" },
+                                                { type: "ESTP", name: "The Entrepreneur", traits: "Energetic, analytical, perceptive", color: "bg-amber-100 dark:bg-amber-950/20", accent: "border-amber-500" },
+                                                { type: "ESFP", name: "The Entertainer", traits: "Enthusiastic, friendly, spontaneous", color: "bg-amber-100 dark:bg-amber-950/20", accent: "border-amber-500" },
                                             ].map(personality => (
                                                 <PersonalityCard key={personality.type} personality={personality} />
                                             ))}
@@ -444,7 +448,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                 </h2>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <Card className="hover:shadow-md transition-all">
+                                    <Card className="hover:shadow-md transition-all pt-6 pb-6">
                                         <CardHeader>
                                             <CardTitle className="flex items-center gap-2">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -464,7 +468,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                         </CardContent>
                                     </Card>
                                     
-                                    <Card className="hover:shadow-md transition-all">
+                                    <Card className="hover:shadow-md transition-all pt-6 pb-6">
                                         <CardHeader>
                                             <CardTitle className="flex items-center gap-2">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -487,7 +491,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                         </CardContent>
                                     </Card>
                                     
-                                    <Card className="hover:shadow-md transition-all">
+                                    <Card className="hover:shadow-md transition-all pt-6 pb-6">
                                         <CardHeader>
                                             <CardTitle className="flex items-center gap-2">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -508,7 +512,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                         </CardContent>
                                     </Card>
                                     
-                                    <Card className="hover:shadow-md transition-all">
+                                    <Card className="hover:shadow-md transition-all pt-6 pb-6">
                                         <CardHeader>
                                             <CardTitle className="flex items-center gap-2">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -542,7 +546,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                     Important Considerations
                                     <span className="w-8 h-1 bg-primary rounded-full"></span>
                                 </h2>
-                                <div className="bg-gradient-to-r from-primary/5 to-primary/10 border rounded-lg p-6 max-w-3xl mx-auto">
+                                <div className="bg-white border rounded-lg p-6 max-w-3xl mx-auto pt-6 pb-6">
                                     <ul className="space-y-4">
                                         <li className="flex items-start gap-3">
                                             <div className="mt-1 min-w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary">

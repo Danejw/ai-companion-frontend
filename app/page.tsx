@@ -19,7 +19,7 @@ export default function Home() {
     <div className="relative h-screen w-full">
 
       {/* Background */}
-      <div className="absolute inset-0 -z-10">
+      <div className="absolute inset-0">
         <Background />
       </div>
 
