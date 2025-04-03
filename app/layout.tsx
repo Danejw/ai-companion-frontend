@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Persoanlized AI Companion",
-  description: "The AI Companion for your life",
+  title: "Knolia",
+  description: "The Personalized AI Companion for your life",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
