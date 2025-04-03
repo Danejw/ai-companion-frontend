@@ -21,11 +21,20 @@ const creditPackages = [
     { name: 'tier5', credits: 3000, price: '$48', title: '$48 for 3000 Credits' }
 ];
 
+const ENV = process.env.ENV;
+
+let stripePublishableKey: string;
+if (ENV === 'development') {
+    stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_TEST ?? '';
+} else {
+    stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_LIVE ?? '';
+}
+
 // Stripe loading logic
 let stripePromise: Promise<Stripe | null> | null = null;
 const getStripe = () => {
     if (!stripePromise) {
-        const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+        const stripeKey = stripePublishableKey;
         if (stripeKey) {
             stripePromise = loadStripe(stripeKey);
         } else {
