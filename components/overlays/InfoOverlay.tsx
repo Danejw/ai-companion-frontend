@@ -90,7 +90,7 @@ export default function InfoOverlay({ open, onOpenChange }: InfoOverlayProps) {
                                     <Users className="h-12 w-12 mx-auto mb-5 text-primary opacity-80" />
                                     <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-5 sm:mb-6 text-primary">The Silent Epidemic We Need to Address</h2>
                                     <p className="text-base sm:text-lg text-muted-foreground mb-6 max-w-4xl mx-auto leading-relaxed"> 
-                                        Loneliness impacts nearly <strong className="font-semibold text-foreground dark:text-gray-200">one-third of adults</strong>, increasing premature death risk by <strong className="font-semibold text-foreground dark:text-gray-200">26%</strong> and fueling conditions like depression and anxiety. It's not just personal; it costs employers over <strong className="font-semibold text-foreground dark:text-gray-200">$150 billion</strong> annually.
+                                        Loneliness impacts nearly <strong className="font-semibold text-foreground dark:text-gray-200">one-third of adults</strong>, increasing premature death risk by <strong className="font-semibold text-foreground dark:text-gray-200">26%</strong> and fueling conditions like depression and anxiety. It&apos;s not just personal; it costs employers over <strong className="font-semibold text-foreground dark:text-gray-200">$150 billion</strong> annually.
                                     </p>
                                     <p className="text-base sm:text-lg text-muted-foreground max-w-4xl mx-auto leading-relaxed">
                                         Knolia provides a readily available, supportive space to foster connection and understanding when you need it most.
@@ -139,7 +139,7 @@ export default function InfoOverlay({ open, onOpenChange }: InfoOverlayProps) {
                                     Born from the understanding that loneliness touches millions, Knolia aims to be a supportive tool. We believe AI can serve as a valuable <strong className="font-semibold text-foreground dark:text-gray-200">bridge to connection</strong>, complementing, not replacing, human relationships.
                                 </p>
                                 <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-                                    We're committed to ethical development, focusing on user well-being and fostering healthier patterns of interaction, both with AI and with others.
+                                    We&apos;re committed to ethical development, focusing on user well-being and fostering healthier patterns of interaction, both with AI and with others.
                                 </p>
                             </section>
 

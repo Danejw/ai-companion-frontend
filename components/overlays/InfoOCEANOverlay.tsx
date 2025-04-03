@@ -103,7 +103,7 @@ export default function InfoOCEANOverlay({ open, onOpenChange }: InfoOCEANOverla
                                         </li>
                                         <li className="flex gap-2">
                                             <span className="text-primary font-bold">•</span>
-                                            <span>Each trait exists on a spectrum - there are no "good" or "bad" scores.</span>
+                                            <span>Each trait exists on a spectrum - there are no &quot;good&quot; or &quot;bad&quot; scores.</span>
                                         </li>
                                         <li className="flex gap-2">
                                             <span className="text-primary font-bold">•</span>
