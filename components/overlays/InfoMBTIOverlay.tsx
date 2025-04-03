@@ -75,7 +75,7 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                     with approximately two million people completing the assessment annually.
                                 </p>
                                 <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-                                    Based on Carl Jung's theory of psychological types, the MBTI helps you understand your natural preferences 
+                                    Based on Carl Jung&apos;s theory of psychological types, the MBTI helps you understand your natural preferences 
                                     for how you interact with the world, process information, make decisions, and structure your life.
                                 </p>
                                 <div className="flex flex-wrap justify-center gap-2 mb-2">
@@ -98,12 +98,12 @@ export default function InfoMBTIOverlay({ open, onOpenChange }: InfoMBTIOverlayP
                                         <div className="space-y-4">
                                             <p>
                                                 The MBTI was developed by Katharine Cook Briggs and her daughter Isabel Briggs Myers during and after World War II. 
-                                                They were inspired by Carl Jung's work on psychological types published in his 1921 book "Psychological Types."
+                                                They were inspired by Carl Jung&apos;s work on psychological types published in his 1921 book &quot;Psychological Types.&quot;
                                             </p>
                                             <p>
-                                                Katharine Briggs began her research into personality in 1917, and upon reading Jung's work in 1923, 
+                                                Katharine Briggs began her research into personality in 1917, and upon reading Jung&apos;s work in 1923, 
                                                 recognized the alignment with her own theories. Together with her daughter Isabel, they spent decades 
-                                                developing and refining the type indicator to make Jung's theories accessible and practical for everyday use.
+                                                developing and refining the type indicator to make Jung&apos;s theories accessible and practical for everyday use.
                                             </p>
                                             <p>
                                                 The MBTI is not designed to measure ability, achievement, or mental health. Instead, it focuses on identifying 

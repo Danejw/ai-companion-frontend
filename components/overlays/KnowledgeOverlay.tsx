@@ -65,7 +65,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
             queryClient.invalidateQueries({ queryKey: ['knowledgeVectors'] });
             toast.success('Knowledge Removed');
         },
-        onError: (error) => {
+        onError: () => {
             toast.error('Error Removing Knowledge');
         },
     });
@@ -76,7 +76,7 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
             queryClient.invalidateQueries({ queryKey: ['slangVectors'] });
             toast.success('Slang Term Removed');
         },
-        onError: (error) => {
+        onError: () => {
             toast.error('Error Removing Slang');
         },
     });
