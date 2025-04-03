@@ -79,20 +79,20 @@ export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayPro
         onSuccess: async (data) => {
             const stripe = await getStripe();
             if (!stripe) {
-                toast.error("Stripe configuration error.", { description: "Could not initialize Stripe." });
+                toast.error("Stripe configuration error.");
                 setProcessingTier(null);
                 return;
             }
             const { error } = await stripe.redirectToCheckout({ sessionId: data.sessionId });
             if (error) {
                 console.error("Stripe redirect error:", error);
-                toast.error("Checkout Failed", { description: error.message || "Could not redirect to Stripe." });
+                toast.error("Checkout Failed");
                 setProcessingTier(null);
             }
         },
         onError: (error: Error) => {
             console.error("Checkout session creation error:", error);
-            toast.error("Checkout Failed", { description: error.message || "Could not initiate purchase." });
+            toast.error("Checkout Failed");
             setProcessingTier(null);
         },
     });
@@ -179,8 +179,8 @@ export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayPro
                             className={cn(
                                 "cursor-pointer transition-all border",
                                 selectedPackage === pkg.name 
-                                    ? "border-2 border-primary" 
-                                    : "hover:border-primary/50"
+                                    ? "border-2 border-accent bg-accent/30" 
+                                    : "hover:border-accent/50 hover:bg-accent/10"
                             )}
                             onClick={() => setSelectedPackage(pkg.name)}
                         >
@@ -192,7 +192,7 @@ export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayPro
                                     <div className="font-medium text-base">
                                         {pkg.credits.toLocaleString()} credits
                                     </div>
-                                    <div className="flex text-amber-500">
+                                    <div className="flex text-red-500">
                                         {pkg.name === 'tier5' ? 'Best Value' : pkg.name === 'tier2' ? 'Most Popular' : ''}
                                     </div>
                                 </div>

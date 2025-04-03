@@ -76,19 +76,19 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
                 if (result?.error) {
                     const errorMessage = result.error === 'CredentialsSignin' ? 'Invalid email or password.' : result.error;
                     setError(errorMessage);
-                    toast.error('Login Failed', { description: errorMessage });
+                    toast.error('Login Failed');
                 } else if (result?.ok) {
                     toast.success('Login Successful!');
                     onOpenChange(false); // <-- Use prop function to close
                     router.refresh(); // Refresh server components to reflect login state
                 } else {
                     setError('An unknown error occurred during login.');
-                    toast.error('Login Failed', { description: 'An unknown error occurred.' });
+                    toast.error('Login Failed');
                 }
             } catch (err) {
                 console.error("Login submit error:", err);
                 setError('An unexpected error occurred.');
-                toast.error('Login Failed', { description: 'An unexpected error occurred.' });
+                toast.error('Login Failed');
             } finally {
                 setIsLoading(false);
             }
@@ -98,7 +98,7 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
             // Client-side validation (optional but recommended)
             if (password.length < 8) {
                 setError("Password must be at least 8 characters long.");
-                toast.warning("Password Too Short", { description: "Password must be at least 8 characters long." });
+                toast.warning("Password Too Short");
                 setIsLoading(false);
                 return;
             }
@@ -120,13 +120,10 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
                     // Use the message from the API response if available, otherwise generic error
                     const errorMessage = data?.message || `Sign up failed (Status: ${response.status})`;
                     setError(errorMessage);
-                    toast.error('Sign Up Failed', { description: errorMessage });
+                    toast.error('Sign Up Failed');
                 } else {
                     // Use the success message from the API response
-                    toast.success('Sign Up Request Successful!', {
-                        description: data?.message || 'Account created. Check email or login.',
-                        duration: 7000 // Give more time to read confirmation messages
-                    });
+                    toast.success('Sign Up Request Successful!');
                     setActiveTab('login'); // Switch to login tab
                     // Keep email populated for convenience, clear password
                     setEmail(email);
@@ -136,7 +133,7 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
             } catch (err) { // Catch network errors during fetch itself
                 console.error("Signup fetch network error:", err);
                 setError('An unexpected network error occurred during sign up.');
-                toast.error('Sign Up Failed', { description: 'A network error occurred. Please check your connection.' });
+                toast.error('Sign Up Failed');
             } finally {
                 setIsLoading(false);
             }

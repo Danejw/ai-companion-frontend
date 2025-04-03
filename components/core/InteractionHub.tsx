@@ -30,9 +30,7 @@ export default function InteractionHub() {
             // Handle NO_CREDITS error case
             if (typeof data === 'object' && data?.error?.message === 'NO_CREDITS') {
                 useUIStore.getState().toggleCreditsOverlay();
-                toast.error('Out of credits', {
-                    description: 'Please purchase more to continue chatting'
-                });
+                toast.error('Out of credits');
                 return;
             }
 
@@ -47,7 +45,7 @@ export default function InteractionHub() {
         onError: (error: Error) => {
             console.error("Mutation Error:", error);
             setAiResponse(''); // Clear response area on error
-            toast.error('Failed to get AI response', { description: error.message });
+            toast.error('Failed to get AI response');
         },
     });
 
@@ -74,7 +72,7 @@ export default function InteractionHub() {
     const startListening = () => {
         const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognitionAPI) {
-            toast.error("Speech Recognition not supported", { description: "Your browser doesn't support voice input." });
+            toast.error("Speech Recognition not supported");
             return;
         }
 

@@ -63,14 +63,10 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
         mutationFn: removeKnowledgeVector,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['knowledgeVectors'] });
-            toast.success('Knowledge Removed', {
-                description: "The AI will no longer recall this specific piece of information."
-            });
+            toast.success('Knowledge Removed');
         },
         onError: (error) => {
-            toast.error('Error Removing Knowledge', {
-                description: error.message || "Could not remove the item. Please try again."
-            });
+            toast.error('Error Removing Knowledge');
         },
     });
 
@@ -78,14 +74,10 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
         mutationFn: removeSlangVector,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['slangVectors'] });
-            toast.success('Slang Term Removed', {
-                description: "The AI will no longer recognize this slang term."
-            });
+            toast.success('Slang Term Removed');
         },
         onError: (error) => {
-            toast.error('Error Removing Slang', {
-                description: error.message || "Could not remove the slang term. Please try again."
-            });
+            toast.error('Error Removing Slang');
         },
     });
 

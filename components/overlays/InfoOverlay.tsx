@@ -51,10 +51,6 @@ export default function InfoOverlay({ open, onOpenChange }: InfoOverlayProps) {
                 </Button>
                 
                 <ScrollArea className="h-full w-full">
-
-
-
-
                     <div className="flex min-h-full w-full justify-center">
                         <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8">
 
