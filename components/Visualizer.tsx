@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 
 const NUM_BLOBS = 4
-const BASE_Y = 10
+const BASE_Y = 90
+const DEFAULT_SPEED = 0.05 // default speed for animation
 const colors = ['#f472b6', '#818cf8', '#facc15', '#a78bfa']
 const baseX = [30, 70, 110, 150]
 
@@ -12,7 +13,7 @@ export default function AudioVisualizer() {
     const easing = 0.1        // how smooth the motion is
     const delayBetweenBlobs = 500 // delay in ms before each blob starts
 
-    const [speed, setSpeed] = useState(0.05) // reactive control over speed
+    const [speed, setSpeed] = useState(DEFAULT_SPEED) // reactive control over speed
 
     const circlesRef = useRef<(SVGCircleElement | null)[]>([])
     const phase = useRef<number[]>(Array(NUM_BLOBS).fill(0))
