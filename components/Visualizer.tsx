@@ -1,17 +1,18 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const NUM_BLOBS = 4
-const BASE_Y = 90
+const BASE_Y = 10
 const colors = ['#f472b6', '#818cf8', '#facc15', '#a78bfa']
 const baseX = [30, 70, 110, 150]
 
 export default function AudioVisualizer() {
-    const amplitude = 40      // vertical range of motion
-    const speed = 0.03        // how fast the phase increases
-    const easing = 0.3       // how smooth the motion is
-    const delayBetweenBlobs = 700 // delay in ms before each blob starts
+    const amplitude = 30      // vertical range of motion
+    const easing = 0.1        // how smooth the motion is
+    const delayBetweenBlobs = 500 // delay in ms before each blob starts
+
+    const [speed, setSpeed] = useState(0.05) // reactive control over speed
 
     const circlesRef = useRef<(SVGCircleElement | null)[]>([])
     const phase = useRef<number[]>(Array(NUM_BLOBS).fill(0))
@@ -43,7 +44,10 @@ export default function AudioVisualizer() {
 
         startTimers()
         requestAnimationFrame(animate)
-    }, [])
+    }, [speed])
+
+    // For debugging or control:
+    // useEffect(() => { setSpeed(0.08) }, [someTrigger])
 
     return (
         <svg width="200" height="200" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
