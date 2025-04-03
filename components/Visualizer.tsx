@@ -13,7 +13,8 @@ export default function AudioVisualizer() {
     const easing = 0.1        // how smooth the motion is
     const delayBetweenBlobs = 500 // delay in ms before each blob starts
 
-    const [speed, setSpeed] = useState(DEFAULT_SPEED) // reactive control over speed
+    // const [speed, setSpeed] = useState(DEFAULT_SPEED) // reactive control over speed
+    const [speed] = useState(DEFAULT_SPEED) // reactive control over speed
 
     const circlesRef = useRef<(SVGCircleElement | null)[]>([])
     const phase = useRef<number[]>(Array(NUM_BLOBS).fill(0))
