@@ -183,7 +183,7 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
                     </DialogTitle>
                     <DialogDescription className="text-center">
                         {activeTab === 'login'
-                            ? 'Sign in to access your AI Companion.'
+                            ? 'Log in to access your account.'
                             : 'Sign up to get started.'}
                     </DialogDescription>
                 </DialogHeader>

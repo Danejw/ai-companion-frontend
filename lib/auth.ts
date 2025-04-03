@@ -70,9 +70,6 @@ export const authOptions: NextAuthOptions = {
 
                     // If successful, return an object representing the authenticated user.
                     // This object will be encoded in the JWT. It MUST have at least `id`.
-                    console.log("✅ Supabase Sign-In Success for:", data.user.email);
-
-                    console.log("✅ Supabase Sign-In Success for:", data.session.access_token);
                     return {
                         id: data.user.id,
                         email: data.user.email,

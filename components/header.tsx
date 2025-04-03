@@ -17,7 +17,7 @@ export default function Header() {
     const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
 
     return (
-        <header className="sticky top-0 z-50 w-screenf border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-10 w-screenf border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-14 items-center pl-6 pr-6">
                 <div className="mr-4 flex ">
                     <Link href="/" className="mr-2 flex items-center space-x-2">

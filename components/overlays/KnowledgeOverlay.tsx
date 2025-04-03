@@ -18,6 +18,8 @@ import { fetchMBTI, type MBTIData } from '@/lib/api/mbti';
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { fetchOcean, type Ocean } from '@/lib/api/ocean';
+import InfoOCEANOverlay from '@/components/overlays/InfoOCEANOverlay';
+import InfoMBTIOverlay from '@/components/overlays/InfoMBTIOverlay';
 
 // Props Interface remains the same
 interface KnowledgeOverlayProps {
@@ -27,6 +29,8 @@ interface KnowledgeOverlayProps {
 
 export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverlayProps) {
     const queryClient = useQueryClient();
+    const [isOceanInfoOpen, setIsOceanInfoOpen] = React.useState(false);
+    const [isMbtiInfoOpen, setIsMbtiInfoOpen] = React.useState(false);
 
     // --- Fetch Knowledge Vectors ---
     const {
@@ -284,124 +288,153 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
     };
 
     return (
-        <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent side="right" className="sm:max-w-md md:max-w-lg lg:max-w-xl flex flex-col !p-0">
-                <SheetHeader className="ml-2 mr-2 mt-2">
-                    <SheetTitle className="flex items-center">
-                        <Brain className="mr-2 h-5 w-5" /> AI Memory & Learned Knowledge
-                    </SheetTitle>
-                    <SheetDescription>
-                        Review and manage what your AI has learned.
-                    </SheetDescription>
-                </SheetHeader>
+        <>
+            <InfoOCEANOverlay open={isOceanInfoOpen} onOpenChange={setIsOceanInfoOpen} />
+            <InfoMBTIOverlay open={isMbtiInfoOpen} onOpenChange={setIsMbtiInfoOpen} />
+            
+            <Sheet open={open} onOpenChange={onOpenChange}>
+                <SheetContent side="right" className="sm:max-w-md md:max-w-lg lg:max-w-xl flex flex-col !p-0">
+                    <SheetHeader className="ml-2 mr-2 mt-2">
+                        <SheetTitle className="flex items-center">
+                            <Brain className="mr-2 h-5 w-5" /> AI Memory & Learned Knowledge
+                        </SheetTitle>
+                        <SheetDescription>
+                            Review and manage what your AI has learned.
+                        </SheetDescription>
+                    </SheetHeader>
 
-                {/* Use Tabs component */}
-                <Tabs defaultValue="knowledge" className="flex-grow flex flex-col overflow-hidden pl-3 pr-3">
-                    <TabsList className="grid w-full grid-cols-4">
-                        <TabsTrigger value="knowledge" className="flex items-center justify-center">
-                            <Layers className="h-4 w-4 sm:mr-1.5" /> 
-                            <span className="hidden sm:inline">Knowledge</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="slang" className="flex items-center justify-center">
-                            <MessageSquareWarning className="h-4 w-4 sm:mr-1.5" /> 
-                            <span className="hidden sm:inline">Terms</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="mbti" className="flex items-center justify-center">
-                            <PersonStanding className="h-4 w-4 sm:mr-1.5" /> 
-                            <span className="hidden sm:inline">MBTI</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="ocean" className="flex items-center justify-center">
-                            <User className="h-4 w-4 sm:mr-1.5" /> 
-                            <span className="hidden sm:inline">OCEAN</span>
-                        </TabsTrigger>
-                    </TabsList>
+                    {/* Use Tabs component */}
+                    <Tabs defaultValue="knowledge" className="flex-grow flex flex-col overflow-hidden pl-3 pr-3">
+                        <TabsList className="grid w-full grid-cols-4">
+                            <TabsTrigger value="knowledge" className="flex items-center justify-center">
+                                <Layers className="h-4 w-4 sm:mr-1.5" /> 
+                                <span className="hidden sm:inline">Knowledge</span>
+                            </TabsTrigger>
+                            <TabsTrigger value="slang" className="flex items-center justify-center">
+                                <MessageSquareWarning className="h-4 w-4 sm:mr-1.5" /> 
+                                <span className="hidden sm:inline">Terms</span>
+                            </TabsTrigger>
+                            <TabsTrigger value="mbti" className="flex items-center justify-center">
+                                <PersonStanding className="h-4 w-4 sm:mr-1.5" /> 
+                                <span className="hidden sm:inline">MBTI</span>
+                            </TabsTrigger>
+                            <TabsTrigger value="ocean" className="flex items-center justify-center">
+                                <User className="h-4 w-4 sm:mr-1.5" /> 
+                                <span className="hidden sm:inline">OCEAN</span>
+                            </TabsTrigger>
+                        </TabsList>
 
-                    <TabsContent value="knowledge" className="flex-grow overflow-hidden">
-                        <ScrollArea className="h-full">
-                            {renderTabContent(knowledgeData, isLoadingKnowledge, isKnowledgeError, knowledgeError, 'knowledge')}
-                        </ScrollArea>
-                    </TabsContent>
-                    <TabsContent value="slang" className="flex-grow overflow-hidden px-2">
-                        <ScrollArea className="h-full">
-                            {renderTabContent(slangData, isLoadingSlang, isSlangError, slangError, 'slang')}
-                        </ScrollArea>
-                    </TabsContent>
+                        <TabsContent value="knowledge" className="flex-grow overflow-hidden">
+                            <ScrollArea className="h-full">
+                                {renderTabContent(knowledgeData, isLoadingKnowledge, isKnowledgeError, knowledgeError, 'knowledge')}
+                            </ScrollArea>
+                        </TabsContent>
+                        <TabsContent value="slang" className="flex-grow overflow-hidden px-2">
+                            <ScrollArea className="h-full">
+                                {renderTabContent(slangData, isLoadingSlang, isSlangError, slangError, 'slang')}
+                            </ScrollArea>
+                        </TabsContent>
 
-                    <TabsContent value="mbti" className="flex-grow overflow-hidden px-2">
-                        <ScrollArea className="h-full">
-                            {isLoadingMBTI ? (
-                                <div className="space-y-3 pt-4">{renderSkeletons(1)}</div>
-                            ) : isMBTIError ? (
-                                <div className="mt-4 p-4 text-destructive flex items-center gap-2 bg-destructive/10 rounded-md border border-destructive/30">
-                                    <Info className="h-5 w-5 flex-shrink-0" />
-                                    <span>Failed to load MBTI: {mbtiError?.message || 'Unknown error'}</span>
-                                </div>
-                            ) : mbtiData && mbtiData.message_count > 0 ? (
-                                <div className="pt-4 space-y-6">
-                                    <div className="text-center">
-                                        <h3 className="text-2xl font-bold mb-2">Your MBTI Type</h3>
-                                        <div className="text-4xl font-mono bg-primary/10 p-4 rounded-lg">
-                                            {mbtiData.type || "NONE"}
-                                        </div>
-                                        <div className="text-sm text-muted-foreground mt-2">
-                                            Based on {mbtiData?.message_count} interactions
-                                        </div>
+                        <TabsContent value="mbti" className="flex-grow overflow-hidden px-2 flex flex-col">
+                            <ScrollArea className="h-full flex-grow">
+                                {isLoadingMBTI ? (
+                                    <div className="space-y-3 pt-4">{renderSkeletons(1)}</div>
+                                ) : isMBTIError ? (
+                                    <div className="mt-4 p-4 text-destructive flex items-center gap-2 bg-destructive/10 rounded-md border border-destructive/30">
+                                        <Info className="h-5 w-5 flex-shrink-0" />
+                                        <span>Failed to load MBTI: {mbtiError?.message || 'Unknown error'}</span>
                                     </div>
-                                    
-                                    <div className="space-y-4">
-                                        {renderMBTITrait('Extraversion', 'Introversion', mbtiData.extraversion_introversion)}
-                                        {renderMBTITrait('Sensing', 'Intuition', mbtiData.sensing_intuition)}
-                                        {renderMBTITrait('Thinking', 'Feeling', mbtiData.thinking_feeling)}
-                                        {renderMBTITrait('Judging', 'Perceiving', mbtiData.judging_perceiving)}
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="pt-10 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
-                                    <PersonStanding className="h-10 w-10 mb-3 text-gray-400" />
-                                    <p className="font-semibold">No personality data yet!</p>
-                                    <p className="text-sm">Keep chatting for MBTI insights.</p>
-                                </div>
-                            )}
-                        </ScrollArea>
-                    </TabsContent>
-
-                    <TabsContent value="ocean" className="flex-grow overflow-hidden px-2">
-                        <ScrollArea className="h-full">
-                            {isLoadingOcean ? (
-                                <div className="space-y-3 pt-4">{renderSkeletons(1)}</div>
-                            ) : isOceanError ? (
-                                <div className="mt-4 p-4 text-destructive flex items-center gap-2 bg-destructive/10 rounded-md border border-destructive/30">
-                                    <Info className="h-5 w-5 flex-shrink-0" />
-                                    <span>Failed to load OCEAN: {oceanError?.message || 'Unknown error'}</span>
-                                </div>
-                            ) : oceanData && oceanData.response_count > 0 ? (
-                                <div className="pt-4 space-y-6">
-                                    <div className="text-center">
-                                        <h3 className="text-2xl font-bold mb-2">OCEAN Personality Traits</h3>
-                                        <div className="text-sm text-muted-foreground mb-4">
-                                            Based on {oceanData.response_count} interactions
+                                ) : mbtiData && mbtiData.message_count > 0 ? (
+                                    <div className="pt-4 space-y-6">
+                                        <div className="text-center">
+                                            <h3 className="text-2xl font-bold mb-2">Your MBTI Type</h3>
+                                            <div className="text-4xl font-mono bg-primary/10 p-4 rounded-lg">
+                                                {mbtiData.type || "NONE"}
+                                            </div>
+                                            <div className="text-sm text-muted-foreground mt-2">
+                                                Based on {mbtiData?.message_count} interactions
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="space-y-4">
+                                            {renderMBTITrait('Extraversion', 'Introversion', mbtiData.extraversion_introversion)}
+                                            {renderMBTITrait('Sensing', 'Intuition', mbtiData.sensing_intuition)}
+                                            {renderMBTITrait('Thinking', 'Feeling', mbtiData.thinking_feeling)}
+                                            {renderMBTITrait('Judging', 'Perceiving', mbtiData.judging_perceiving)}
                                         </div>
                                     </div>
-                                    
-                                    <div className="space-y-4">
-                                        {renderOceanTrait('Openness', oceanData.openness)}
-                                        {renderOceanTrait('Conscientiousness', oceanData.conscientiousness)}
-                                        {renderOceanTrait('Extraversion', oceanData.extraversion)}
-                                        {renderOceanTrait('Agreeableness', oceanData.agreeableness)}
-                                        {renderOceanTrait('Neuroticism', oceanData.neuroticism)}
+                                ) : (
+                                    <div className="pt-10 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
+                                        <PersonStanding className="h-10 w-10 mb-3 text-gray-400" />
+                                        <p className="font-semibold">No personality data yet!</p>
+                                        <p className="text-sm">Keep chatting for MBTI insights.</p>
                                     </div>
-                                </div>
-                            ) : (
-                                <div className="pt-10 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
-                                    <User className="h-10 w-10 mb-3 text-gray-400" />
-                                    <p className="font-semibold">No personality data yet!</p>
-                                    <p className="text-sm">Keep chatting for OCEAN insights.</p>
-                                </div>
-                            )}
-                        </ScrollArea>
-                    </TabsContent>
-                </Tabs>
-            </SheetContent>
-        </Sheet>
+                                )}
+                            </ScrollArea>
+                            
+                            <div className="pt-2 pb-4 bg-background border-t mt-auto">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full text-muted-foreground"
+                                    onClick={() => setIsMbtiInfoOpen(true)}
+                                >
+                                    <Info className="h-4 w-4 mr-2" />
+                                    Learn about MBTI
+                                </Button>
+                            </div>
+                        </TabsContent>
+
+                        <TabsContent value="ocean" className="flex-grow overflow-hidden px-2 flex flex-col">
+                            <ScrollArea className="h-full flex-grow">
+                                {isLoadingOcean ? (
+                                    <div className="space-y-3 pt-4">{renderSkeletons(1)}</div>
+                                ) : isOceanError ? (
+                                    <div className="mt-4 p-4 text-destructive flex items-center gap-2 bg-destructive/10 rounded-md border border-destructive/30">
+                                        <Info className="h-5 w-5 flex-shrink-0" />
+                                        <span>Failed to load OCEAN: {oceanError?.message || 'Unknown error'}</span>
+                                    </div>
+                                ) : oceanData && oceanData.response_count > 0 ? (
+                                    <div className="pt-4 space-y-6">
+                                        <div className="text-center">
+                                            <h3 className="text-2xl font-bold mb-2">OCEAN Personality Traits</h3>
+                                            <div className="text-sm text-muted-foreground mb-4">
+                                                Based on {oceanData.response_count} interactions
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="space-y-4">
+                                            {renderOceanTrait('Openness', oceanData.openness)}
+                                            {renderOceanTrait('Conscientiousness', oceanData.conscientiousness)}
+                                            {renderOceanTrait('Extraversion', oceanData.extraversion)}
+                                            {renderOceanTrait('Agreeableness', oceanData.agreeableness)}
+                                            {renderOceanTrait('Neuroticism', oceanData.neuroticism)}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="pt-10 text-center text-muted-foreground flex flex-col items-center justify-center h-full">
+                                        <User className="h-10 w-10 mb-3 text-gray-400" />
+                                        <p className="font-semibold">No personality data yet!</p>
+                                        <p className="text-sm">Keep chatting for OCEAN insights.</p>
+                                    </div>
+                                )}
+                            </ScrollArea>
+                            
+                            <div className="pt-2 pb-4 bg-background border-t mt-auto">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full text-muted-foreground"
+                                    onClick={() => setIsOceanInfoOpen(true)}
+                                >
+                                    <Info className="h-4 w-4 mr-2" />
+                                    Learn about OCEAN
+                                </Button>
+                            </div>
+                        </TabsContent>
+                    </Tabs>
+                </SheetContent>
+            </Sheet>
+        </>
     );
 }

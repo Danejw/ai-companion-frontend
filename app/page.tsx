@@ -17,14 +17,14 @@ export default function Home() {
 
   return (
     <div className="relative h-screen w-full">
-      
+
       {/* Background */}
       <div className="absolute inset-0 -z-10">
         <Background />
       </div>
 
       {/* InteractionHub */}
-      <div className="absolute bottom-48 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-xl px-4">
+      <div className="absolute bottom-48 left-1/2 transform -translate-x-1/2 z-0 w-full max-w-xl px-4">
         <InteractionHub />
       </div>
     </div>
