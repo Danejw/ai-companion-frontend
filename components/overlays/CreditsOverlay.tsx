@@ -21,8 +21,6 @@ const creditPackages = [
     { name: 'tier5', credits: 3000, price: '$48', title: '$48 for 3000 Credits' }
 ];
 
-const NEXT_PUBLIC_ENV = process.env.NEXT_PUBLIC_ENV;
-
 
 let stripePublishableKey: string;
 if (process.env.NEXT_PUBLIC_ENV === 'development') {
