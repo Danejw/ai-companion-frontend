@@ -25,10 +25,8 @@ const creditPackages = [
 let stripePublishableKey: string;
 if (process.env.NEXT_PUBLIC_ENV === 'development') {
     stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_TEST ?? '';
-    console.log('Using TEST stripe key in development mode');
 } else {
     stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_LIVE ?? '';
-    console.log('Using LIVE stripe key in production mode');
 }
 
 

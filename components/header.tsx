@@ -25,29 +25,21 @@ export default function Header() {
                         <span className="font-bold text-xl text-gray-700">Knolia</span>
                     </Link>
 
-                    {/*Info button*/}
+                    {/*Info button with environment-specific colors*/}
                     <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => toggleInfoOverlay(true)}
                         title="About & Information"
                     >
-                        <Info className="h-4 w-4" />
+                        <Info 
+                            className={`h-4 w-4 ${
+                                process.env.NEXT_PUBLIC_ENV === 'production' 
+                                ? "text-[#f472b6]" 
+                                : "text-[#818cf8]"
+                            }`} 
+                        />
                     </Button>
-
-
-                    {/* Flag for telling if in development mode or production mode */}
-                    {process.env.NEXT_PUBLIC_ENV === 'development' && (
-                        <span className="text-xs flex items-center justify-center text-muted-foreground">Development</span>
-                    )}
-
-                    {process.env.NEXT_PUBLIC_ENV === 'production' && (
-                        <span className="text-xs flex items-center justify-center text-muted-foreground">Production</span>
-                    )}
-
-
-
-
 
                 </div>
                 <div className="flex flex-1 items-center justify-end space-x-1 sm:space-x-2"> {/* Added space-x-1 for mobile */}
