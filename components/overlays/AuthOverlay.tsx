@@ -76,19 +76,19 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
                 if (result?.error) {
                     const errorMessage = result.error === 'CredentialsSignin' ? 'Invalid email or password.' : result.error;
                     setError(errorMessage);
-                    toast.error('Login Failed');
+                    toast.error(`Login Failed: ${errorMessage}`);
                 } else if (result?.ok) {
                     toast.success('Login Successful!');
                     onOpenChange(false); // <-- Use prop function to close
                     router.refresh(); // Refresh server components to reflect login state
                 } else {
                     setError('An unknown error occurred during login.');
-                    toast.error('Login Failed');
+                    toast.error(`Login Failed: Unknown error`);
                 }
             } catch (err) {
                 console.error("Login submit error:", err);
                 setError('An unexpected error occurred.');
-                toast.error('Login Failed');
+                toast.error(`Login Failed: ${err}`);
             } finally {
                 setIsLoading(false);
             }

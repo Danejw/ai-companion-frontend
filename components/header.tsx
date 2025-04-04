@@ -34,6 +34,21 @@ export default function Header() {
                     >
                         <Info className="h-4 w-4" />
                     </Button>
+
+
+                    {/* Flag for telling if in development mode or production mode */}
+                    {process.env.NEXT_PUBLIC_ENV === 'development' && (
+                        <span className="text-xs flex items-center justify-center text-muted-foreground">Development</span>
+                    )}
+
+                    {process.env.NEXT_PUBLIC_ENV === 'production' && (
+                        <span className="text-xs flex items-center justify-center text-muted-foreground">Production</span>
+                    )}
+
+
+
+
+
                 </div>
                 <div className="flex flex-1 items-center justify-end space-x-1 sm:space-x-2"> {/* Added space-x-1 for mobile */}
 

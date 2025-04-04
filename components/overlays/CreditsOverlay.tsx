@@ -21,15 +21,18 @@ const creditPackages = [
     { name: 'tier5', credits: 3000, price: '$48', title: '$48 for 3000 Credits' }
 ];
 
-const ENV = process.env.ENV;
+const NEXT_PUBLIC_ENV = process.env.NEXT_PUBLIC_ENV;
 
 
 let stripePublishableKey: string;
-if (ENV === 'development') {
+if (process.env.NEXT_PUBLIC_ENV === 'development') {
     stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_TEST ?? '';
+    console.log('Using TEST stripe key in development mode');
 } else {
     stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_LIVE ?? '';
+    console.log('Using LIVE stripe key in production mode');
 }
+
 
 
 // Stripe loading logic
@@ -58,7 +61,7 @@ export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayPro
 
     const [processingTier, setProcessingTier] = useState<string | null>(null);
     const [selectedPackage, setSelectedPackage] = useState<string>('Tier 3'); // Default to Tier 3 package
-
+NEXT_PUBLIC_ENV
     // Fetch credit balance query
     const {
         data: balanceData,
