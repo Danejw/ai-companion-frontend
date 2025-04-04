@@ -59,7 +59,8 @@ export default function CreditsOverlay({ open, onOpenChange }: CreditsOverlayPro
 
     const [processingTier, setProcessingTier] = useState<string | null>(null);
     const [selectedPackage, setSelectedPackage] = useState<string>('Tier 3'); // Default to Tier 3 package
-NEXT_PUBLIC_ENV
+
+
     // Fetch credit balance query
     const {
         data: balanceData,
