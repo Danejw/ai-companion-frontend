@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import Background from '@/components/Background'
 import InteractionHub from '@/components/core/InteractionHub'
+import InteractionHubStream from '@/components/core/InteractionHubStream'
 
 export default function Home() {
   // Disable scroll when this page is mounted
@@ -25,7 +26,8 @@ export default function Home() {
 
       {/* InteractionHub */}
       <div className="absolute bottom-48 left-1/2 transform -translate-x-1/2 z-0 w-full max-w-xl px-4">
-        <InteractionHub />
+        {/* <InteractionHub /> */}
+        <InteractionHubStream />
       </div>
     </div>
   )

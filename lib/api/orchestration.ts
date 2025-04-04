@@ -110,3 +110,61 @@ export async function sendTextMessage(payload: SendMessagePayload): Promise<Send
     }
 }
 
+export async function sendStreamedTextMessage(
+    payload: { message: string },
+    onToken: (token: string) => void
+): Promise<void> {
+    const headers = await getAuthHeaders();
+    const url = `${BACKEND_URL}/orchestration/convo-lead`;
+
+    const response = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+    });
+
+    if (!response.ok || !response.body) {
+        throw new Error("Streaming request failed.");
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+
+    let buffer = "";
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // Handle multiple lines per chunk, if necessary
+        let lines = buffer.split("\n");
+        buffer = lines.pop() || ""; // Save incomplete line
+
+        for (const line of lines) {
+            if (!line.trim()) continue;
+
+            try {
+                const json = JSON.parse(line);
+                if (json.delta) {
+                    onToken(json.delta);
+                }
+            } catch (err) {
+                console.error("Failed to parse stream chunk:", line);
+            }
+        }
+    }
+
+    // Flush the final buffer if it has a complete line
+    if (buffer.trim()) {
+        try {
+            const json = JSON.parse(buffer);
+            if (json.delta) {
+                onToken(json.delta);
+            }
+        } catch (err) {
+            console.error("Failed to parse final chunk:", buffer);
+        }
+    }
+}
