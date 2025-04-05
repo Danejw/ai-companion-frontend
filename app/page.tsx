@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react'
 import Background from '@/components/Background'
-import InteractionHub from '@/components/core/InteractionHub'
 import InteractionHubStream from '@/components/core/InteractionHubStream'
 
 export default function Home() {

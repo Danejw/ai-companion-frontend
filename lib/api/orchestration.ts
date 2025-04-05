@@ -48,8 +48,8 @@ export async function sendTextMessage(payload: SendMessagePayload): Promise<Send
     const headers = await getAuthHeaders();
 
     const url = `${BACKEND_URL}/orchestration/convo-lead`;
-    console.log(`--- DEBUG: Sending POST to ${url} with payload:`, payload);
 
+    
     let response: Response; // Define response variable outside try block
 
     try {
@@ -139,7 +139,7 @@ export async function sendStreamedTextMessage(
         buffer += decoder.decode(value, { stream: true });
 
         // Handle multiple lines per chunk, if necessary
-        let lines = buffer.split("\n");
+        const lines = buffer.split("\n");
         buffer = lines.pop() || ""; // Save incomplete line
 
         for (const line of lines) {
