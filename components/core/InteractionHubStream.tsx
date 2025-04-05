@@ -233,7 +233,7 @@ export default function InteractionHub() {
                                                 className="w-full min-h-[100px] p-3 mb-2 text-sm border-none"
                                                 disabled={isSubmittingFeedback}
                                             />
-                                            <div className="flex justify-end gap-2">
+                                            <div className="flex justify-center gap-2">
                                                 <Button 
                                                     variant="outline" 
                                                     className="hover:text-white"
