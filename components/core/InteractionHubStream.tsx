@@ -4,9 +4,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query'; // Import useMutation & useQueryClient
 import { sendStreamedTextMessage } from '@/lib/api/orchestration'; // Adjust path as needed
+import { useUIStore } from '@/store'; // Import the store
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2, Ear, EarOff } from 'lucide-react'; // Added Loader2
+import { Send, Loader2, Ear, EarOff } from 'lucide-react';
 import { toast } from 'sonner'; // For error feedback
 import AudioVisualizer from '../Visualizer';
 
@@ -14,6 +15,13 @@ import AudioVisualizer from '../Visualizer';
 const Spinner = () => <Loader2 className="h-4 w-4 animate-spin" />;
 
 export default function InteractionHub() {
+    // Get settings from store
+    const { 
+        extractKnowledge, 
+        summarizeFrequency,
+        toggleSettingsOverlay
+    } = useUIStore();
+
     const [inputText, setInputText] = useState('');
     const [aiResponse, setAiResponse] = useState('');
     const [isListening, setIsListening] = useState(false);
@@ -48,8 +56,16 @@ export default function InteractionHub() {
             setInputText('');
             setIsStreaming(true);
 
+            // Create payload using settings from the store
+            const payload = {
+                message: messageToSend,
+                stream: true,
+                extract: extractKnowledge,
+                summarize: summarizeFrequency,
+            };
+
             await sendStreamedTextMessage(
-                { message: messageToSend },
+                payload,
                 (chunk: string) => {
                     setAiResponse((prev) => prev + chunk);
                 }

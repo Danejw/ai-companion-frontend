@@ -4,14 +4,14 @@ import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useUIStore } from '@/store';
-import { History, CreditCard, LogIn, LogOut, Loader2, Brain, Info } from 'lucide-react';
+import { History, CreditCard, LogIn, LogOut, Loader2, Brain, Info, Settings } from 'lucide-react';
 import AnimatedBlobLogo from '@/components/Logo';
 
 export default function Header() {
     const { data: session, status } = useSession();
     const toggleAuthOverlay = useUIStore((state) => state.toggleAuthOverlay);
     const toggleCreditsOverlay = useUIStore((state) => state.toggleCreditsOverlay);
-    //const toggleSettingsOverlay = useUIStore((state) => state.toggleSettingsOverlay);
+    const toggleSettingsOverlay = useUIStore((state) => state.toggleSettingsOverlay);
     const toggleHistoryOverlay = useUIStore((state) => state.toggleHistoryOverlay);
     const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
     const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
@@ -91,9 +91,14 @@ export default function Header() {
                                 <CreditCard className="h-4 w-4" />
                             </Button>
                             
-                            {/* <Button variant="ghost" size="icon" onClick={toggleSettingsOverlay} title="Settings">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => toggleSettingsOverlay(true)}
+                                title="Settings"
+                            >
                                 <Settings className="h-4 w-4" />
-                            </Button> */}
+                            </Button>
 
                             {/* --- Logout Button (Icon only) --- */}
                             <Button

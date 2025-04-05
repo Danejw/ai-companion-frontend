@@ -26,6 +26,9 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
 // --- Define expected payload for sending a message ---
 interface SendMessagePayload {
     message: string;
+    stream?: boolean;
+    summarize?: number;
+    extract?: boolean;
 }
 
 // --- Define expected response type --- TODO: this will need to be updated to handle the the response from the backend gets more complex
@@ -110,10 +113,7 @@ export async function sendTextMessage(payload: SendMessagePayload): Promise<Send
     }
 }
 
-export async function sendStreamedTextMessage(
-    payload: { message: string },
-    onToken: (token: string) => void
-): Promise<void> {
+export async function sendStreamedTextMessage(payload: SendMessagePayload, onToken: (token: string) => void): Promise<void> {
     const headers = await getAuthHeaders();
     const url = `${BACKEND_URL}/orchestration/convo-lead`;
 

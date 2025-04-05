@@ -1,5 +1,6 @@
 // store/index.ts
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 interface UIState {
     isHistoryOpen: boolean;
@@ -20,42 +21,75 @@ interface UIState {
     toggleInfoOverlay: (isOpen: boolean) => void;
 
     // setConfirmationAction: (action: object | null) => void;
+
+    // NEW: Settings for message processing
+    extractKnowledge: boolean;
+    summarizeFrequency: number; // 0 = never, 1 = always, higher numbers for less frequency
+    
+    // NEW: Functions to update settings
+    toggleExtractKnowledge: () => void;
+    setSummarizeFrequency: (value: number) => void;
 }
 
-export const useUIStore = create<UIState>((set, get) => ({
-    // Initial State
-    isHistoryOpen: false,
-    isCreditsOpen: false,
-    isSettingsOpen: false,
-    isAuthOpen: false,
-    isKnowledgeOpen: false,
-    isInfoOpen: false,
-    // confirmationAction: null,
+export const useUIStore = create<UIState>()(
+    persist(
+        (set, get) => ({
+            // Initial State
+            isHistoryOpen: false,
+            isCreditsOpen: false,
+            isSettingsOpen: false,
+            isAuthOpen: false,
+            isKnowledgeOpen: false,
+            isInfoOpen: false,
+            // confirmationAction: null,
 
-    // Actions
-    toggleHistoryOverlay: (isOpen) => set((state) => ({
-        isHistoryOpen: isOpen !== undefined ? isOpen : !state.isHistoryOpen
-    })),    
-    
-    toggleCreditsOverlay: (isOpen) => set((state) => ({
-        isCreditsOpen: isOpen !== undefined ? isOpen : !state.isCreditsOpen
-    })),    
-        
-    toggleSettingsOverlay: (isOpen) => set((state) => ({
-        isSettingsOpen: isOpen !== undefined ? isOpen : !state.isSettingsOpen
-    })),    
+            // Settings values
+            extractKnowledge: true,
+            summarizeFrequency: 10,
 
-    toggleAuthOverlay: (isOpen) => set((state) => ({
-        isAuthOpen: isOpen !== undefined ? isOpen : !state.isAuthOpen
-    })),    
+            // Actions
+            toggleHistoryOverlay: (isOpen) => set((state) => ({
+                isHistoryOpen: isOpen !== undefined ? isOpen : !state.isHistoryOpen
+            })),    
+            
+            toggleCreditsOverlay: (isOpen) => set((state) => ({
+                isCreditsOpen: isOpen !== undefined ? isOpen : !state.isCreditsOpen
+            })),    
+            
+            toggleSettingsOverlay: (isOpen) => set((state) => ({
+                isSettingsOpen: isOpen !== undefined ? isOpen : !state.isSettingsOpen
+            })),    
 
-    toggleKnowledgeOverlay: (isOpen) => set((state) => ({ 
-        isKnowledgeOpen: isOpen !== undefined ? isOpen : !state.isKnowledgeOpen 
-    })),
+            toggleAuthOverlay: (isOpen) => set((state) => ({
+                isAuthOpen: isOpen !== undefined ? isOpen : !state.isAuthOpen
+            })),    
 
-    toggleInfoOverlay: (isOpen) => set((state) => ({ 
-        isInfoOpen: isOpen !== undefined ? isOpen : !state.isInfoOpen 
-    })),
+            toggleKnowledgeOverlay: (isOpen) => set((state) => ({ 
+                isKnowledgeOpen: isOpen !== undefined ? isOpen : !state.isKnowledgeOpen 
+            })),
 
-    // setConfirmationAction: (action) => set({ confirmationAction: action }),
-}));
+            toggleInfoOverlay: (isOpen) => set((state) => ({ 
+                isInfoOpen: isOpen !== undefined ? isOpen : !state.isInfoOpen 
+            })),
+
+            // setConfirmationAction: (action) => set({ confirmationAction: action }),
+
+            // NEW: Settings toggle functions
+            toggleExtractKnowledge: () => set((state) => ({
+                extractKnowledge: !state.extractKnowledge
+            })),
+            
+            setSummarizeFrequency: (value) => set({
+                summarizeFrequency: value
+            }),
+        }),
+        {
+            name: 'ui-settings', // Storage key
+            partialize: (state) => ({ 
+                // Only persist these settings in localStorage
+                extractKnowledge: state.extractKnowledge,
+                summarizeFrequency: state.summarizeFrequency,
+            }),
+        }
+    )
+);
