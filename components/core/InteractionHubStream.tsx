@@ -215,7 +215,7 @@ export default function InteractionHub() {
                                         <Button 
                                             variant="ghost" 
                                             size="sm"
-                                            className="mt-4 text-xs flex items-center gap-1 text-gray-400 hover:text-gray-800"
+                                            className="mt-4 text-xs flex items-center gap-1 text-gray-400 hover:text-gray-500"
                                             onClick={handleToggleFeedbackMode}
                                         >
                                             <MessageSquarePlus size={14} />
