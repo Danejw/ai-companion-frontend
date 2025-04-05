@@ -18,8 +18,7 @@ export default function InteractionHub() {
     // Get settings from store
     const { 
         extractKnowledge, 
-        summarizeFrequency,
-        toggleSettingsOverlay
+        summarizeFrequency
     } = useUIStore();
 
     const [inputText, setInputText] = useState('');

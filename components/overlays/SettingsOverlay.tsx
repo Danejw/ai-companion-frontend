@@ -30,7 +30,7 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
                         <Settings className="mr-3 h-5 w-5" /> Settings
                     </SheetTitle>
                     <SheetDescription className="mt-2">
-                        Configure your AI assistant's behavior
+                        Configure your AI assistant&apos;s behavior
                     </SheetDescription>
                 </SheetHeader>
 
