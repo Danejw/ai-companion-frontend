@@ -7,9 +7,10 @@ import { sendStreamedTextMessage } from '@/lib/api/orchestration'; // Adjust pat
 import { useUIStore } from '@/store'; // Import the store
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2, Ear, EarOff } from 'lucide-react';
+import { Send, Loader2, Ear, EarOff, MessageSquarePlus } from 'lucide-react';
 import { toast } from 'sonner'; // For error feedback
-import AudioVisualizer from '../Visualizer';
+import AudioVisualizer from '@/components/Visualizer';
+import { submitFeedback } from '@/lib/api/feedback'; // Import the feedback function
 
 // Simple Spinner component reused
 const Spinner = () => <Loader2 className="h-4 w-4 animate-spin" />;
@@ -28,7 +29,9 @@ export default function InteractionHub() {
     const textareaRef = useRef<HTMLTextAreaElement>(null)
     const [isStreaming, setIsStreaming] = useState(false);
     const scrollViewportRef = useRef<HTMLDivElement>(null);
-
+    const [isFeedbackMode, setIsFeedbackMode] = useState(false);
+    const [feedbackText, setFeedbackText] = useState('');
+    const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
 
     // --- Setup Mutation ---
     const queryClient = useQueryClient(); // Get query client if needed for invalidation later
@@ -147,6 +150,38 @@ export default function InteractionHub() {
             }
         };
 
+    // Handler for toggling feedback mode
+    const handleToggleFeedbackMode = () => {
+        setIsFeedbackMode(true);
+        setFeedbackText('');
+    };
+
+    // Handler for submitting feedback
+    const handleSubmitFeedback = async () => {
+        if (!feedbackText.trim()) {
+            toast.error("Please enter feedback before submitting.");
+            return;
+        }
+
+        try {
+            setIsSubmittingFeedback(true);
+            await submitFeedback(feedbackText);
+            setIsFeedbackMode(false);
+            setFeedbackText('');
+            toast.success("Thank you for your feedback!");
+        } catch (error) {
+            console.error("Error submitting feedback:", error);
+            toast.error("Failed to submit feedback. Please try again.");
+        } finally {
+            setIsSubmittingFeedback(false);
+        }
+    };
+
+    // Handler for canceling feedback
+    const handleCancelFeedback = () => {
+        setIsFeedbackMode(false);
+        setFeedbackText('');
+    };
 
     return (
         <div className="flex flex-col items-center gap-6 w-full max-w-xl px-4">
@@ -166,13 +201,60 @@ export default function InteractionHub() {
                         </div>
 
                         {/* Text content with streaming effect */}
-                        <div className="flex items-center justify-center text-center text-gray-700 mb-4 px-4 break-words whitespace-pre-wrap">
+                        <div className="flex flex-col items-center justify-center text-center text-gray-700 mb-4 px-4 break-words whitespace-pre-wrap">
                             {isStreaming && !aiResponse ? (
                                 <Spinner /> // Only show spinner at very beginning of streaming
                             ) : (
-                                <p className="animate-in fade-in duration-500 ease-out">
-                                    {aiResponse || <span className="opacity-90">How are you today?</span>}
-                                </p>
+                                <>
+                                    <p className="animate-in fade-in duration-500 ease-out">
+                                        {aiResponse || <span className="opacity-90">How are you today?</span>}
+                                    </p>
+                                    
+                                    {/* Feedback button */}
+                                    {aiResponse && !isFeedbackMode && (
+                                        <Button 
+                                            variant="ghost" 
+                                            size="sm"
+                                            className="mt-2 text-xs flex items-center gap-1 text-gray-500 hover:text-gray-800"
+                                            onClick={handleToggleFeedbackMode}
+                                        >
+                                            <MessageSquarePlus size={14} />
+                                            Give feedback
+                                        </Button>
+                                    )}
+                                    
+                                    {/* Feedback form */}
+                                    {isFeedbackMode && (
+                                        <div className="w-full max-w-md mt-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                                            <Textarea
+                                                value={feedbackText}
+                                                onChange={(e) => setFeedbackText(e.target.value)}
+                                                placeholder="Tell us what you think about this response..."
+                                                className="w-full min-h-[100px] p-3 mb-2 text-sm border-none"
+                                                disabled={isSubmittingFeedback}
+                                            />
+                                            <div className="flex justify-end gap-2">
+                                                <Button 
+                                                    variant="outline" 
+                                                    className="hover:text-white"
+                                                    size="sm" 
+                                                    onClick={handleCancelFeedback}
+                                                    disabled={isSubmittingFeedback}
+                                                >
+                                                    Cancel
+                                                </Button>
+                                                <Button 
+                                                    variant="default" 
+                                                    size="sm" 
+                                                    onClick={handleSubmitFeedback}
+                                                    disabled={isSubmittingFeedback}
+                                                >
+                                                    {isSubmittingFeedback ? <Spinner /> : 'Submit Feedback'}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
                     </div>
