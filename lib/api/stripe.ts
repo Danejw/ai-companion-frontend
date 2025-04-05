@@ -41,9 +41,6 @@ export async function fetchCreditBalance(): Promise<{ credits: number }> {
     if (!userId) {
         throw new Error('User ID not found in session');
     }
-    
-    console.log('--- DEBUG: fetchCreditBalance - User ID:', userId);
-
 
     const headers = await getAuthHeaders();
     // Use the retrieved userId in the URL

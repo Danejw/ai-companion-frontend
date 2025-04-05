@@ -2,12 +2,11 @@ import { getSession } from 'next-auth/react'; // Or however you get the auth tok
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ai-companion-backend-opuh.onrender.com"; // Use env var
 
-
 export interface ConversationMessage {
     role: string;
     content: string;
+    createdAt?: string;
 }
-
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
     const session = await getSession();
@@ -20,12 +19,11 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
         headers['Authorization'] = `Bearer ${accessToken}`;
     } else {
         console.warn('--- WARN: getAuthHeaders - No Access Token Found for request ---');
-
     }
     return headers;
 }
 
-export async function fetchConversationHistory(): Promise<string[]> {
+export async function fetchConversationHistory(): Promise<ConversationMessage[]> {
     // Get session within this function to access user ID
     const session = await getSession();
 
@@ -41,10 +39,11 @@ export async function fetchConversationHistory(): Promise<string[]> {
         headers: headers,
     });
 
+    if (!response.ok) {
+        throw new Error(`Failed to fetch history: ${response.status}`);
+    }
+
     // Expecting an array of messages
     const data = await response.json();
-
-    console.log('--- DEBUG: fetchConversationHistory - Response:', data);
-
     return data;
 }
