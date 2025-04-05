@@ -4,7 +4,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchConversationHistory, ConversationMessage } from '@/lib/api/conversation_history';
-import { format, parseISO } from 'date-fns'; // Import for formatting timestamps and parseISO
+import { format } from 'date-fns'; // Import for formatting timestamps and parseISO
 
 // UI Imports
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -55,14 +55,11 @@ export default function HistoryOverlay({ open, onOpenChange }: HistoryOverlayPro
     const renderHistoryItem = (message: ConversationMessage, index: number) => {
         const { role, content } = message;
         
-        // Access created_at directly from the raw message object
-        const created_at = (message as any).created_at;
-        
         // Format the timestamp
         let formattedTime = 'Invalid Date';
         try {
-            if (created_at) {
-                const date = new Date(created_at);
+            if (message.created_at) {
+                const date = new Date(message.created_at);
                 if (!isNaN(date.getTime())) {
                     formattedTime = format(date, 'MMM d, h:mm a');
                 }

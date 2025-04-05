@@ -151,7 +151,7 @@ export async function sendStreamedTextMessage(
                     onToken(json.delta);
                 }
             } catch (err) {
-                console.error("Failed to parse stream chunk:", line);
+                console.error("Failed to parse stream chunk:", line, err);
             }
         }
     }
@@ -164,7 +164,7 @@ export async function sendStreamedTextMessage(
                 onToken(json.delta);
             }
         } catch (err) {
-            console.error("Failed to parse final chunk:", buffer);
+            console.error("Failed to parse final chunk:", buffer, err);
         }
     }
 }

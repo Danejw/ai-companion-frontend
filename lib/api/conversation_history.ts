@@ -2,10 +2,11 @@ import { getSession } from 'next-auth/react'; // Or however you get the auth tok
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ai-companion-backend-opuh.onrender.com"; // Use env var
 
+
 export interface ConversationMessage {
     role: string;
     content: string;
-    createdAt?: string;
+    created_at?: string;
 }
 
 async function getAuthHeaders(): Promise<Record<string, string>> {

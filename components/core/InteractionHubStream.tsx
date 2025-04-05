@@ -3,7 +3,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query'; // Import useMutation & useQueryClient
-import { sendStreamedTextMessage, sendTextMessage } from '@/lib/api/orchestration'; // Adjust path as needed
+import { sendStreamedTextMessage } from '@/lib/api/orchestration'; // Adjust path as needed
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, Loader2, Ear, EarOff } from 'lucide-react'; // Added Loader2
