@@ -70,6 +70,36 @@ export default function InteractionHub() {
                 payload,
                 (chunk: string) => {
                     setAiResponse((prev) => prev + chunk);
+                },
+                (toolCall) => {
+                    // Display tool call notification with longer duration
+                    toast.info(
+                        <div>
+                            <h3 className="font-medium">Using Tool</h3>
+                            <p className="text-sm">Tool: {toolCall.name || "Unknown"}</p>
+                        </div>,
+                        {
+                            duration: 4000, // 4 seconds
+                        }
+                    );
+                },
+                (toolCallOutput) => {
+                    // Add a slight delay before showing the output toast
+                    setTimeout(() => {
+                        toast.success(
+                            <div>
+                                <h3 className="font-medium">Tool Result</h3>
+                                <p className="text-sm truncate max-w-[300px]">
+                                    {typeof toolCallOutput === 'string' 
+                                        ? toolCallOutput 
+                                        : JSON.stringify(toolCallOutput).substring(0, 100)}
+                                </p>
+                            </div>,
+                            {
+                                duration: 4000, // 4 seconds
+                            }
+                        );
+                    }, 4000); // 4 second delay
                 }
             );
 

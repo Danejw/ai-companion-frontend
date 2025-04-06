@@ -113,7 +113,12 @@ export async function sendTextMessage(payload: SendMessagePayload): Promise<Send
     }
 }
 
-export async function sendStreamedTextMessage(payload: SendMessagePayload, onToken: (token: string) => void): Promise<void> {
+export async function sendStreamedTextMessage(
+    payload: SendMessagePayload, 
+    onToken: (token: string) => void,
+    onToolCall?: (toolCall: any) => void,
+    onToolCallOutput?: (toolCallOutput: any) => void
+): Promise<void> {
     const headers = await getAuthHeaders();
     const url = `${BACKEND_URL}/orchestration/convo-lead`;
 
@@ -149,7 +154,20 @@ export async function sendStreamedTextMessage(payload: SendMessagePayload, onTok
                 const json = JSON.parse(line);
                 if (json.delta) {
                     onToken(json.delta);
+                } 
+                else if (json.tool_call_output) {
+                    console.log("Tool result received:", json.tool_call_output);
+                    if (onToolCallOutput) {
+                        onToolCallOutput(json.tool_call_output);
+                    }
                 }
+                else if (json.tool_call) {
+                    console.log("Tool call received:", json.tool_call);
+                    if (onToolCall) {
+                        onToolCall(json.tool_call);
+                    }
+                }
+                
             } catch (err) {
                 console.error("Failed to parse stream chunk:", line, err);
             }
