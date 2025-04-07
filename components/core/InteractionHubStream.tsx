@@ -33,6 +33,7 @@ export default function InteractionHub() {
     const [isFeedbackMode, setIsFeedbackMode] = useState(false);
     const [feedbackText, setFeedbackText] = useState('');
     const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+    const [teachAi, setTeachAi] = useState(false);
 
     // --- Setup Mutation ---
     const queryClient = useQueryClient(); // Get query client if needed for invalidation later
@@ -208,7 +209,7 @@ export default function InteractionHub() {
     };
 
     // Handler for submitting feedback
-    const handleSubmitFeedback = async () => {
+    const handleSubmitFeedback = async (teachAi: boolean) => {
         if (!feedbackText.trim()) {
             toast.error("Please enter feedback before submitting.");
             return;
@@ -216,7 +217,7 @@ export default function InteractionHub() {
 
         try {
             setIsSubmittingFeedback(true);
-            await submitFeedback(feedbackText);
+            await submitFeedback(feedbackText, teachAi);
             setIsFeedbackMode(false);
             setFeedbackText('');
             toast.success("Thank you for your feedback!");
@@ -290,20 +291,37 @@ export default function InteractionHub() {
                                                 className="w-full min-h-[100px] p-3 mb-2 text-sm border-none"
                                                 disabled={isSubmittingFeedback}
                                             />
+                                                <div className="flex justify-end px-1 mb-2">
+                                                    <label htmlFor="teachAi" className="relative inline-flex items-center cursor-pointer group">
+                                                        <input
+                                                            type="checkbox"
+                                                            id="teachAi"
+                                                            checked={teachAi}
+                                                            onChange={(e) => setTeachAi(e.target.checked)}
+                                                            disabled={isSubmittingFeedback}
+                                                            className="sr-only peer"
+                                                        />
+                                                        <div className="w-10 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-accent transition-all duration-300"></div>
+                                                        <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-all duration-300 peer-checked:translate-x-5"></div>
+                                                        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-all text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-md border border-gray-300 shadow">
+                                                            Teach the AI with this feedback
+                                                        </div>
+                                                    </label>
+                                                </div>
                                             <div className="flex justify-center gap-2">
-                                                <Button 
-                                                    variant="outline" 
+                                                <Button
+                                                    variant="outline"
                                                     className="hover:text-white"
-                                                    size="sm" 
+                                                    size="sm"
                                                     onClick={handleCancelFeedback}
                                                     disabled={isSubmittingFeedback}
                                                 >
                                                     Cancel
                                                 </Button>
-                                                <Button 
-                                                    variant="default" 
-                                                    size="sm" 
-                                                    onClick={handleSubmitFeedback}
+                                                <Button
+                                                    variant="default"
+                                                    size="sm"
+                                                    onClick={() => handleSubmitFeedback(teachAi)}
                                                     disabled={isSubmittingFeedback}
                                                 >
                                                     {isSubmittingFeedback ? <Spinner /> : 'Submit Feedback'}
