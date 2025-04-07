@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -297,4 +298,69 @@
   /* IE/Edge */
   scrollbar-width: none;
   /* Firefox */
+}
+
+
+.prose {
+  color: #374151;
+  /* text-gray-700 */
+  max-width: 65ch;
+  line-height: 1.5;
+  font-size: 1rem;
+}
+
+.prose h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.prose h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.prose p {
+  margin-top: .1em;
+  margin-bottom: .1em;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.25em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.prose code {
+  background-color: #f3f4f6;
+  /* bg-gray-100 */
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.prose pre {
+  background-color: #111827;
+  /* bg-gray-900 */
+  color: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  overflow-x: auto;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  font-size: 0.875rem;
+}
+
+.prose blockquote {
+  border-left: 4px solid #d1d5db;
+  /* border-gray-300 */
+  padding-left: 1em;
+  color: #6b7280;
+  /* text-gray-500 */
+  font-style: italic;
+  margin: 1em 0;
 }

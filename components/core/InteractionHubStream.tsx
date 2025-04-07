@@ -11,6 +11,7 @@ import { Send, Loader2, Ear, EarOff, MessageSquarePlus } from 'lucide-react';
 import { toast } from 'sonner'; // For error feedback
 import AudioVisualizer from '@/components/Visualizer';
 import { submitFeedback } from '@/lib/api/feedback'; // Import the feedback function
+import ReactMarkdown from "react-markdown";
 
 // Simple Spinner component reused
 const Spinner = () => <Loader2 className="h-4 w-4 animate-spin" />;
@@ -55,7 +56,6 @@ export default function InteractionHub() {
 
         try {
             setAiResponse('');
-            setInputText('');
             setIsStreaming(true);
 
             // Create payload using settings from the store
@@ -70,6 +70,9 @@ export default function InteractionHub() {
                 payload,
                 (chunk: string) => {
                     setAiResponse((prev) => prev + chunk);
+                    if (chunk) {
+                        setInputText('');
+                    }
                 },
                 (toolCall) => {
                     // Display tool call notification with longer duration
@@ -93,6 +96,24 @@ export default function InteractionHub() {
                                     {typeof toolCallOutput === 'string' 
                                         ? toolCallOutput 
                                         : JSON.stringify(toolCallOutput).substring(0, 100)}
+                                </p>
+                            </div>,
+                            {
+                                duration: 4000, // 4 seconds
+                            }
+                        );
+                    }, 4000); // 4 second delay
+                },
+                (agentUpdated) => {
+                    // Add a slight delay before showing the output toast
+                    setTimeout(() => {
+                        toast.success(
+                            <div>
+                                <h3 className="font-medium">Tool Result</h3>
+                                <p className="text-sm truncate max-w-[300px]">
+                                    {typeof agentUpdated === 'string'
+                                        ? agentUpdated
+                                        : JSON.stringify(agentUpdated).substring(0, 100)}
                                 </p>
                             </div>,
                             {
@@ -236,9 +257,15 @@ export default function InteractionHub() {
                                 <Spinner /> // Only show spinner at very beginning of streaming
                             ) : (
                                 <>
-                                    <p className="animate-in fade-in duration-500 ease-out">
-                                        {aiResponse || <span className="opacity-90">How are you today?</span>}
-                                    </p>
+                                        {aiResponse ? (
+                                            <div className="prose prose-sm text-left w-full max-w-none animate-in fade-in duration-500 ease-out">
+                                                <ReactMarkdown>
+                                                    {aiResponse}
+                                                </ReactMarkdown>
+                                            </div>
+                                        ) : (
+                                            <p className="opacity-90">How are you today?</p>
+                                        )}
                                     
                                     {/* Feedback button */}
                                     {aiResponse && !isFeedbackMode && (
