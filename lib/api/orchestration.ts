@@ -113,12 +113,31 @@ export async function sendTextMessage(payload: SendMessagePayload): Promise<Send
     }
 }
 
+// Define interfaces for callback parameters
+interface ToolCall {
+    name: string;
+    arguments: Record<string, unknown>;
+    id?: string;
+}
+
+interface ToolCallOutput {
+    id?: string;
+    name?: string;
+    output: unknown;
+}
+
+interface AgentUpdate {
+    state: string;
+    message?: string;
+    progress?: number;
+}
+
 export async function sendStreamedTextMessage(
     payload: SendMessagePayload, 
     onToken: (token: string) => void,
-    onToolCall?: (toolCall: any) => void,
-    onToolCallOutput?: (toolCallOutput: any) => void,
-    onAgentUpdated?: (agentUpdated: any) => void
+    onToolCall?: (toolCall: ToolCall) => void,
+    onToolCallOutput?: (toolCallOutput: ToolCallOutput) => void,
+    onAgentUpdated?: (agentUpdated: AgentUpdate) => void
 ): Promise<void> {
     const headers = await getAuthHeaders();
     const url = `${BACKEND_URL}/orchestration/convo-lead`;
