@@ -6,8 +6,22 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { Settings, Brain, RefreshCw } from 'lucide-react';
+import { Settings, Brain, RefreshCw, Volume2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+
+// Voice options array
+const voiceOptions = [
+    { id: 'alloy', name: 'Alloy', description: 'Female' },
+    { id: 'ash', name: 'Ash', description: 'Male' },
+    { id: 'coral', name: 'Coral', description: 'Female' },
+    { id: 'echo', name: 'Echo', description: 'Female' },
+    { id: 'fable', name: 'Fable', description: 'Female' },
+    { id: 'onyx', name: 'Onyx', description: 'Male' },
+    { id: 'nova', name: 'Nova', description: 'Female' },
+    { id: 'sage', name: 'Sage', description: 'Female' },
+    { id: 'shimmer', name: 'Shimmer', description: 'Female' },
+];
 
 interface SettingsOverlayProps {
     open: boolean;
@@ -19,12 +33,14 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
         extractKnowledge,
         toggleExtractKnowledge,
         summarizeFrequency,
-        setSummarizeFrequency
+        setSummarizeFrequency,
+        selectedVoice,
+        setSelectedVoice
     } = useUIStore();
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent side="right" className="sm:max-w-md flex flex-col">
+            <SheetContent side="right" className="sm:max-w-md flex flex-col overflow-y-auto">
                 <SheetHeader className="border-b pb-6 pt-2">
                     <SheetTitle className="flex items-center text-xl">
                         <Settings className="mr-3 h-5 w-5" /> Settings
@@ -89,6 +105,48 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
                                     <span>Summarize every {summarizeFrequency} messages</span>
                                 )}
                             </div>
+                        </div>
+                    </div>
+
+                    <Separator className="my-6" />
+
+                    {/* Voice Settings */}
+                    <div className="space-y-6">
+                        <h3 className="text-lg font-medium flex items-center">
+                            <Volume2 className="mr-3 h-5 w-5" /> Voice Settings
+                        </h3>
+                        
+                        <div className="space-y-5 px-2">
+                            <div>
+                                <Label className="text-base">Voice Selection</Label>
+                                <p className="text-sm text-muted-foreground mt-2">
+                                    Choose the voice of your AI assistant
+                                </p>
+                            </div>
+                            
+                            <RadioGroup 
+                                value={selectedVoice} 
+                                onValueChange={setSelectedVoice}
+                                className="mt-4"
+                            >
+                                <div className="grid grid-cols-2 gap-3">
+                                    {voiceOptions.map((voice) => (
+                                        <div 
+                                            key={voice.id} 
+                                            className={`flex items-center p-3 rounded-md border hover:bg-accent/10 transition-colors cursor-pointer ${selectedVoice === voice.id ? 'border-accent bg-accent/5' : ''}`}
+                                            onClick={() => setSelectedVoice(voice.id)}
+                                        >
+                                            <div className="mr-2">
+                                                <RadioGroupItem value={voice.id} id={voice.id} />
+                                            </div>
+                                            <Label htmlFor={voice.id} className="flex-1 cursor-pointer">
+                                                <div className="font-medium">{voice.name}</div>
+                                                <div className="text-xs text-accent/80">{voice.description}</div>
+                                            </Label>
+                                        </div>
+                                    ))}
+                                </div>
+                            </RadioGroup>
                         </div>
                     </div>
                 </div>

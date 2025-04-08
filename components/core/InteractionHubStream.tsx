@@ -21,7 +21,8 @@ export default function InteractionHub() {
     // Get settings from store
     const { 
         extractKnowledge, 
-        summarizeFrequency
+        summarizeFrequency,
+        selectedVoice
     } = useUIStore();
 
     const [inputText, setInputText] = useState('');
@@ -272,13 +273,19 @@ export default function InteractionHub() {
             mediaRecorder.onstop = async () => {
                 // Create a blob using the browser's native format
                 const blob = new Blob(chunks, { type: 'audio/webm' });
+                
+                // Set streaming true to disable buttons while waiting for response
+                setIsStreaming(true);
+                
                 try {
-                    await startVoiceInteraction(blob, "alloy"); // Later: make voice user-selectable
+                    await startVoiceInteraction(blob, selectedVoice); // Later: make voice user-selectable
                 } catch (err) {
                     toast.error("Failed to process voice input.");
                     console.error("Voice Error:", err);
+                } finally {
+                    // Always ensure we re-enable the buttons by setting streaming to false
+                    setIsStreaming(false);
                 }
-                
             };
 
             mediaRecorder.start();
@@ -491,9 +498,8 @@ export default function InteractionHub() {
             {/* Voice Mode Button */}
             <div className="flex items-center justify-center gap-2 mt-2 w-20 h-20">
                 <Button
-                    // variant=""
                     size="icon"
-                    className={`rounded-full flex-shrink-0 self-center ${isListening ? 'bg-accent/10' : ''} w-full h-full animate-pulse`}
+                    className={`rounded-full flex-shrink-0 self-center ${isListening ? 'bg-accent/10' : ''} w-full h-full ${!isStreaming && 'animate-pulse'}`}
                     title="Hold to Speak"
                     disabled={isStreaming}
                     onMouseDown={startRecording}
@@ -501,11 +507,13 @@ export default function InteractionHub() {
                     onTouchStart={startRecording}
                     onTouchEnd={stopRecording}
                 >
-
-                {isListening ? 
-                    <MicOff className="w-3/4 h-3/4 text-white " /> : 
-                    <Mic className="w-3/4 h-3/4 text-white  animate-pulse" />
-                }
+                    {isStreaming ? 
+                        <Spinner /> : 
+                        (isListening ? 
+                            <Mic className="w-3/4 h-3/4 text-white" /> : 
+                            <MicOff className="w-3/4 h-3/4 text-white animate-pulse" />
+                        )
+                    }
                 </Button>
             </div>
 
