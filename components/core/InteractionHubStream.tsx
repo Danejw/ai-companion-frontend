@@ -7,7 +7,7 @@ import { sendStreamedTextMessage } from '@/lib/api/orchestration'; // Adjust pat
 import { useUIStore } from '@/store'; // Import the store
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2, Ear, EarOff, MessageSquarePlus } from 'lucide-react';
+import { Send, Loader2, Ear, EarOff, MessageSquarePlus , Mic, MicOff } from 'lucide-react';
 import { toast } from 'sonner'; // For error feedback
 import AudioVisualizer from '@/components/Visualizer';
 import { submitFeedback } from '@/lib/api/feedback'; // Import the feedback function
@@ -37,6 +37,9 @@ export default function InteractionHub() {
     const [teachAi, setTeachAi] = useState(false);
     const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
 
+    let mediaRecorder: MediaRecorder | null = null;
+    let streamRef: MediaStream | null = null;
+    let chunks: BlobPart[] = [];
 
     // --- Setup Mutation ---
     const queryClient = useQueryClient(); // Get query client if needed for invalidation later
@@ -193,13 +196,59 @@ export default function InteractionHub() {
             if (recognitionRef.current) {
                 console.log("Manually stopping recognition via stopListening().");
                 recognitionRef.current.stop(); // User manually stopped it
+                setIsListening(false);
             }
         };
+
+
+        const startRecording = async () => {
+            try {
+                // Start audio recording
+                streamRef = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(streamRef, { mimeType: 'audio/webm' });
+                chunks = [];
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) chunks.push(e.data);
+                };
+
+                mediaRecorder.start();
+                
+                // Start speech recognition
+                startListening();
+                toast("Listening…");
+            } catch (err) {
+                console.error("Could not start recording", err);
+                toast.error("Microphone access denied or not supported.");
+            }
+        };
+
+        const stopRecording = async () => {
+            // First, stop the speech recognition immediately
+            stopListening();
+            
+            // Process audio for voice response using the existing function
+            handleVoiceModeRequest();
+            
+            // If we have transcribed text, send it immediately
+            // if (inputText.trim()) {
+            //     await handleSendText();
+            // }
+            
+            // Clean up media recorder and stream
+            if (mediaRecorder && streamRef) {
+                mediaRecorder.stop();
+                streamRef.getTracks().forEach(track => track.stop());
+            }
+        };
+
+
 
         // handleMicClick toggles start/stop as before
         const handleMicClick = () => {
             if (voiceModeEnabled) {
                 handleVoiceModeRequest();
+                startListening()
             } else {
                 if (isListening) stopListening();
                 else startListening();
@@ -229,6 +278,7 @@ export default function InteractionHub() {
                     toast.error("Failed to process voice input.");
                     console.error("Voice Error:", err);
                 }
+                
             };
 
             mediaRecorder.start();
@@ -424,7 +474,7 @@ export default function InteractionHub() {
             </div>
 
             {/* Toggle for Voice Mode */}
-            <div className="flex items-center gap-2 mt-2">
+            {/* <div className="flex items-center gap-2 mt-2">
                 <span className="text-sm text-gray-500">Voice Mode</span>
                 <label className="relative inline-flex items-center cursor-pointer">
                     <input
@@ -436,8 +486,28 @@ export default function InteractionHub() {
                     <div className="w-10 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-accent transition-all duration-300"></div>
                     <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-all duration-300 peer-checked:translate-x-5"></div>
                 </label>
-            </div>
+            </div> */}
 
+            {/* Voice Mode Button */}
+            <div className="flex items-center justify-center gap-2 mt-2 w-20 h-20">
+                <Button
+                    // variant=""
+                    size="icon"
+                    className={`rounded-full flex-shrink-0 self-center ${isListening ? 'bg-accent/10' : ''} w-full h-full animate-pulse`}
+                    title="Hold to Speak"
+                    disabled={isStreaming}
+                    onMouseDown={startRecording}
+                    onMouseUp={stopRecording}
+                    onTouchStart={startRecording}
+                    onTouchEnd={stopRecording}
+                >
+
+                {isListening ? 
+                    <MicOff className="w-3/4 h-3/4 text-white " /> : 
+                    <Mic className="w-3/4 h-3/4 text-white  animate-pulse" />
+                }
+                </Button>
+            </div>
 
             {/* Disclaimer Area - DO NOT CHANGE */}
             <div className="text-xs text-gray-600/60 text-center px-4 max-w-md mb-2">
