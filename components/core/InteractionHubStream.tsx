@@ -12,6 +12,7 @@ import { toast } from 'sonner'; // For error feedback
 import AudioVisualizer from '@/components/Visualizer';
 import { submitFeedback } from '@/lib/api/feedback'; // Import the feedback function
 import ReactMarkdown from "react-markdown";
+import { startVoiceInteraction } from "@/lib/api/voice"; // Adjust if needed
 
 // Simple Spinner component reused
 const Spinner = () => <Loader2 className="h-4 w-4 animate-spin" />;
@@ -34,6 +35,8 @@ export default function InteractionHub() {
     const [feedbackText, setFeedbackText] = useState('');
     const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
     const [teachAi, setTeachAi] = useState(false);
+    const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
+
 
     // --- Setup Mutation ---
     const queryClient = useQueryClient(); // Get query client if needed for invalidation later
@@ -195,45 +198,82 @@ export default function InteractionHub() {
 
         // handleMicClick toggles start/stop as before
         const handleMicClick = () => {
-            if (isListening) {
-                stopListening();
+            if (voiceModeEnabled) {
+                handleVoiceModeRequest();
             } else {
-                startListening();
+                if (isListening) stopListening();
+                else startListening();
             }
         };
 
-    // Handler for toggling feedback mode
-    const handleToggleFeedbackMode = () => {
-        setIsFeedbackMode(true);
-        setFeedbackText('');
-    };
+        // Handle voice mode request
+        const handleVoiceModeRequest = async () => {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            
+            const mediaRecorder = new MediaRecorder(stream, {
+                mimeType: 'audio/webm' // Explicit, browser-supported format
+            });
+            
+            const chunks: BlobPart[] = [];
 
-    // Handler for submitting feedback
-    const handleSubmitFeedback = async (teachAi: boolean) => {
-        if (!feedbackText.trim()) {
-            toast.error("Please enter feedback before submitting.");
-            return;
-        }
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) chunks.push(e.data);
+            };
 
-        try {
-            setIsSubmittingFeedback(true);
-            await submitFeedback(feedbackText, teachAi);
+            mediaRecorder.onstop = async () => {
+                // Create a blob using the browser's native format
+                const blob = new Blob(chunks, { type: 'audio/webm' });
+                try {
+                    await startVoiceInteraction(blob, "alloy"); // Later: make voice user-selectable
+                } catch (err) {
+                    toast.error("Failed to process voice input.");
+                    console.error("Voice Error:", err);
+                }
+            };
+
+            mediaRecorder.start();
+            toast("Listening… Speak now");
+
+            setTimeout(() => {
+                mediaRecorder.stop();
+                stream.getTracks().forEach(track => track.stop());
+            }, 5000); // You can tweak this duration
+        };
+
+
+
+        // Handler for toggling feedback mode
+        const handleToggleFeedbackMode = () => {
+            setIsFeedbackMode(true);
+            setFeedbackText('');
+        };
+
+        // Handler for submitting feedback
+        const handleSubmitFeedback = async (teachAi: boolean) => {
+            if (!feedbackText.trim()) {
+                toast.error("Please enter feedback before submitting.");
+                return;
+            }
+
+            try {
+                setIsSubmittingFeedback(true);
+                await submitFeedback(feedbackText, teachAi);
+                setIsFeedbackMode(false);
+                setFeedbackText('');
+                toast.success("Thank you for your feedback!");
+            } catch (error) {
+                console.error("Error submitting feedback:", error);
+                toast.error("Failed to submit feedback. Please try again.");
+            } finally {
+                setIsSubmittingFeedback(false);
+            }
+        };
+
+        // Handler for canceling feedback
+        const handleCancelFeedback = () => {
             setIsFeedbackMode(false);
             setFeedbackText('');
-            toast.success("Thank you for your feedback!");
-        } catch (error) {
-            console.error("Error submitting feedback:", error);
-            toast.error("Failed to submit feedback. Please try again.");
-        } finally {
-            setIsSubmittingFeedback(false);
-        }
-    };
-
-    // Handler for canceling feedback
-    const handleCancelFeedback = () => {
-        setIsFeedbackMode(false);
-        setFeedbackText('');
-    };
+        };
 
     return (
         <div className="flex flex-col items-center gap-6 w-full max-w-xl px-4">
@@ -382,6 +422,22 @@ export default function InteractionHub() {
                     {isStreaming ? <Spinner /> : <Send className="h-5 w-5" />}
                 </Button>
             </div>
+
+            {/* Toggle for Voice Mode */}
+            <div className="flex items-center gap-2 mt-2">
+                <span className="text-sm text-gray-500">Voice Mode</span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={voiceModeEnabled}
+                        onChange={(e) => setVoiceModeEnabled(e.target.checked)}
+                    />
+                    <div className="w-10 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-accent transition-all duration-300"></div>
+                    <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-all duration-300 peer-checked:translate-x-5"></div>
+                </label>
+            </div>
+
 
             {/* Disclaimer Area - DO NOT CHANGE */}
             <div className="text-xs text-gray-600/60 text-center px-4 max-w-md mb-2">
