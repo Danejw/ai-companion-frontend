@@ -88,7 +88,7 @@ export default function InteractionHub() {
                     toast.info(
                         <div>
                             <h3 className="font-medium">Using Tool</h3>
-                            <p className="text-sm">Tool: {toolCall.name || "Unknown"}</p>
+                            <p className="text-sm">Tool: {toolCall || "Unknown"}</p>
                         </div>,
                         {
                             duration: 4000, // 4 seconds
@@ -133,8 +133,8 @@ export default function InteractionHub() {
                 },
                 (error) => {
                     // Check if error is specifically NO_CREDITS
-                    if (error === 'NO_CREDITS' || 
-                        (typeof error === 'object' && error.message === 'NO_CREDITS')) {
+                    console.log("--- DEBUG: error", error);
+                    if (error === 'NO_CREDITS') {
                         // Open credits overlay immediately
                         toggleCreditsOverlay(true);
                         
