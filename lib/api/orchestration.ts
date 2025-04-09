@@ -115,10 +115,10 @@ export async function sendTextMessage(payload: SendMessagePayload): Promise<Send
 export async function sendStreamedTextMessage(
     payload: SendMessagePayload, 
     onToken: (token: string) => void,
-    onToolCall?: (toolCall: any) => void,
-    onToolCallOutput?: (toolCallOutput: any) => void,
-    onAgentUpdated?: (agentUpdated: any) => void,
-    onError?: (error: any) => void
+    onToolCall?: (toolCall: string) => void,
+    onToolCallOutput?: (toolCallOutput: string) => void,
+    onAgentUpdated?: (agentUpdated: string) => void,
+    onError?: (error: string) => void
 ): Promise<void> {
     const headers = await getAuthHeaders();
     const url = `${BACKEND_URL}/orchestration/convo-lead`;

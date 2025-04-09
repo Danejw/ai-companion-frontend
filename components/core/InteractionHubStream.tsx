@@ -38,7 +38,7 @@ export default function InteractionHub() {
     const [feedbackText, setFeedbackText] = useState('');
     const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
     const [teachAi, setTeachAi] = useState(false);
-    const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
+    const [voiceModeEnabled] = useState(false);
 
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const streamRef = useRef<MediaStream | null>(null);
@@ -141,7 +141,7 @@ export default function InteractionHub() {
                         toast.info(
                             <div>
                                 <h3 className="font-medium">Credits Required</h3>
-                                <p className="text-sm">You've run out of credits. Please purchase more to continue.</p>
+                                <p className="text-sm">You&apos;ve run out of credits. Please purchase more to continue.</p>
                             </div>,
                             { duration: 4000 }
                         );
