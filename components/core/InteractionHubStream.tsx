@@ -25,6 +25,8 @@ export default function InteractionHub() {
         selectedVoice
     } = useUIStore();
 
+    const toggleCreditsOverlay = useUIStore((state) => state.toggleCreditsOverlay);
+
     const [inputText, setInputText] = useState('');
     const [aiResponse, setAiResponse] = useState('');
     const [isListening, setIsListening] = useState(false);
@@ -69,7 +71,6 @@ export default function InteractionHub() {
             // Create payload using settings from the store
             const payload = {
                 message: messageToSend,
-                stream: true,
                 extract: extractKnowledge,
                 summarize: summarizeFrequency,
             };
@@ -129,6 +130,37 @@ export default function InteractionHub() {
                             }
                         );
                     }, 4000); // 4 second delay
+                },
+                (error) => {
+                    // Check if error is specifically NO_CREDITS
+                    if (error === 'NO_CREDITS' || 
+                        (typeof error === 'object' && error.message === 'NO_CREDITS')) {
+                        // Open credits overlay immediately
+                        toggleCreditsOverlay(true);
+                        
+                        toast.info(
+                            <div>
+                                <h3 className="font-medium">Credits Required</h3>
+                                <p className="text-sm">You've run out of credits. Please purchase more to continue.</p>
+                            </div>,
+                            { duration: 4000 }
+                        );
+                    } else {
+                        // Handle other errors as before
+                        setTimeout(() => {
+                            toast.info(
+                                <div>
+                                    <h3 className="font-medium">Error</h3>
+                                    <p className="text-sm truncate max-w-[300px]">
+                                        {typeof error === 'string'
+                                            ? error
+                                            : JSON.stringify(error).substring(0, 100)}
+                                    </p>
+                                </div>,
+                                { duration: 4000 }
+                            );
+                        }, 4000);
+                    }
                 }
             );
 

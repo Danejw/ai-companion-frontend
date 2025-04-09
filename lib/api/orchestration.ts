@@ -26,7 +26,6 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
 // --- Define expected payload for sending a message ---
 interface SendMessagePayload {
     message: string;
-    stream?: boolean;
     summarize?: number;
     extract?: boolean;
 }
@@ -118,7 +117,8 @@ export async function sendStreamedTextMessage(
     onToken: (token: string) => void,
     onToolCall?: (toolCall: any) => void,
     onToolCallOutput?: (toolCallOutput: any) => void,
-    onAgentUpdated?: (agentUpdated: any) => void
+    onAgentUpdated?: (agentUpdated: any) => void,
+    onError?: (error: any) => void
 ): Promise<void> {
     const headers = await getAuthHeaders();
     const url = `${BACKEND_URL}/orchestration/convo-lead`;
@@ -155,7 +155,8 @@ export async function sendStreamedTextMessage(
                 const json = JSON.parse(line);
                 if (json.delta) {
                     onToken(json.delta);
-                } 
+                }
+                
                 else if (json.tool_call_output) {
                     if (onToolCallOutput) {
                         onToolCallOutput(json.tool_call_output);
@@ -170,6 +171,12 @@ export async function sendStreamedTextMessage(
                     console.log("Agent updated:", json.agent_updated);
                     if (onAgentUpdated) {
                         onAgentUpdated(json.agent_updated);
+                    }
+                }
+                else if (json.error) {
+                    console.log("Error received:", json.error); 
+                    if (onError) {
+                        onError(json.error);
                     }
                 }
                 
