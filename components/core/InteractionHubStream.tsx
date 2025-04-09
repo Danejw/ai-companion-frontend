@@ -7,11 +7,12 @@ import { sendStreamedTextMessage } from '@/lib/api/orchestration'; // Adjust pat
 import { useUIStore } from '@/store'; // Import the store
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2, Ear, EarOff, MessageSquarePlus } from 'lucide-react';
+import { Send, Loader2, Ear, EarOff, MessageSquarePlus , Mic, MicOff } from 'lucide-react';
 import { toast } from 'sonner'; // For error feedback
 import AudioVisualizer from '@/components/Visualizer';
 import { submitFeedback } from '@/lib/api/feedback'; // Import the feedback function
 import ReactMarkdown from "react-markdown";
+import { startVoiceInteraction } from "@/lib/api/voice"; // Adjust if needed
 
 // Simple Spinner component reused
 const Spinner = () => <Loader2 className="h-4 w-4 animate-spin" />;
@@ -20,8 +21,11 @@ export default function InteractionHub() {
     // Get settings from store
     const { 
         extractKnowledge, 
-        summarizeFrequency
+        summarizeFrequency,
+        selectedVoice
     } = useUIStore();
+
+    const toggleCreditsOverlay = useUIStore((state) => state.toggleCreditsOverlay);
 
     const [inputText, setInputText] = useState('');
     const [aiResponse, setAiResponse] = useState('');
@@ -33,6 +37,12 @@ export default function InteractionHub() {
     const [isFeedbackMode, setIsFeedbackMode] = useState(false);
     const [feedbackText, setFeedbackText] = useState('');
     const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+    const [teachAi, setTeachAi] = useState(false);
+    const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
+
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const streamRef = useRef<MediaStream | null>(null);
+    const chunks = useRef<BlobPart[]>([]);
 
     // --- Setup Mutation ---
     const queryClient = useQueryClient(); // Get query client if needed for invalidation later
@@ -61,7 +71,6 @@ export default function InteractionHub() {
             // Create payload using settings from the store
             const payload = {
                 message: messageToSend,
-                stream: true,
                 extract: extractKnowledge,
                 summarize: summarizeFrequency,
             };
@@ -121,6 +130,37 @@ export default function InteractionHub() {
                             }
                         );
                     }, 4000); // 4 second delay
+                },
+                (error) => {
+                    // Check if error is specifically NO_CREDITS
+                    if (error === 'NO_CREDITS' || 
+                        (typeof error === 'object' && error.message === 'NO_CREDITS')) {
+                        // Open credits overlay immediately
+                        toggleCreditsOverlay(true);
+                        
+                        toast.info(
+                            <div>
+                                <h3 className="font-medium">Credits Required</h3>
+                                <p className="text-sm">You've run out of credits. Please purchase more to continue.</p>
+                            </div>,
+                            { duration: 4000 }
+                        );
+                    } else {
+                        // Handle other errors as before
+                        setTimeout(() => {
+                            toast.info(
+                                <div>
+                                    <h3 className="font-medium">Error</h3>
+                                    <p className="text-sm truncate max-w-[300px]">
+                                        {typeof error === 'string'
+                                            ? error
+                                            : JSON.stringify(error).substring(0, 100)}
+                                    </p>
+                                </div>,
+                                { duration: 4000 }
+                            );
+                        }, 4000);
+                    }
                 }
             );
 
@@ -187,52 +227,114 @@ export default function InteractionHub() {
 
         const stopListening = () => {
             if (recognitionRef.current) {
-                console.log("Manually stopping recognition via stopListening().");
                 recognitionRef.current.stop(); // User manually stopped it
+                setIsListening(false);
             }
         };
+
+
+        const startRecording = async () => {        
+            try {
+                startListening();
+                setIsListening(true);
+
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                streamRef.current = stream;
+
+                const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                mediaRecorderRef.current = mediaRecorder;
+
+                chunks.current = [];
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) chunks.current.push(e.data);
+                };
+
+                mediaRecorder.start();
+                
+                toast("Listening...");
+            } catch (err) {
+                console.error("Could not start recording", err);
+                toast.error("Microphone access denied or not supported.");
+            }
+        };
+
+        const stopRecording = async () => {
+            stopListening();
+            setIsListening(false);
+
+            if (!mediaRecorderRef.current || !streamRef.current) return;
+            
+            mediaRecorderRef.current.stop();
+
+            mediaRecorderRef.current.onstop = async () => {
+                setIsStreaming(true);
+                const blob = new Blob(chunks.current, { type: 'audio/webm' });
+
+                try {
+                    const response = await startVoiceInteraction(blob, selectedVoice);
+                    if (response.transcript) {
+                        setAiResponse(response.transcript);
+                    }
+                } catch (err) {
+                    toast.error("Failed to process voice input.");
+                    console.error("Voice Error:", err);
+                } finally {
+                    setIsStreaming(false);
+                    stopRecording();
+                }
+            };
+
+            streamRef.current?.getTracks().forEach((track) => track.stop());
+        };
+
+
 
         // handleMicClick toggles start/stop as before
         const handleMicClick = () => {
-            if (isListening) {
-                stopListening();
+            if (voiceModeEnabled) {
+                // handleVoiceModeRequest();
+                startListening()
             } else {
-                startListening();
+                if (isListening) stopListening();
+                else startListening();
             }
         };
 
-    // Handler for toggling feedback mode
-    const handleToggleFeedbackMode = () => {
-        setIsFeedbackMode(true);
-        setFeedbackText('');
-    };
+        
 
-    // Handler for submitting feedback
-    const handleSubmitFeedback = async () => {
-        if (!feedbackText.trim()) {
-            toast.error("Please enter feedback before submitting.");
-            return;
-        }
+        // Handler for toggling feedback mode
+        const handleToggleFeedbackMode = () => {
+            setIsFeedbackMode(true);
+            setFeedbackText('');
+        };
 
-        try {
-            setIsSubmittingFeedback(true);
-            await submitFeedback(feedbackText);
+        // Handler for submitting feedback
+        const handleSubmitFeedback = async (teachAi: boolean) => {
+            if (!feedbackText.trim()) {
+                toast.error("Please enter feedback before submitting.");
+                return;
+            }
+
+            try {
+                setIsSubmittingFeedback(true);
+                await submitFeedback(feedbackText, teachAi);
+                setIsFeedbackMode(false);
+                setFeedbackText('');
+                toast.success("Thank you for your feedback!");
+            } catch (error) {
+                console.error("Error submitting feedback:", error);
+                toast.error("Failed to submit feedback. Please try again.");
+            } finally {
+                setIsSubmittingFeedback(false);
+            }
+        };
+
+        // Handler for canceling feedback
+        const handleCancelFeedback = () => {
             setIsFeedbackMode(false);
             setFeedbackText('');
-            toast.success("Thank you for your feedback!");
-        } catch (error) {
-            console.error("Error submitting feedback:", error);
-            toast.error("Failed to submit feedback. Please try again.");
-        } finally {
-            setIsSubmittingFeedback(false);
-        }
-    };
-
-    // Handler for canceling feedback
-    const handleCancelFeedback = () => {
-        setIsFeedbackMode(false);
-        setFeedbackText('');
-    };
+        };
 
     return (
         <div className="flex flex-col items-center gap-6 w-full max-w-xl px-4">
@@ -290,20 +392,37 @@ export default function InteractionHub() {
                                                 className="w-full min-h-[100px] p-3 mb-2 text-sm border-none"
                                                 disabled={isSubmittingFeedback}
                                             />
+                                                <div className="flex justify-end px-1 mb-2">
+                                                    <label htmlFor="teachAi" className="relative inline-flex items-center cursor-pointer group">
+                                                        <input
+                                                            type="checkbox"
+                                                            id="teachAi"
+                                                            checked={teachAi}
+                                                            onChange={(e) => setTeachAi(e.target.checked)}
+                                                            disabled={isSubmittingFeedback}
+                                                            className="sr-only peer"
+                                                        />
+                                                        <div className="w-10 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-accent transition-all duration-300"></div>
+                                                        <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-all duration-300 peer-checked:translate-x-5"></div>
+                                                        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-all text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-md border border-gray-300 shadow">
+                                                            Teach the AI with this feedback
+                                                        </div>
+                                                    </label>
+                                                </div>
                                             <div className="flex justify-center gap-2">
-                                                <Button 
-                                                    variant="outline" 
+                                                <Button
+                                                    variant="outline"
                                                     className="hover:text-white"
-                                                    size="sm" 
+                                                    size="sm"
                                                     onClick={handleCancelFeedback}
                                                     disabled={isSubmittingFeedback}
                                                 >
                                                     Cancel
                                                 </Button>
-                                                <Button 
-                                                    variant="default" 
-                                                    size="sm" 
-                                                    onClick={handleSubmitFeedback}
+                                                <Button
+                                                    variant="default"
+                                                    size="sm"
+                                                    onClick={() => handleSubmitFeedback(teachAi)}
                                                     disabled={isSubmittingFeedback}
                                                 >
                                                     {isSubmittingFeedback ? <Spinner /> : 'Submit Feedback'}
@@ -362,6 +481,43 @@ export default function InteractionHub() {
                     disabled={!inputText.trim() || isStreaming}
                 >
                     {isStreaming ? <Spinner /> : <Send className="h-5 w-5" />}
+                </Button>
+            </div>
+
+            {/* Toggle for Voice Mode */}
+            {/* <div className="flex items-center gap-2 mt-2">
+                <span className="text-sm text-gray-500">Voice Mode</span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={voiceModeEnabled}
+                        onChange={(e) => setVoiceModeEnabled(e.target.checked)}
+                    />
+                    <div className="w-10 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-accent transition-all duration-300"></div>
+                    <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-all duration-300 peer-checked:translate-x-5"></div>
+                </label>
+            </div> */}
+
+            {/* Voice Mode Button */}
+            <div className="flex items-center justify-center gap-2 mt-2 w-20 h-20">
+                <Button
+                    size="icon"
+                    className={`rounded-full flex-shrink-0 self-center ${isListening ? 'bg-accent/10' : ''} w-full h-full ${!isStreaming && 'animate-pulse'}`}
+                    title="Hold to Speak"
+                    disabled={isStreaming}
+                    onMouseDown={startRecording}
+                    onMouseUp={stopRecording}
+                    onTouchStart={startRecording}
+                    onTouchEnd={stopRecording}
+                >
+                    {isStreaming ? 
+                        <Spinner /> : 
+                        (isListening ? 
+                            <Mic className="w-3/4 h-3/4 text-white" /> : 
+                            <MicOff className="w-3/4 h-3/4 text-white animate-pulse" />
+                        )
+                    }
                 </Button>
             </div>
 

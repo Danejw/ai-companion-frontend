@@ -28,10 +28,10 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
 
 
 // --- Submit Feedback ---
-export async function submitFeedback(feedback: string): Promise<void> {
+export async function submitFeedback(feedback: string, toMemory: boolean = false): Promise<void> {
     console.log('--- Submitting Feedback ---', feedback);
     const headers = await getAuthHeaders();
-    const url = `${API_BASE_URL}/orchestration/create-user-feedback`;
+    const url = `${API_BASE_URL}/feedback/create-user-feedback`;
     
     // Send properly formatted JSON matching the FeedbackRequest model
     const response = await fetch(url, {
@@ -43,6 +43,20 @@ export async function submitFeedback(feedback: string): Promise<void> {
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Failed to submit feedback' }));
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`); 
+    }
+
+    // Optionally forward to memory system
+    if (toMemory) {
+        const memoryResponse = await fetch(`${API_BASE_URL}/feedback/store-feedback-memory`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ feedback }) // can expand later with tags/context/etc
+        });
+
+        if (!memoryResponse.ok) {
+            const errorData = await memoryResponse.json().catch(() => ({ message: 'Failed to store feedback in memory' }));
+            throw new Error(errorData.message || `Memory store failed: ${memoryResponse.status}`);
+        }
     }
 }
 

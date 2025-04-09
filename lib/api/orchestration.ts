@@ -26,7 +26,6 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
 // --- Define expected payload for sending a message ---
 interface SendMessagePayload {
     message: string;
-    stream?: boolean;
     summarize?: number;
     extract?: boolean;
 }
@@ -113,31 +112,13 @@ export async function sendTextMessage(payload: SendMessagePayload): Promise<Send
     }
 }
 
-// Define interfaces for callback parameters
-interface ToolCall {
-    name: string;
-    arguments: Record<string, unknown>;
-    id?: string;
-}
-
-interface ToolCallOutput {
-    id?: string;
-    name?: string;
-    output: unknown;
-}
-
-interface AgentUpdate {
-    state: string;
-    message?: string;
-    progress?: number;
-}
-
 export async function sendStreamedTextMessage(
     payload: SendMessagePayload, 
     onToken: (token: string) => void,
-    onToolCall?: (toolCall: ToolCall) => void,
-    onToolCallOutput?: (toolCallOutput: ToolCallOutput) => void,
-    onAgentUpdated?: (agentUpdated: AgentUpdate) => void
+    onToolCall?: (toolCall: any) => void,
+    onToolCallOutput?: (toolCallOutput: any) => void,
+    onAgentUpdated?: (agentUpdated: any) => void,
+    onError?: (error: any) => void
 ): Promise<void> {
     const headers = await getAuthHeaders();
     const url = `${BACKEND_URL}/orchestration/convo-lead`;
@@ -174,7 +155,8 @@ export async function sendStreamedTextMessage(
                 const json = JSON.parse(line);
                 if (json.delta) {
                     onToken(json.delta);
-                } 
+                }
+                
                 else if (json.tool_call_output) {
                     if (onToolCallOutput) {
                         onToolCallOutput(json.tool_call_output);
@@ -189,6 +171,12 @@ export async function sendStreamedTextMessage(
                     console.log("Agent updated:", json.agent_updated);
                     if (onAgentUpdated) {
                         onAgentUpdated(json.agent_updated);
+                    }
+                }
+                else if (json.error) {
+                    console.log("Error received:", json.error); 
+                    if (onError) {
+                        onError(json.error);
                     }
                 }
                 

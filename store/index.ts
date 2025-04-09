@@ -29,6 +29,10 @@ interface UIState {
     // NEW: Functions to update settings
     toggleExtractKnowledge: () => void;
     setSummarizeFrequency: (value: number) => void;
+
+    // Voice settings
+    selectedVoice: string;
+    setSelectedVoice: (voice: string) => void;
 }
 
 export const useUIStore = create<UIState>()(
@@ -46,6 +50,9 @@ export const useUIStore = create<UIState>()(
             // Settings values
             extractKnowledge: true,
             summarizeFrequency: 10,
+
+            // Voice settings
+            selectedVoice: 'alloy',
 
             // Actions
             toggleHistoryOverlay: (isOpen) => set((state) => ({
@@ -82,6 +89,11 @@ export const useUIStore = create<UIState>()(
             setSummarizeFrequency: (value) => set({
                 summarizeFrequency: value
             }),
+
+            // Set voice
+            setSelectedVoice: (voice) => set({
+                selectedVoice: voice
+            }),
         }),
         {
             name: 'ui-settings', // Storage key
@@ -89,6 +101,7 @@ export const useUIStore = create<UIState>()(
                 // Only persist these settings in localStorage
                 extractKnowledge: state.extractKnowledge,
                 summarizeFrequency: state.summarizeFrequency,
+                selectedVoice: state.selectedVoice, // Add voice to persisted settings
             }),
         }
     )
