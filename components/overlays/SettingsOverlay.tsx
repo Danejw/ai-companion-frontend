@@ -129,14 +129,14 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
                                 onValueChange={setSelectedVoice}
                                 className="mt-4"
                             >
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 md:grid-cols-2 sm:grid-cols-1 gap-3">
                                     {voiceOptions.map((voice) => (
                                         <div 
                                             key={voice.id} 
-                                            className={`flex items-start p-3 rounded-md border hover:bg-accent/10 transition-colors cursor-pointer ${selectedVoice === voice.id ? 'border-accent bg-accent/5' : ''}`}
+                                            className={`flex items-center p-3 rounded-md border hover:bg-accent/10 transition-colors cursor-pointer ${selectedVoice === voice.id ? 'border-accent bg-accent/5' : ''}`}
                                             onClick={() => setSelectedVoice(voice.id)}
                                         >
-                                            <div className="mr-2 mt-0.5">
+                                            <div className="mr-2">
                                                 <RadioGroupItem value={voice.id} id={voice.id} />
                                             </div>
                                             <Label htmlFor={voice.id} className="flex-1 cursor-pointer">
