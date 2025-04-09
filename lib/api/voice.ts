@@ -32,6 +32,10 @@ export const startVoiceInteraction = async (recordedBlob: Blob, selectedVoice: s
         throw new Error("Failed to fetch voice response");
     }
 
+    // 👇 Get transcript from response headers
+    const transcript = response.headers.get("X-Transcript");
+    console.log("📝 Transcribed Text:", transcript);
+
     // Convert stream to audio
     const audioBlob = await response.blob();
     console.log("Received audio blob:", audioBlob);
@@ -43,4 +47,6 @@ export const startVoiceInteraction = async (recordedBlob: Blob, selectedVoice: s
     audio.play().catch((err) => {
         console.error("Playback error:", err);
     });
+
+    return { transcript, audioUrl };
 };

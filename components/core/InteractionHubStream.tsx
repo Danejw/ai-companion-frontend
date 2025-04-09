@@ -40,9 +40,9 @@ export default function InteractionHub() {
     const [teachAi, setTeachAi] = useState(false);
     const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
 
-    let mediaRecorder: MediaRecorder | null = null;
-    let streamRef: MediaStream | null = null;
-    let chunks: BlobPart[] = [];
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const streamRef = useRef<MediaStream | null>(null);
+    const chunks = useRef<BlobPart[]>([]);
 
     // --- Setup Mutation ---
     const queryClient = useQueryClient(); // Get query client if needed for invalidation later
@@ -227,29 +227,32 @@ export default function InteractionHub() {
 
         const stopListening = () => {
             if (recognitionRef.current) {
-                console.log("Manually stopping recognition via stopListening().");
                 recognitionRef.current.stop(); // User manually stopped it
                 setIsListening(false);
             }
         };
 
 
-        const startRecording = async () => {
+        const startRecording = async () => {        
             try {
-                // Start audio recording
-                streamRef = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(streamRef, { mimeType: 'audio/webm' });
-                chunks = [];
+                startListening();
+                setIsListening(true);
+
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                streamRef.current = stream;
+
+                const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                mediaRecorderRef.current = mediaRecorder;
+
+                chunks.current = [];
 
                 mediaRecorder.ondataavailable = (e) => {
-                    if (e.data.size > 0) chunks.push(e.data);
+                    if (e.data.size > 0) chunks.current.push(e.data);
                 };
 
                 mediaRecorder.start();
                 
-                // Start speech recognition
-                startListening();
-                toast("Listening…");
+                toast("Listening...");
             } catch (err) {
                 console.error("Could not start recording", err);
                 toast.error("Microphone access denied or not supported.");
@@ -257,22 +260,32 @@ export default function InteractionHub() {
         };
 
         const stopRecording = async () => {
-            // First, stop the speech recognition immediately
             stopListening();
+            setIsListening(false);
+
+            if (!mediaRecorderRef.current || !streamRef.current) return;
             
-            // Process audio for voice response using the existing function
-            handleVoiceModeRequest();
-            
-            // If we have transcribed text, send it immediately
-            // if (inputText.trim()) {
-            //     await handleSendText();
-            // }
-            
-            // Clean up media recorder and stream
-            if (mediaRecorder && streamRef) {
-                mediaRecorder.stop();
-                streamRef.getTracks().forEach(track => track.stop());
-            }
+            mediaRecorderRef.current.stop();
+
+            mediaRecorderRef.current.onstop = async () => {
+                setIsStreaming(true);
+                const blob = new Blob(chunks.current, { type: 'audio/webm' });
+
+                try {
+                    const response = await startVoiceInteraction(blob, selectedVoice);
+                    if (response.transcript) {
+                        setAiResponse(response.transcript);
+                    }
+                } catch (err) {
+                    toast.error("Failed to process voice input.");
+                    console.error("Voice Error:", err);
+                } finally {
+                    setIsStreaming(false);
+                    stopRecording();
+                }
+            };
+
+            streamRef.current?.getTracks().forEach((track) => track.stop());
         };
 
 
@@ -280,7 +293,7 @@ export default function InteractionHub() {
         // handleMicClick toggles start/stop as before
         const handleMicClick = () => {
             if (voiceModeEnabled) {
-                handleVoiceModeRequest();
+                // handleVoiceModeRequest();
                 startListening()
             } else {
                 if (isListening) stopListening();
@@ -288,48 +301,7 @@ export default function InteractionHub() {
             }
         };
 
-        // Handle voice mode request
-        const handleVoiceModeRequest = async () => {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            
-            const mediaRecorder = new MediaRecorder(stream, {
-                mimeType: 'audio/webm' // Explicit, browser-supported format
-            });
-            
-            const chunks: BlobPart[] = [];
-
-            mediaRecorder.ondataavailable = (e) => {
-                if (e.data.size > 0) chunks.push(e.data);
-            };
-
-            mediaRecorder.onstop = async () => {
-                // Create a blob using the browser's native format
-                const blob = new Blob(chunks, { type: 'audio/webm' });
-                
-                // Set streaming true to disable buttons while waiting for response
-                setIsStreaming(true);
-                
-                try {
-                    await startVoiceInteraction(blob, selectedVoice); // Later: make voice user-selectable
-                } catch (err) {
-                    toast.error("Failed to process voice input.");
-                    console.error("Voice Error:", err);
-                } finally {
-                    // Always ensure we re-enable the buttons by setting streaming to false
-                    setIsStreaming(false);
-                }
-            };
-
-            mediaRecorder.start();
-            toast("Listening… Speak now");
-
-            setTimeout(() => {
-                mediaRecorder.stop();
-                stream.getTracks().forEach(track => track.stop());
-            }, 5000); // You can tweak this duration
-        };
-
-
+        
 
         // Handler for toggling feedback mode
         const handleToggleFeedbackMode = () => {
