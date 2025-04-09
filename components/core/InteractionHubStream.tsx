@@ -503,7 +503,7 @@ export default function InteractionHub() {
             <div className="flex items-center justify-center gap-2 mt-2 w-20 h-20">
                 <Button
                     size="icon"
-                    className={`rounded-full flex-shrink-0 self-center ${isListening ? 'bg-accent/10' : ''} w-full h-full ${!isStreaming && 'animate-pulse'}`}
+                    className={`rounded-full flex-shrink-0 self-center ${isListening ? 'bg-accent/10' : ''} w-full h-full ${isStreaming && 'animate-pulse'}`}
                     title="Hold to Speak"
                     disabled={isStreaming}
                     onMouseDown={startRecording}
@@ -514,7 +514,7 @@ export default function InteractionHub() {
                     {isStreaming ? 
                         <Spinner /> : 
                         (isListening ? 
-                            <Mic className="w-3/4 h-3/4 text-white" /> : 
+                            <Mic className="w-3/4 h-3/4 text-white animate-pulse" /> : 
                             <MicOff className="w-3/4 h-3/4 text-white animate-pulse" />
                         )
                     }
