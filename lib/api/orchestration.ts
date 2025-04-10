@@ -40,9 +40,6 @@ interface SendMessagePayload {
     extract?: boolean;
 }
 
-// Voice options type
-type Voice = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' | 'ash' | 'coral' | 'sage';
-
 
 
 
