@@ -443,7 +443,7 @@ export default function InteractionHub() {
             </div>
 
             {/* Input Area - DO NOT CHANGE */}
-            <div className={`flex w-full items-start gap-2 rounded-full border p-2 shadow-sm bg-background transition-opacity ${isStreaming ? 'opacity-70 cursor-not-allowed' : 'opacity-100'}`}>
+            <div className={`flex w-full items-start gap-2 rounded-4xl border p-2 shadow-sm bg-background transition-opacity ${isStreaming ? 'opacity-70 cursor-not-allowed' : 'opacity-100'}`}>
                 <Button
                     variant="ghost"
                     size="icon"
