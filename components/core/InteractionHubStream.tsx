@@ -3,7 +3,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query'; // Import useMutation & useQueryClient
-import { sendStreamedTextMessage } from '@/lib/api/orchestration'; // Adjust path as needed
+import { sendStreamedTextMessage, startVoiceOrchestration } from '@/lib/api/orchestration'; // Adjust path as needed
 import { useUIStore } from '@/store'; // Import the store
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,7 +12,6 @@ import { toast } from 'sonner'; // For error feedback
 import AudioVisualizer from '@/components/Visualizer';
 import { submitFeedback } from '@/lib/api/feedback'; // Import the feedback function
 import ReactMarkdown from "react-markdown";
-import { startVoiceInteraction } from "@/lib/api/voice"; // Adjust if needed
 
 // Simple Spinner component reused
 const Spinner = () => <Loader2 className="h-4 w-4 animate-spin" />;
@@ -271,11 +270,17 @@ export default function InteractionHub() {
                 setIsStreaming(true);
                 const blob = new Blob(chunks.current, { type: 'audio/webm' });
 
+
                 try {
-                    const response = await startVoiceInteraction(blob, selectedVoice);
-                    if (response.transcript) {
-                        setAiResponse(response.transcript);
-                    }
+                    await startVoiceOrchestration(
+                        blob,
+                        selectedVoice,
+                        summarizeFrequency,
+                        extractKnowledge,
+                        (transcript: string) => {
+                            setAiResponse(transcript); // Show the transcript while audio plays
+                        }
+                    );
                 } catch (err) {
                     toast.error("Failed to process voice input.");
                     console.error("Voice Error:", err);

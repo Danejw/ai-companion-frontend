@@ -23,6 +23,16 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
     return headers;
 }
 
+const getAuthToken = async (): Promise<string | null> => {
+    const session = await getSession();
+    const accessToken = session?.user?.accessToken || null;
+    if (!accessToken) {
+        console.warn('No access token found');
+    }
+    return accessToken;
+};
+
+
 // --- Define expected payload for sending a message ---
 interface SendMessagePayload {
     message: string;
@@ -30,7 +40,34 @@ interface SendMessagePayload {
     extract?: boolean;
 }
 
-// --- Define expected response type --- TODO: this will need to be updated to handle the the response from the backend gets more complex
+// Voice options type
+type Voice = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' | 'ash' | 'coral' | 'sage';
+
+// Voice orchestration payload interface
+interface VoiceOrchestrationPayload {
+    audio: Blob;
+    voice: Voice;
+    summarize?: number;
+    extract?: boolean;
+}
+
+
+
+function decodeBase64Utf8(base64: string): string | null {
+    try {
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return new TextDecoder('utf-8').decode(bytes);
+    } catch (error) {
+        console.error("Failed to decode:", error);
+        return null;
+    }
+}
+
+
 type SendMessageResponse = {
     response?: string;
     error?: {
@@ -121,7 +158,7 @@ export async function sendStreamedTextMessage(
     onError?: (error: string) => void
 ): Promise<void> {
     const headers = await getAuthHeaders();
-    const url = `${BACKEND_URL}/orchestration/convo-lead`;
+    const url = `${BACKEND_URL}/orchestration/chat-orchestration`;
 
     const response = await fetch(url, {
         method: "POST",
@@ -199,3 +236,57 @@ export async function sendStreamedTextMessage(
         }
     }
 }
+
+
+
+export async function startVoiceOrchestration(
+    recordedBlob: Blob,
+    voice: string,
+    summarize: number,
+    extract: boolean,
+    onTranscript?: (text: string) => void,
+): Promise<void> {
+    const formData = new FormData();
+    formData.append("audio", recordedBlob, "input.webm");
+
+    const token = await getAuthToken(); // or however you're authenticating
+
+    const response = await fetch(
+        `${BACKEND_URL}/orchestration/voice-orchestration?voice=${voice}&summarize=${summarize}&extract=${extract}`,
+        {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            body: formData,
+        }
+    );
+
+    if (!response.ok || !response.body) {
+        throw new Error("Voice orchestration failed");
+    }
+
+    const transcript = response.headers.get("X-Transcript");
+    if (transcript && onTranscript) {
+        // DECODE THE TRANSCRIPT
+        const decodedTranscript = decodeBase64Utf8(transcript);
+        if (decodedTranscript) {
+            onTranscript(decodedTranscript);
+        }
+    }
+
+    const reader = response.body.getReader();
+    const chunks: Uint8Array[] = [];
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value) chunks.push(value);
+    }
+
+    const audioBlob = new Blob(chunks, { type: "audio/mp3" });
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioUrl);
+    await audio.play();
+}
+

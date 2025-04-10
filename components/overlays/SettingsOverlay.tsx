@@ -129,7 +129,7 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
                                 onValueChange={setSelectedVoice}
                                 className="mt-4"
                             >
-                                <div className="grid grid-cols-1 lg:grid-cols-2 md:grid-cols-2 sm:grid-cols-1 gap-3">
+                                <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3">
                                     {voiceOptions.map((voice) => (
                                         <div 
                                             key={voice.id} 
