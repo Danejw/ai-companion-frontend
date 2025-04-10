@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { getSession } from 'next-auth/react'; // Or your preferred way to get token
+import Markdown from 'react-markdown';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ai-companion-backend-opuh.onrender.com";
 
@@ -10,6 +11,8 @@ export default function VoiceInteraction() {
     const [aiTranscript, setAiTranscript] = useState('');
     const [isRecording, setIsRecording] = useState(false);
     const [connected, setConnected] = useState(false);
+    const [toolcalls, setToolcalls] = useState('');
+    const [toolresults, setToolresults] = useState('');
 
     const connectWebSocket = async () => {
 
@@ -42,6 +45,14 @@ export default function VoiceInteraction() {
                 const audioUrl = URL.createObjectURL(audioBlob);
                 const audio = new Audio(audioUrl);
                 audio.play();
+            }
+
+            if (data.type === 'tool_call_item') {
+                setToolcalls(data.text);
+            }
+
+            if (data.type === 'tool_call_output_item') {
+                setToolresults(data.text);
             }
         };
 
@@ -118,7 +129,10 @@ export default function VoiceInteraction() {
 
             <div className="mt-4">
                 <p><strong>You:</strong> {userTranscript}</p>
-                <p><strong>AI:</strong> {aiTranscript}</p>
+                <strong>AI:</strong> <Markdown>{aiTranscript}</Markdown>
+                <p><strong>Tool Calls:</strong> {toolcalls}</p>
+                <p><strong>Tool Results:</strong> {toolresults}</p>
+
             </div>
         </div>
     );
