@@ -51,7 +51,23 @@ interface VoiceOrchestrationPayload {
     extract?: boolean;
 }
 
-// --- Define expected response type --- TODO: this will need to be updated to handle the the response from the backend gets more complex
+
+
+function decodeBase64Utf8(base64: string): string | null {
+    try {
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return new TextDecoder('utf-8').decode(bytes);
+    } catch (error) {
+        console.error("Failed to decode:", error);
+        return null;
+    }
+}
+
+
 type SendMessageResponse = {
     response?: string;
     error?: {
@@ -235,7 +251,6 @@ export async function startVoiceOrchestration(
 
     const token = await getAuthToken(); // or however you're authenticating
 
-    console.log("--- DEBUG: startVoiceOrchestration - Token:", token);
     const response = await fetch(
         `${BACKEND_URL}/orchestration/voice-orchestration?voice=${voice}&summarize=${summarize}&extract=${extract}`,
         {
@@ -253,7 +268,11 @@ export async function startVoiceOrchestration(
 
     const transcript = response.headers.get("X-Transcript");
     if (transcript && onTranscript) {
-        onTranscript(transcript);
+        // DECODE THE TRANSCRIPT
+        const decodedTranscript = decodeBase64Utf8(transcript);
+        if (decodedTranscript) {
+            onTranscript(decodedTranscript);
+        }
     }
 
     const reader = response.body.getReader();

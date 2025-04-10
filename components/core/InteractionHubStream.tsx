@@ -272,7 +272,6 @@ export default function InteractionHub() {
 
 
                 try {
-                    console.log("--- DEBUG: startVoiceOrchestration - Blob:", blob);
                     await startVoiceOrchestration(
                         blob,
                         selectedVoice,
