@@ -43,13 +43,6 @@ interface SendMessagePayload {
 // Voice options type
 type Voice = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' | 'ash' | 'coral' | 'sage';
 
-// Voice orchestration payload interface
-interface VoiceOrchestrationPayload {
-    audio: Blob;
-    voice: Voice;
-    summarize?: number;
-    extract?: boolean;
-}
 
 
 
