@@ -23,9 +23,30 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
     return headers;
 }
 
+const getAuthToken = async (): Promise<string | null> => {
+    const session = await getSession();
+    const accessToken = session?.user?.accessToken || null;
+    if (!accessToken) {
+        console.warn('No access token found');
+    }
+    return accessToken;
+};
+
+
 // --- Define expected payload for sending a message ---
 interface SendMessagePayload {
     message: string;
+    summarize?: number;
+    extract?: boolean;
+}
+
+// Voice options type
+type Voice = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' | 'ash' | 'coral' | 'sage';
+
+// Voice orchestration payload interface
+interface VoiceOrchestrationPayload {
+    audio: Blob;
+    voice: Voice;
     summarize?: number;
     extract?: boolean;
 }
@@ -121,7 +142,7 @@ export async function sendStreamedTextMessage(
     onError?: (error: string) => void
 ): Promise<void> {
     const headers = await getAuthHeaders();
-    const url = `${BACKEND_URL}/orchestration/convo-lead`;
+    const url = `${BACKEND_URL}/orchestration/chat-orchestration`;
 
     const response = await fetch(url, {
         method: "POST",
@@ -199,3 +220,54 @@ export async function sendStreamedTextMessage(
         }
     }
 }
+
+
+
+export async function startVoiceOrchestration(
+    recordedBlob: Blob,
+    voice: string,
+    summarize: number,
+    extract: boolean,
+    onTranscript?: (text: string) => void,
+): Promise<void> {
+    const formData = new FormData();
+    formData.append("audio", recordedBlob, "input.webm");
+
+    const token = await getAuthToken(); // or however you're authenticating
+
+    console.log("--- DEBUG: startVoiceOrchestration - Token:", token);
+    const response = await fetch(
+        `${BACKEND_URL}/orchestration/voice-orchestration?voice=${voice}&summarize=${summarize}&extract=${extract}`,
+        {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            body: formData,
+        }
+    );
+
+    if (!response.ok || !response.body) {
+        throw new Error("Voice orchestration failed");
+    }
+
+    const transcript = response.headers.get("X-Transcript");
+    if (transcript && onTranscript) {
+        onTranscript(transcript);
+    }
+
+    const reader = response.body.getReader();
+    const chunks: Uint8Array[] = [];
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value) chunks.push(value);
+    }
+
+    const audioBlob = new Blob(chunks, { type: "audio/mp3" });
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioUrl);
+    await audio.play();
+}
+

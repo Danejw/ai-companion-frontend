@@ -3,7 +3,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query'; // Import useMutation & useQueryClient
-import { sendStreamedTextMessage } from '@/lib/api/orchestration'; // Adjust path as needed
+import { sendStreamedTextMessage, startVoiceOrchestration } from '@/lib/api/orchestration'; // Adjust path as needed
 import { useUIStore } from '@/store'; // Import the store
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,7 +12,6 @@ import { toast } from 'sonner'; // For error feedback
 import AudioVisualizer from '@/components/Visualizer';
 import { submitFeedback } from '@/lib/api/feedback'; // Import the feedback function
 import ReactMarkdown from "react-markdown";
-import { startVoiceInteraction } from "@/lib/api/voice"; // Adjust if needed
 
 // Simple Spinner component reused
 const Spinner = () => <Loader2 className="h-4 w-4 animate-spin" />;
@@ -271,11 +270,18 @@ export default function InteractionHub() {
                 setIsStreaming(true);
                 const blob = new Blob(chunks.current, { type: 'audio/webm' });
 
+
                 try {
-                    const response = await startVoiceInteraction(blob, selectedVoice);
-                    if (response.transcript) {
-                        setAiResponse(response.transcript);
-                    }
+                    console.log("--- DEBUG: startVoiceOrchestration - Blob:", blob);
+                    await startVoiceOrchestration(
+                        blob,
+                        selectedVoice,
+                        summarizeFrequency,
+                        extractKnowledge,
+                        (transcript: string) => {
+                            setAiResponse(transcript); // Show the transcript while audio plays
+                        }
+                    );
                 } catch (err) {
                     toast.error("Failed to process voice input.");
                     console.error("Voice Error:", err);
@@ -503,7 +509,7 @@ export default function InteractionHub() {
             <div className="flex items-center justify-center gap-2 mt-2 w-20 h-20">
                 <Button
                     size="icon"
-                    className={`rounded-full flex-shrink-0 self-center ${isListening ? 'bg-accent/10' : ''} w-full h-full ${!isStreaming && 'animate-pulse'}`}
+                    className={`rounded-full flex-shrink-0 self-center ${isListening ? 'bg-accent/10' : ''} w-full h-full ${isStreaming && 'animate-pulse'}`}
                     title="Hold to Speak"
                     disabled={isStreaming}
                     onMouseDown={startRecording}
@@ -514,7 +520,7 @@ export default function InteractionHub() {
                     {isStreaming ? 
                         <Spinner /> : 
                         (isListening ? 
-                            <Mic className="w-3/4 h-3/4 text-white" /> : 
+                            <Mic className="w-3/4 h-3/4 text-white animate-pulse" /> : 
                             <MicOff className="w-3/4 h-3/4 text-white animate-pulse" />
                         )
                     }
