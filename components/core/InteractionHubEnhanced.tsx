@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, MicOff, Power, Send, X } from "lucide-react";
-import { AudioMessage, TextMessage, WebSocketMessage } from "@/types/messages";
+import { AudioMessage, GPSMessage, OrchestrateMessage, TextMessage, TimeMessage, WebSocketMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -93,6 +93,9 @@ export default function InteractionHubVoice() {
 
             ws.current?.send(JSON.stringify(textMessage));
 
+            const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: messageToSend }
+            ws.current?.send(JSON.stringify(orchestrationMessage));
+
         } catch (error) {
             console.error("Streaming error:", error);
             toast.error("Something went wrong while streaming the response.");
@@ -172,7 +175,6 @@ export default function InteractionHubVoice() {
     };
 
 
-
     // Handler for toggling feedback mode
     const handleToggleFeedbackMode = () => {
             setIsFeedbackMode(true);
@@ -208,6 +210,8 @@ export default function InteractionHubVoice() {
 
 
 
+
+    // WebSocket Stuff
     const connectSocket = async () => {
 
         const session = await getSession();
@@ -220,6 +224,8 @@ export default function InteractionHubVoice() {
             ws.current.onopen = () => {
                 console.log("WebSocket connected");
                 setConnected(true);
+                sendGPS();
+                sendTime();
             };
 
             ws.current.onclose = () => {
@@ -230,16 +236,17 @@ export default function InteractionHubVoice() {
 
             ws.current.onmessage = (event) => {
                 const msg = JSON.parse(event.data);
-                
+
+                // Responses
                 if (msg.type === "user_transcript") {
                     setMessages((prev) => [...prev, `🧍 You said: ${msg.text}`]);
                 }
 
-                if (msg.type === "ai_transcript" || msg.type === "ai_response" || msg.type === "message_output_item") {
+                else if (msg.type === "ai_transcript" || msg.type === "ai_response" || msg.type === "message_output_item") {
                     setAiResponse(msg.text)
                 }
 
-                if (msg.type === "audio_response") {
+                else if (msg.type === "audio_response") {
                     (async () => {
                         try {
                             // Convert base64 to blob
@@ -269,25 +276,44 @@ export default function InteractionHubVoice() {
                     })();
                 }
 
-                if (msg.type === "tool_call") {
+                // Info Events
+                else if (msg.type === "tool_call_item") {
                     setToolcalls(msg.text);
                     toast.info(msg.text);
                 }
 
-                if (msg.type === "tool_result") {
+                else if (msg.type === "tool_call_output_item") {
                     setToolresults(msg.text);
                     toast.info(msg.text);
                 }
 
-                if (msg.type === "agent_updated") {
+                else if (msg.type === "agent_updated") {
                     setAgentUpdated(msg.text);
                     toast.info(msg.text);
                 }
 
-                if (msg.type === "error") {
+                else if (msg.typ === "orchestration") {
+                    toast.info(msg.status);
+                }
+                
+                // Actions
+                else if (msg.type === "gps_action") {
+                    toast.info(msg.status);
+                }
+
+                else if (msg.type === "time_action") {
+                    toast.info(msg.status);
+                }
+
+                else if (msg.type === "error") {
                     console.error("Error:", msg.text);
                     toast.error(msg.text);
                 }
+
+                else {
+                    console.log("Unhandled message type:", msg);
+                }
+
             };
         }
     };
@@ -311,8 +337,13 @@ export default function InteractionHubVoice() {
             const reader = new FileReader();
             reader.onloadend = () => {
                 const base64Audio = (reader.result as string).split(",")[1];
+                
                 const audioMsg: AudioMessage = { type: "audio", audio: base64Audio, voice: selectedVoice, extract: extractKnowledge, summarize: summarizeFrequency };
                 ws.current?.send(JSON.stringify(audioMsg));
+
+
+                const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: userTranscript }
+                ws.current?.send(JSON.stringify(orchestrationMessage));
             };
             reader.readAsDataURL(audioBlob);
         };
@@ -331,6 +362,47 @@ export default function InteractionHubVoice() {
         setConnected(false);
         setIsListening(false);
     };
+
+
+    // Send GPS
+    const sendGPS = () => {
+        if (!navigator.geolocation) {
+            console.warn("Geolocation not supported");
+            return;
+        }
+
+
+        navigator.geolocation.getCurrentPosition((position) => {
+            const gpsMsg: GPSMessage = {
+                type: "gps",
+                coords: {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    accuracy: position.coords.accuracy,
+                    altitude: position.coords.altitude,
+                    altitudeAccuracy: position.coords.altitudeAccuracy,
+                    heading: position.coords.heading,
+                    speed: position.coords.speed,
+                },
+                timestamp: position.timestamp,
+            };
+            ws.current?.send(JSON.stringify(gpsMsg));
+        });
+    };
+
+    // Send Time
+    const sendTime = () => {
+        const now = new Date();
+        const timeMsg: TimeMessage = {
+            type: "time",
+            timestamp: now.toLocaleString(),
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        };
+        ws.current?.send(JSON.stringify(timeMsg));
+    };
+
+
+
 
     return (
         <div className="flex flex-col items-center gap-6 w-full max-w-xl px-4">
@@ -435,51 +507,52 @@ export default function InteractionHubVoice() {
 
 
             {/* Input Area - DO NOT CHANGE */}
-            <div className={`flex w-full items-start gap-2 rounded-4xl border p-2 shadow-sm bg-background transition-opacity ${isListening ? 'opacity-70 cursor-not-allowed' : 'opacity-100'}`}>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-full flex-shrink-0 self-center"
-                    onClick={handleMicClick}
-                    title="Use Voice"
-                    disabled={isListening} // Disable mic while streaming response
-                >
-                    {isListening ? <Ear className="h-5 w-5" /> : <EarOff className="h-5 w-5" />}
-                </Button>
+            {connected && (
+                <div className={`flex w-full items-start gap-2 rounded-4xl border p-2 shadow-sm bg-background transition-opacity ${isListening ? 'opacity-70 cursor-not-allowed' : 'opacity-100'}`}>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full flex-shrink-0 self-center"
+                        onClick={handleMicClick}
+                        title="Use Voice"
+                        // disabled={isListening}
+                    >
+                        {isListening ? <Ear className="h-5 w-5" /> : <EarOff className="h-5 w-5" />}
+                    </Button>
 
-                {/* Text Input Area */}
-                <form onSubmit={handleSendText} className="flex-1 flex">
-                    <Textarea
-                        ref={textareaRef}
-                        placeholder="Ask anything..."
-                        className="w-full focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none resize-none min-h-[40px] max-h-[200px] text-md bg-transparent rounded-lg px-4 py-2 border-none scrollbar-hide overflow-y-scroll"
-                        rows={1}
-                        value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault()
-                                handleSendText()
-                            }
-                        }}
-                        disabled={isListening}
-                    />
-                    <button type="submit" disabled={isListening} className="hidden" />
-                </form>
+                    {/* Text Input Area */}
+                    <form onSubmit={handleSendText} className="flex-1 flex">
+                        <Textarea
+                            ref={textareaRef}
+                            placeholder="Ask anything..."
+                            className="w-full focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none resize-none min-h-[40px] max-h-[200px] text-md bg-transparent rounded-lg px-4 py-2 border-none scrollbar-hide overflow-y-scroll"
+                            rows={1}
+                            value={inputText}
+                            onChange={(e) => setInputText(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault()
+                                    handleSendText()
+                                }
+                            }}
+                            disabled={isListening}
+                        />
+                        <button type="submit" disabled={isListening} className="hidden" />
+                    </form>
 
-                {/* Send Button */}
-                <Button
-                    type="button"
-                    size="icon"
-                    className="rounded-full flex-shrink-0 self-center accent"
-                    onClick={handleSendText}
-                    title="Send Message"
-                    // Disable if no text OR if streaming
-                    disabled={!inputText.trim() || isListening}
-                >
-                    {isListening ? <Spinner /> : <Send className="h-5 w-5" />}
-                </Button>
-            </div>
+                    {/* Send Button */}
+                    <Button
+                        type="button"
+                        size="icon"
+                        className="rounded-full flex-shrink-0 self-center accent"
+                        onClick={handleSendText}
+                        title="Send Message"
+                        disabled={!inputText.trim() || isListening}
+                    >
+                        {isListening ? <Spinner /> : <Send className="h-5 w-5" />}
+                    </Button>
+                </div>
+            )}
 
 
             {/* Voice Mode Button */}
@@ -487,10 +560,10 @@ export default function InteractionHubVoice() {
                 <Button
                     size="icon"
                     className={`w-20 h-20 rounded-full flex-shrink-0 self-center transition-colors
-                        ${!connected 
-                            ? 'bg-accent-foreground/60 hover:bg-accent-foreground' 
-                            : isListening 
-                                ? 'bg-accent-foreground' 
+                        ${!connected
+                            ? 'bg-accent-foreground/60 hover:bg-accent-foreground'
+                            : isListening
+                                ? 'bg-accent-foreground'
                                 : 'bg-accent hover:bg-accent/80'
                         }
                         ${isListening && 'animate-pulse'}`}

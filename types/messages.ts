@@ -19,12 +19,19 @@ export type ImageMessage = {
     data: string; // base64
 };
 
-export type GPSMessage = {
-    type: "gps";
+export interface GPSMessage {
+  type: "gps";
+  coords: {
     latitude: number;
     longitude: number;
     accuracy?: number;
-};
+    altitude?: number | null;
+    altitudeAccuracy?: number | null;
+    heading?: number | null;
+    speed?: number | null;
+  };
+  timestamp: number;
+}
 
 export type TimeMessage = {
     type: "time";
