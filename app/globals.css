@@ -1,5 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
 @import "tailwindcss";
 @import "tw-animate-css";
+
+
 
 
 @custom-variant dark (&:is(.dark *));
@@ -57,7 +64,7 @@
   --muted: oklch(0.97 0.001 106.424);
   --muted-foreground: oklch(0.553 0.013 58.071);
   --accent: oklch(0.709 0.159 293.541); /*oklch(0.97 0.001 106.424);*/
-  --accent-foreground: oklch(0.216 0.006 56.043);
+  --accent-foreground: oklch(0.73 0.1752 349.76);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.923 0.003 48.717);
   --input: oklch(0.923 0.003 48.717);
@@ -77,6 +84,10 @@
   --sidebar-ring: oklch(0.709 0.01 56.259);
   --background: oklch(1 0 0);
   --foreground: oklch(0.147 0.004 49.25);
+  --brandpink: oklch(0.73 0.1752 349.76);
+  --brandviolet: oklch(0.68 0.1583 276.93);
+  --brandyellow: oklch(0.86 0.1731 91.94);
+  --brandpurple: oklch(0.71 0.1592 293.54);
 }
 
 .dark {
@@ -123,9 +134,6 @@
 }
 
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 @layer utilities {
   .bg-size-200 {

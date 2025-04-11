@@ -111,6 +111,14 @@ export default function VoiceInteraction() {
 
     return (
         <div className="p-4">
+            <div className="mt-4">
+                <p><strong>You:</strong> {userTranscript}</p>
+                <strong>AI:</strong> <Markdown>{aiTranscript}</Markdown>
+                <p><strong>Tool Calls:</strong> {toolcalls}</p>
+                <p><strong>Tool Results:</strong> {toolresults}</p>
+
+            </div>
+
             <button
                 className={`px-4 py-2 rounded-full text-white ${connected ? 'bg-green-500' : 'bg-gray-500'
                     }`}
@@ -126,14 +134,6 @@ export default function VoiceInteraction() {
             >
                 {isRecording ? 'Stop Recording' : 'Start Recording'}
             </button>
-
-            <div className="mt-4">
-                <p><strong>You:</strong> {userTranscript}</p>
-                <strong>AI:</strong> <Markdown>{aiTranscript}</Markdown>
-                <p><strong>Tool Calls:</strong> {toolcalls}</p>
-                <p><strong>Tool Results:</strong> {toolresults}</p>
-
-            </div>
         </div>
     );
 }
