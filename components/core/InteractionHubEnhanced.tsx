@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react";
-import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, MicOff, Send, X } from "lucide-react";
+import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, MicOff, Power, Send, X } from "lucide-react";
 import { AudioMessage, TextMessage, WebSocketMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
@@ -239,6 +239,36 @@ export default function InteractionHubVoice() {
                     setAiResponse(msg.text)
                 }
 
+                if (msg.type === "audio_response") {
+                    (async () => {
+                        try {
+                            // Convert base64 to blob
+                            const byteCharacters = atob(msg.audio);
+                            const byteNumbers = new Array(byteCharacters.length);
+                            
+                            for (let i = 0; i < byteCharacters.length; i++) {
+                                byteNumbers[i] = byteCharacters.charCodeAt(i);
+                            }
+                            
+                            const byteArray = new Uint8Array(byteNumbers);
+                            const audioBlob = new Blob([byteArray], { type: 'audio/wav' }); // or 'audio/mp3' depending on your format
+                            
+                            // Create and play audio
+                            const audioUrl = URL.createObjectURL(audioBlob);
+                            const audio = new Audio(audioUrl);
+                            
+                            audio.onended = () => {
+                                URL.revokeObjectURL(audioUrl); // Clean up the URL after playing
+                            };
+                            
+                            await audio.play();
+                        } catch (err) {
+                            console.error("Audio playback error:", err);
+                            toast.error("Failed to play audio response");
+                        }
+                    })();
+                }
+
                 if (msg.type === "tool_call") {
                     setToolcalls(msg.text);
                     toast.info(msg.text);
@@ -453,43 +483,45 @@ export default function InteractionHubVoice() {
 
 
             {/* Voice Mode Button */}
-            <div className="flex items-center justify-center gap-2 mt-2 w-20 h-20">
+            <div className="flex flex-col items-center justify-center gap-2 mt-2">
                 <Button
                     size="icon"
-                    className={`rounded-full flex-shrink-0 self-center w-full h-full transition-colors
+                    className={`w-20 h-20 rounded-full flex-shrink-0 self-center transition-colors
                         ${!connected 
-                            ? 'bg-accent/60 hover:bg-accent/80' 
+                            ? 'bg-accent-foreground/60 hover:bg-accent-foreground' 
                             : isListening 
                                 ? 'bg-accent-foreground' 
                                 : 'bg-accent hover:bg-accent/80'
                         }
                         ${isListening && 'animate-pulse'}`}
                     title={connected ? (isListening ? "Release to Stop" : "Hold to Speak") : "Connect"}
-                    onMouseDown={connected ? startRecording : connectSocket}
+                    onClick={!connected ? connectSocket : undefined}
+                    onMouseDown={connected ? startRecording : undefined}
                     onMouseUp={connected ? stopRecording : undefined}
-                    onTouchStart={connected ? startRecording : connectSocket}
+                    onTouchStart={connected ? startRecording : undefined}
                     onTouchEnd={connected ? stopRecording : undefined}
                 >
                     {!connected ? (
-                        <MicOff className="w-3/4 h-3/4 text-white animate-pulse" />
+                        <Power className="w-3/4 h-3/4 text-white" />
                     ) : isListening ? (
                         <Ear className="w-3/4 h-3/4 text-white" />
                     ) : (
-                        <Mic className="w-3/4 h-3/4 text-white animate-pulse" />
+                        <Mic className="w-3/4 h-3/4 text-white" />
                     )}
                 </Button>
+
+                {connected && (
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={disconnectSocket}
+                        className="rounded-full w-8 h-8 bg-accent-foreground/60 hover:bg-accent-foreground transition-colors"
+                    >
+                        <X className="h-4 w-4 text-white" />
+                    </Button>
+                )}
             </div>
 
-            {connected && (
-                <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={disconnectSocket}
-                    className="rounded-full w-8 h-8 bg-accent-foreground/60 hover:bg-accent-foreground transition-colors"
-                >
-                    <X className="h-4 w-4 text-white" />
-                </Button>
-            )}
 
             {/* Disclaimer Area - DO NOT CHANGE */}
             <div className="text-xs text-gray-600/60 text-center px-4 max-w-md mb-2">
