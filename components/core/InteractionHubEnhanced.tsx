@@ -8,10 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { submitFeedback } from "@/lib/api/feedback";
 import AudioVisualizer from "../Visualizer";
-import ReactMarkdown from "react-markdown";
 import { Button } from "../ui/button";
 import { useUIStore } from '@/store'; // Import the store
 import { MarkdownRenderer } from "../MarkdownRenderer";
+
 
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
@@ -481,7 +481,7 @@ export default function InteractionHubVoice() {
                                 <>
                                     {aiResponse ? (
                                         <div className="prose prose-sm text-left w-full max-w-none animate-in fade-in duration-500 ease-out">
-                                            <MarkdownRenderer content={aiResponse} />
+                                            <MarkdownRenderer>{aiResponse}</MarkdownRenderer>
                                         </div>
                                     ) : (
                                         <p className="opacity-90">How are you today?</p>
