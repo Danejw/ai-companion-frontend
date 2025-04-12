@@ -219,7 +219,7 @@ export default function InteractionHubVoice() {
 
 
         if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
-            ws.current = new WebSocket(`${BACKEND_URL.replace("http", "ws")}/ws/main?token=${accessToken}`);
+            ws.current = new WebSocket(`${BACKEND_URL.replace("https", "wss")}/ws/main?token=${accessToken}`);
 
             ws.current.onopen = () => {
                 console.log("WebSocket connected");
