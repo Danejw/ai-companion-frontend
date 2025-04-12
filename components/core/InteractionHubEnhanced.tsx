@@ -11,6 +11,7 @@ import AudioVisualizer from "../Visualizer";
 import ReactMarkdown from "react-markdown";
 import { Button } from "../ui/button";
 import { useUIStore } from '@/store'; // Import the store
+import { MarkdownRenderer } from "../MarkdownRenderer";
 
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
@@ -32,6 +33,8 @@ export default function InteractionHubVoice() {
     const [recording, setRecording] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const [voiceModeEnabled] = useState(false);
+    const [isConnecting, setIsConnecting] = useState(false);
+    const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
 
     // Refs
     const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -95,6 +98,8 @@ export default function InteractionHubVoice() {
 
             const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: messageToSend }
             ws.current?.send(JSON.stringify(orchestrationMessage));
+
+            setIsWaitingForResponse(true);
 
         } catch (error) {
             console.error("Streaming error:", error);
@@ -209,117 +214,158 @@ export default function InteractionHubVoice() {
     };
 
 
-
+    const truncateText = (text: string, maxLength: number = 100) => {
+        if (text.length <= maxLength) return text;
+        return text.slice(0, maxLength) + '...';
+    };
 
     // WebSocket Stuff
     const connectSocket = async () => {
+        try {
+            setIsConnecting(true);
+            toast.info("Connecting to AI...");
 
-        const session = await getSession();
-        const accessToken = session?.user?.accessToken; // Adjust path if necessary
+            const session = await getSession();
+            const accessToken = session?.user?.accessToken;
 
+            if (!accessToken) {
+                toast.error("Authentication required");
+                setIsConnecting(false);
+                return;
+            }
 
-        if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
-            ws.current = new WebSocket(`${BACKEND_URL.replace("https", "wss")}/ws/main?token=${accessToken}`);
+            if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
+                ws.current = new WebSocket(`${BACKEND_URL.replace("https", "wss")}/ws/main?token=${accessToken}`);
 
-            ws.current.onopen = () => {
-                console.log("WebSocket connected");
-                setConnected(true);
-                sendGPS();
-                sendTime();
-            };
+                // Set a connection timeout
+                const connectionTimeout = setTimeout(() => {
+                    if (ws.current?.readyState !== WebSocket.OPEN) {
+                        ws.current?.close();
+                        toast.error("Connection timed out. Please try again.");
+                        setIsConnecting(false);
+                    }
+                }, 10000); // 10 second timeout
 
-            ws.current.onclose = () => {
-                console.log("WebSocket disconnected");
-                setConnected(false);
-                setIsListening(false);
-            };
+                ws.current.onopen = () => {
+                    clearTimeout(connectionTimeout);
+                    console.log("WebSocket connected");
+                    setConnected(true);
+                    setIsConnecting(false);
+                    toast.success("Connected successfully!");
+                    sendGPS();
+                    sendTime();
+                };
 
-            ws.current.onmessage = (event) => {
-                const msg = JSON.parse(event.data);
+                ws.current.onclose = () => {
+                    console.log("WebSocket disconnected");
+                    setConnected(false);
+                    setIsConnecting(false);
+                    setIsListening(false);
+                    toast.info("Disconnected from AI");
+                };
 
-                // Responses
-                if (msg.type === "user_transcript") {
-                    setMessages((prev) => [...prev, `🧍 You said: ${msg.text}`]);
-                }
+                ws.current.onerror = (error) => {
+                    console.error("WebSocket error:", error);
+                    toast.error("Connection error. Please try again.");
+                    setIsConnecting(false);
+                };
 
-                else if (msg.type === "ai_transcript" || msg.type === "ai_response" || msg.type === "message_output_item") {
-                    setAiResponse(msg.text)
-                }
+                ws.current.onmessage = (event) => {
+                    const msg = JSON.parse(event.data);
 
-                else if (msg.type === "audio_response") {
-                    (async () => {
-                        try {
-                            // Convert base64 to blob
-                            const byteCharacters = atob(msg.audio);
-                            const byteNumbers = new Array(byteCharacters.length);
-                            
-                            for (let i = 0; i < byteCharacters.length; i++) {
-                                byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    // Responses
+                    if (msg.type === "user_transcript") {
+                        setMessages((prev) => [...prev, `🧍 You said: ${msg.text}`]);
+                    }
+
+                    else if (msg.type === "ai_transcript" || msg.type === "ai_response" || msg.type === "message_output_item") {                        
+                        setAiResponse(msg.text);
+                        setIsWaitingForResponse(false);
+                        setInputText('');
+                    }
+
+                    else if (msg.type === "audio_response") {
+                        (async () => {
+                            try {
+                                // Convert base64 to blob
+                                const byteCharacters = atob(msg.audio);
+                                const byteNumbers = new Array(byteCharacters.length);
+                                
+                                for (let i = 0; i < byteCharacters.length; i++) {
+                                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                                }
+                                
+                                const byteArray = new Uint8Array(byteNumbers);
+                                const audioBlob = new Blob([byteArray], { type: 'audio/wav' }); // or 'audio/mp3' depending on your format
+                                
+                                // Create and play audio
+                                const audioUrl = URL.createObjectURL(audioBlob);
+                                const audio = new Audio(audioUrl);
+                                
+                                audio.onended = () => {
+                                    URL.revokeObjectURL(audioUrl); // Clean up the URL after playing
+                                };
+
+                                setIsWaitingForResponse(false);
+                                setInputText('');
+                                
+                                await audio.play();
+                            } catch (err) {
+                                console.error("Audio playback error:", err);
+                                toast.error("Failed to play audio response");
                             }
-                            
-                            const byteArray = new Uint8Array(byteNumbers);
-                            const audioBlob = new Blob([byteArray], { type: 'audio/wav' }); // or 'audio/mp3' depending on your format
-                            
-                            // Create and play audio
-                            const audioUrl = URL.createObjectURL(audioBlob);
-                            const audio = new Audio(audioUrl);
-                            
-                            audio.onended = () => {
-                                URL.revokeObjectURL(audioUrl); // Clean up the URL after playing
-                            };
-                            
-                            await audio.play();
-                        } catch (err) {
-                            console.error("Audio playback error:", err);
-                            toast.error("Failed to play audio response");
-                        }
-                    })();
-                }
+                        })();
+                    }
 
-                // Info Events
-                else if (msg.type === "tool_call_item") {
-                    setToolcalls(msg.text);
-                    toast.info(msg.text);
-                }
+                    // Info Events
+                    else if (msg.type === "tool_call_item") {
+                        setToolcalls(msg.text);
+                        toast.info(msg.text);
+                    }
 
-                else if (msg.type === "tool_call_output_item") {
-                    setToolresults(msg.text);
-                    toast.info(msg.text);
-                }
+                    else if (msg.type === "tool_call_output_item") {
+                        setToolresults(msg.text);
+                        toast.info(truncateText(msg.text));
+                    }
 
-                else if (msg.type === "agent_updated") {
-                    setAgentUpdated(msg.text);
-                    toast.info(msg.text);
-                }
+                    else if (msg.type === "agent_updated") {
+                        setAgentUpdated(msg.text);
+                        toast.info(msg.text);
+                    }
 
-                else if (msg.type === "orchestration") {
-                    toast.info(msg.status);
-                }
-                
-                // Actions
-                else if (msg.type === "gps_action") {
-                    toast.info(msg.status);
-                }
+                    else if (msg.type === "orchestration") {
+                        toast.info(msg.status);
+                    }
+                    
+                    // Actions
+                    else if (msg.type === "gps_action") {
+                        toast.info(msg.status);
+                    }
 
-                else if (msg.type === "time_action") {
-                    toast.info(msg.status);
-                }
+                    else if (msg.type === "time_action") {
+                        toast.info(msg.status);
+                    }
 
-                else if (msg.type === "error") {
-                    console.error("Error:", msg.text);
-                    toast.error(msg.text);
-                }
+                    else if (msg.type === "error") {
+                        console.error("Error:", msg.text);
+                        toast.error(msg.text);
+                    }
 
-                else {
-                    console.log("Unhandled message type:", msg);
-                }
+                    else {
+                        console.log("Unhandled message type:", msg);
+                    }
 
-            };
+                };
+            }
+        } catch (error) {
+            console.error("Connection error:", error);
+            toast.error("Failed to connect. Please try again.");
+            setIsConnecting(false);
+            setIsWaitingForResponse(false);
         }
     };
 
     const startRecording = async () => {
-        connectSocket();
         setRecording(true);
         startListening();
         setIsListening(true);
@@ -336,6 +382,10 @@ export default function InteractionHubVoice() {
         recorder.onstop = () => {
             const audioBlob = new Blob(audioChunks.current, { type: "audio/webm" });
             const reader = new FileReader();
+            
+            // Set waiting state when sending audio
+            setIsWaitingForResponse(true);
+            
             reader.onloadend = () => {
                 const base64Audio = (reader.result as string).split(",")[1];
                 
@@ -431,9 +481,7 @@ export default function InteractionHubVoice() {
                                 <>
                                     {aiResponse ? (
                                         <div className="prose prose-sm text-left w-full max-w-none animate-in fade-in duration-500 ease-out">
-                                            <ReactMarkdown>
-                                                {aiResponse}
-                                            </ReactMarkdown>
+                                            <MarkdownRenderer content={aiResponse} />
                                         </div>
                                     ) : (
                                         <p className="opacity-90">How are you today?</p>
@@ -548,10 +596,16 @@ export default function InteractionHubVoice() {
                         size="icon"
                         className="rounded-full flex-shrink-0 self-center accent"
                         onClick={handleSendText}
-                        title="Send Message"
-                        disabled={!inputText.trim() || isListening}
+                        title={isWaitingForResponse ? "Waiting for response..." : "Send Message"}
+                        disabled={!inputText.trim() || isListening || isWaitingForResponse}
                     >
-                        {isListening ? <Spinner /> : <Send className="h-5 w-5" />}
+                        {isWaitingForResponse ? (
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                        ) : isListening ? (
+                            <Spinner />
+                        ) : (
+                            <Send className="h-5 w-5" />
+                        )}
                     </Button>
                 </div>
             )}
@@ -569,14 +623,25 @@ export default function InteractionHubVoice() {
                                 : 'bg-accent hover:bg-accent/80'
                         }
                         ${isListening && 'animate-pulse'}`}
-                    title={connected ? (isListening ? "Release to Stop" : "Hold to Speak") : "Connect"}
+                    title={
+                        isConnecting 
+                            ? "Connecting..." 
+                            : isWaitingForResponse 
+                                ? "Waiting for response..." 
+                                : connected 
+                                    ? (isListening ? "Release to Stop" : "Hold to Speak") 
+                                    : "Connect"
+                    }
                     onClick={!connected ? connectSocket : undefined}
-                    onMouseDown={connected ? startRecording : undefined}
-                    onMouseUp={connected ? stopRecording : undefined}
-                    onTouchStart={connected ? startRecording : undefined}
-                    onTouchEnd={connected ? stopRecording : undefined}
+                    onMouseDown={connected && !isWaitingForResponse ? startRecording : undefined}
+                    onMouseUp={connected && !isWaitingForResponse ? stopRecording : undefined}
+                    onTouchStart={connected && !isWaitingForResponse ? startRecording : undefined}
+                    onTouchEnd={connected && !isWaitingForResponse ? stopRecording : undefined}
+                    disabled={isConnecting || isWaitingForResponse}
                 >
-                    {!connected ? (
+                    {isConnecting || isWaitingForResponse ? (
+                        <Loader2 className="w-3/4 h-3/4 text-white animate-spin" />
+                    ) : !connected ? (
                         <Power className="w-3/4 h-3/4 text-white" />
                     ) : isListening ? (
                         <Ear className="w-3/4 h-3/4 text-white" />
