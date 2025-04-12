@@ -14,10 +14,10 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { fetchMBTI, type MBTIData } from '@/lib/api/mbti';
+import { fetchMBTI, resetMBTI, type MBTIData } from '@/lib/api/mbti';
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { fetchOcean, type Ocean } from '@/lib/api/ocean';
+import { fetchOcean, resetOcean, type Ocean } from '@/lib/api/ocean';
 import InfoOCEANOverlay from '@/components/overlays/InfoOCEANOverlay';
 import InfoMBTIOverlay from '@/components/overlays/InfoMBTIOverlay';
 
@@ -107,6 +107,30 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
         enabled: open,
         staleTime: 15 * 60 * 1000,
         retry: 1,
+    });
+
+    // --- Reset OCEAN Data ---
+    const resetOceanMutation = useMutation({
+        mutationFn: resetOcean,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['oceanData'] });
+            toast.success('OCEAN traits have been reset');
+        },
+        onError: () => {
+            toast.error('Failed to reset OCEAN traits');
+        },
+    });
+
+    // --- Reset MBTI Data ---
+    const resetMBTIMutation = useMutation({
+        mutationFn: resetMBTI,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['mbtiData'] });
+            toast.success('MBTI traits have been reset');
+        },
+        onError: () => {
+            toast.error('Failed to reset MBTI traits');
+        },
     });
 
     // --- Helper to Render a Single Knowledge Card ---
@@ -365,18 +389,50 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                             </ScrollArea>
                             
                             <div className="pt-2 pb-4 bg-background border-t mt-auto">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="w-full text-muted-foreground"
-                                    onClick={() => {
-                                        setIsMbtiInfoOpen(true);
-                                        onOpenChange(false);
-                                    }}
-                                >
-                                    <Info className="h-4 w-4 mr-2" />
-                                    Learn about MBTI
-                                </Button>
+                                <div className="flex flex-col gap-2">
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+                                            >
+                                                <Trash2 className="h-4 w-4 mr-2" />
+                                                Reset MBTI Type
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Reset MBTI Type?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This will reset your MBTI personality type and all related traits. This action cannot be undone.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    className="bg-red-800 text-white hover:bg-red-900/90"
+                                                    onClick={() => resetMBTIMutation.mutate()}
+                                                >
+                                                    Yes, Reset
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-full text-muted-foreground"
+                                        onClick={() => {
+                                            setIsMbtiInfoOpen(true);
+                                            onOpenChange(false);
+                                        }}
+                                    >
+                                        <Info className="h-4 w-4 mr-2" />
+                                        Learn about MBTI
+                                    </Button>
+                                </div>
                             </div>
                         </TabsContent>
 
@@ -416,18 +472,50 @@ export default function KnowledgeOverlay({ open, onOpenChange }: KnowledgeOverla
                             </ScrollArea>
                             
                             <div className="pt-2 pb-4 bg-background border-t mt-auto">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="w-full text-muted-foreground"
-                                    onClick={() => {
-                                        setIsOceanInfoOpen(true);
-                                        onOpenChange(false);
-                                    }}
-                                >
-                                    <Info className="h-4 w-4 mr-2" />
-                                    Learn about OCEAN
-                                </Button>
+                                <div className="flex flex-col gap-2">
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+                                            >
+                                                <Trash2 className="h-4 w-4 mr-2" />
+                                                Reset OCEAN Traits
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Reset OCEAN Traits?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This will reset all your OCEAN personality traits. This action cannot be undone.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    className="bg-red-800 text-white hover:bg-red-900/90"
+                                                    onClick={() => resetOceanMutation.mutate()}
+                                                >
+                                                    Yes, Reset
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-full text-muted-foreground"
+                                        onClick={() => {
+                                            setIsOceanInfoOpen(true);
+                                            onOpenChange(false);
+                                        }}
+                                    >
+                                        <Info className="h-4 w-4 mr-2" />
+                                        Learn about OCEAN
+                                    </Button>
+                                </div>
                             </div>
                         </TabsContent>
                     </Tabs>

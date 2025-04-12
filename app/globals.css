@@ -308,6 +308,13 @@
   /* Firefox */
 }
 
+.toast-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  /* add spacing between toasts */
+}
+
 
 .prose {
   color: #374151;

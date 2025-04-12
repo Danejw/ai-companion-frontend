@@ -115,10 +115,10 @@ export default function InteractionHubVoice() {
 
             // Prevent starting if already listening or sending text
             if (isListening) return;
-
-            setIsListening(true);
+            
             setInputText(''); // Clear any existing input text at the start
-
+            setIsListening(true);
+            
             recognitionRef.current = new SpeechRecognitionAPI();
             const recognition = recognitionRef.current;
 
@@ -292,7 +292,7 @@ export default function InteractionHubVoice() {
                     toast.info(msg.text);
                 }
 
-                else if (msg.typ === "orchestration") {
+                else if (msg.type === "orchestration") {
                     toast.info(msg.status);
                 }
                 
@@ -321,6 +321,7 @@ export default function InteractionHubVoice() {
     const startRecording = async () => {
         connectSocket();
         setRecording(true);
+        startListening();
         setIsListening(true);
 
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -353,6 +354,7 @@ export default function InteractionHubVoice() {
 
     const stopRecording = () => {
         setRecording(false);
+        stopListening();
         setIsListening(false);
         mediaRecorder.current?.stop();
     };

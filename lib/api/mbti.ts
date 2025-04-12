@@ -45,3 +45,17 @@ export async function fetchMBTI(): Promise<MBTIData> {
     return data;
 }
 
+// reset MBTI Type
+export async function resetMBTI(): Promise<boolean> {
+    const headers = await getAuthHeaders();
+    const url = `${API_BASE_URL}/mbti/reset-mbti`;
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { ...headers },
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Failed to reset MBTI type' }));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+    return true;
+}
