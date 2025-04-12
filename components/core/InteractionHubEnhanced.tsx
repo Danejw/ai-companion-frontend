@@ -27,7 +27,13 @@ export default function InteractionHubVoice() {
         selectedVoice
     } = useUIStore();
     
+
+
+    const toggleCreditsOverlay = useUIStore((state) => state.toggleCreditsOverlay);
+    const toggleAuthOverlay = useUIStore((state) => state.toggleAuthOverlay);
     
+
+
     // States
     const [connected, setConnected] = useState(false);
     const [recording, setRecording] = useState(false);
@@ -347,8 +353,28 @@ export default function InteractionHubVoice() {
                     }
 
                     else if (msg.type === "error") {
-                        console.error("Error:", msg.text);
-                        toast.error(msg.text);
+
+                        if (msg.text === 'NO_CREDITS') {
+                            // Open credits overlay immediately
+                            toggleCreditsOverlay(true);
+
+                            toast.info(
+                                <div>
+                                    <h3 className="font-medium">Credits Required</h3>
+                                    <p className="text-sm">You&apos;ve run out of credits. Please purchase more to continue.</p>
+                                </div>,
+                                { duration: 4000 }
+                            );
+                        }
+                        else if (msg.text === 'UNAUTHENTICATED') {
+                            toggleAuthOverlay(true);
+                            toast.error("Please login again");
+                        }
+                        else 
+                        {
+                            console.error("Error:", msg.text);
+                            toast.error(msg.text);
+                        }
                     }
 
                     else {
