@@ -27,8 +27,6 @@ export default function Home() {
 
       {/* InteractionHub */}
       <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2 z-0 w-full max-w-xl px-4">
-        {/* <InteractionHubStream /> */}
-        {/* <WebsocketVoiceInteraction /> */}
         <InteractionHubEnhanced />
       </div>
     </div>

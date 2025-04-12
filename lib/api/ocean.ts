@@ -47,7 +47,7 @@ export async function fetchOcean(): Promise<Ocean> {
 }
 
 // Reset Ocean Data
-export async function resetOcean(): Promise<Boolean> {
+export async function resetOcean(): Promise<boolean> {
     const headers = await getAuthHeaders();
     const url = `${API_BASE_URL}/ocean/reset-ocean`;
     const response = await fetch(url, {

@@ -2,7 +2,6 @@ import { useRef, useState } from 'react';
 import { getSession } from 'next-auth/react'; // Or your preferred way to get token
 import Markdown from 'react-markdown';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ai-companion-backend-opuh.onrender.com";
 
 export default function VoiceInteraction() {
     const ws = useRef<WebSocket | null>(null);

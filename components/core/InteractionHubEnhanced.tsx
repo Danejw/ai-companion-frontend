@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react";
-import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, MicOff, Power, Send, X } from "lucide-react";
-import { AudioMessage, GPSMessage, OrchestrateMessage, TextMessage, TimeMessage, WebSocketMessage } from "@/types/messages";
+import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X } from "lucide-react";
+import { AudioMessage, GPSMessage, OrchestrateMessage, TextMessage, TimeMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -10,7 +10,6 @@ import { submitFeedback } from "@/lib/api/feedback";
 import AudioVisualizer from "../Visualizer";
 import ReactMarkdown from "react-markdown";
 import { Button } from "../ui/button";
-import { JSX } from "react/jsx-runtime";
 import { useUIStore } from '@/store'; // Import the store
 
 
@@ -66,6 +65,7 @@ export default function InteractionHubVoice() {
     const [teachAi, setTeachAi] = useState(false);
 
 
+    console.log(recording, messages, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated);
 
 
     // Add effect to scroll to bottom when content changes
