@@ -2,8 +2,6 @@
 
 import { useEffect } from 'react'
 import Background from '@/components/Background'
-import InteractionHubStream from '@/components/core/InteractionHubStream'
-import WebsocketVoiceInteraction from '@/components/core/WebsocketVoiceInteraction'
 import InteractionHubEnhanced from '@/components/core/InteractionHubEnhanced'
 
 export default function Home() {
