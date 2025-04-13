@@ -1,16 +1,12 @@
 export type TextMessage = {
     type: "text";
     text: string;
-    extract?: boolean;
-    summarize?: number;
 };
 
 export type AudioMessage = {
     type: "audio";
     audio: string; // base64
     voice?: string;
-    extract?: boolean;
-    summarize?: number;
 };
 
 export type ImageMessage = {
@@ -49,6 +45,8 @@ export type UIActionMessage = {
 export type OrchestrateMessage = {
     type: "orchestrate";
     user_input: string;
+    extract?: boolean;
+    summarize?: number;
 };
 
 export type WebSocketMessage =

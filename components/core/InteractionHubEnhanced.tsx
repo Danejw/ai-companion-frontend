@@ -31,7 +31,11 @@ export default function InteractionHubVoice() {
 
     const toggleCreditsOverlay = useUIStore((state) => state.toggleCreditsOverlay);
     const toggleAuthOverlay = useUIStore((state) => state.toggleAuthOverlay);
-    
+    const toggleSettingsOverlay = useUIStore((state) => state.toggleSettingsOverlay);
+    const toggleHistoryOverlay = useUIStore((state) => state.toggleHistoryOverlay);
+    const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
+    const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
+
 
 
     // States
@@ -74,7 +78,7 @@ export default function InteractionHubVoice() {
     const [teachAi, setTeachAi] = useState(false);
 
 
-    console.log(recording, messages, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated);
+    // console.log(recording, messages, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated);
 
 
     // Add effect to scroll to bottom when content changes
@@ -98,11 +102,11 @@ export default function InteractionHubVoice() {
         try {
             setAiResponse('');
 
-            const textMessage: TextMessage = { type: "text", text: messageToSend, extract: extractKnowledge, summarize: summarizeFrequency };
+            const textMessage: TextMessage = { type: "text", text: messageToSend };
 
             ws.current?.send(JSON.stringify(textMessage));
 
-            const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: messageToSend }
+            const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: messageToSend, extract: extractKnowledge, summarize: summarizeFrequency }
             ws.current?.send(JSON.stringify(orchestrationMessage));
 
             setIsWaitingForResponse(true);
@@ -229,7 +233,7 @@ export default function InteractionHubVoice() {
     const connectSocket = async () => {
         try {
             setIsConnecting(true);
-            toast.info("Connecting to AI...");
+            toast.info("Connecting...");
 
             const session = await getSession();
             const accessToken = session?.user?.accessToken;
@@ -267,7 +271,7 @@ export default function InteractionHubVoice() {
                     setConnected(false);
                     setIsConnecting(false);
                     setIsListening(false);
-                    toast.info("Disconnected from AI");
+                    toast.info("Disconnected...");
                 };
 
                 ws.current.onerror = (error) => {
@@ -352,6 +356,47 @@ export default function InteractionHubVoice() {
                         toast.info(msg.status);
                     }
 
+                    else if (msg.type === "text_action") {
+                        toast.info(msg.status);
+                    }
+
+                    else if (msg.type === "ui_action") {
+                        console.log("UI Action:", msg);
+                        console.log("Message:", msg.action);
+
+                        if (msg.action === 'toggle_credits') {
+                            toggleCreditsOverlay(true);
+                            console.log("Credits Overlay Opened");
+                        }
+
+                        else if (msg.action === 'toggle_auth') {
+                            toggleAuthOverlay(true);
+                            console.log("Auth Overlay Opened");
+                        }
+
+                        else if (msg.action === 'toggle_settings') {
+                            toggleSettingsOverlay(true);
+                            console.log("Settings Overlay Opened");
+                        }
+                        
+                        else if (msg.action === 'toggle_conversation_history') {
+                            toggleHistoryOverlay(true);
+                            console.log("Conversation History Overlay Opened");
+                        }
+
+                        else if (msg.action === 'toggle_knowledge_base') {
+                            toggleKnowledgeOverlay(true);
+                            console.log("Knowledge Overlay Opened");
+                        }
+
+                        else if (msg.action === 'toggle_inoformation') {
+                            toggleInfoOverlay(true);
+                            console.log("Information Overlay Opened");
+                        }
+
+                        toast.info(msg.action);
+                    }
+
                     else if (msg.type === "error") {
 
                         if (msg.text === 'NO_CREDITS') {
@@ -415,11 +460,11 @@ export default function InteractionHubVoice() {
             reader.onloadend = () => {
                 const base64Audio = (reader.result as string).split(",")[1];
                 
-                const audioMsg: AudioMessage = { type: "audio", audio: base64Audio, voice: selectedVoice, extract: extractKnowledge, summarize: summarizeFrequency };
+                const audioMsg: AudioMessage = { type: "audio", audio: base64Audio, voice: selectedVoice};
                 ws.current?.send(JSON.stringify(audioMsg));
 
 
-                const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: userTranscript }
+                const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: userTranscript, extract: extractKnowledge, summarize: summarizeFrequency }
                 ws.current?.send(JSON.stringify(orchestrationMessage));
             };
             reader.readAsDataURL(audioBlob);
