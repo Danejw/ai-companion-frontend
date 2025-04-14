@@ -1,18 +1,25 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react";
-import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X } from "lucide-react";
-import { AudioMessage, GPSMessage, OrchestrateMessage, TextMessage, TimeMessage } from "@/types/messages";
+import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera, Video } from "lucide-react";
+import { AudioMessage, GPSMessage, ImageMessage, OrchestrateMessage, TextMessage, TimeMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { submitFeedback } from "@/lib/api/feedback";
 import AudioVisualizer from "../Visualizer";
-import ReactMarkdown from "react-markdown";
 import { Button } from "../ui/button";
 import { useUIStore } from '@/store'; // Import the store
 import { MarkdownRenderer } from "../MarkdownRenderer";
 
+
+// TypeScript to stop complaining about ImageCapture
+declare var ImageCapture: {
+    new(videoTrack: MediaStreamTrack): {
+        takePhoto: () => Promise<Blob>;
+        grabFrame: () => Promise<ImageBitmap>;
+    }
+};
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
@@ -24,10 +31,21 @@ export default function InteractionHubVoice() {
     const {
         extractKnowledge,
         summarizeFrequency,
-        selectedVoice
+        selectedVoice,
+        toggleCaptureOverlay
     } = useUIStore();
     
-    
+
+
+    const toggleCreditsOverlay = useUIStore((state) => state.toggleCreditsOverlay);
+    const toggleAuthOverlay = useUIStore((state) => state.toggleAuthOverlay);
+    const toggleSettingsOverlay = useUIStore((state) => state.toggleSettingsOverlay);
+    const toggleHistoryOverlay = useUIStore((state) => state.toggleHistoryOverlay);
+    const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
+    const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
+
+
+
     // States
     const [connected, setConnected] = useState(false);
     const [recording, setRecording] = useState(false);
@@ -60,6 +78,9 @@ export default function InteractionHubVoice() {
     const [toolcalls, setToolcalls] = useState('');
     const [toolresults, setToolresults] = useState('');
     const [agentUpdated, setAgentUpdated] = useState('');
+    
+    // Add state for captured images
+    const [capturedImages, setCapturedImages] = useState<{id: string, data: string}[]>([]);
 
     // Feedback
     const [isFeedbackMode, setIsFeedbackMode] = useState(false);
@@ -68,7 +89,7 @@ export default function InteractionHubVoice() {
     const [teachAi, setTeachAi] = useState(false);
 
 
-    console.log(recording, messages, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated);
+    // console.log(recording, messages, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated);
 
 
     // Add effect to scroll to bottom when content changes
@@ -78,7 +99,25 @@ export default function InteractionHubVoice() {
         }
     }, [aiResponse]); // Make sure this triggers on every aiResponse change
 
+    // Effect to handle captured images from sessionStorage
+    useEffect(() => {
+        const capturedImage = sessionStorage.getItem('capturedImage');
+        if (capturedImage) {
+            // Add image to the captured images array
+            setCapturedImages(prev => [...prev, {
+                id: Date.now().toString(),
+                data: capturedImage
+            }]);
+            
+            // Clear the storage
+            sessionStorage.removeItem('capturedImage');
+        }
+    }, []);
 
+    // Function to remove an image when clicked
+    const removeImage = (id: string) => {
+        setCapturedImages(prev => prev.filter(img => img.id !== id));
+    };
 
     // Handler for sending text via button click or Enter key
     const handleSendText = async (e?: React.FormEvent | React.MouseEvent) => {
@@ -87,19 +126,38 @@ export default function InteractionHubVoice() {
         }
 
         const messageToSend = inputText.trim();
-        if (!messageToSend) return; // Prevent multiple streams
+        if (!messageToSend && capturedImages.length === 0) return; // Prevent empty messages
     
         try {
             setAiResponse('');
 
-            const textMessage: TextMessage = { type: "text", text: messageToSend, extract: extractKnowledge, summarize: summarizeFrequency };
+            if (messageToSend) {
+                const textMessage: TextMessage = { type: "text", text: messageToSend };
+                ws.current?.send(JSON.stringify(textMessage));
 
-            ws.current?.send(JSON.stringify(textMessage));
+                const orchestrationMessage: OrchestrateMessage = { 
+                    type: "orchestrate", 
+                    user_input: messageToSend, 
+                    extract: extractKnowledge, 
+                    summarize: summarizeFrequency 
+                };
+                ws.current?.send(JSON.stringify(orchestrationMessage));
+            }
 
-            const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: messageToSend }
-            ws.current?.send(JSON.stringify(orchestrationMessage));
+            // Send all captured images
+            for (const img of capturedImages) {
+                const imageMessage : ImageMessage = {
+                    type: "image",
+                    format: "jpeg",
+                    data: img.data,
+                };
+                ws.current?.send(JSON.stringify(imageMessage));
+            }
 
+            // Clear images after sending
+            setCapturedImages([]);
             setIsWaitingForResponse(true);
+            setInputText('');
 
         } catch (error) {
             console.error("Streaming error:", error);
@@ -223,7 +281,7 @@ export default function InteractionHubVoice() {
     const connectSocket = async () => {
         try {
             setIsConnecting(true);
-            toast.info("Connecting to AI...");
+            toast.info("Connecting...");
 
             const session = await getSession();
             const accessToken = session?.user?.accessToken;
@@ -254,6 +312,9 @@ export default function InteractionHubVoice() {
                     toast.success("Connected successfully!");
                     sendGPS();
                     sendTime();
+                    
+                    // Make the WebSocket available globally
+                    (window as any).currentWebSocket = ws.current;
                 };
 
                 ws.current.onclose = () => {
@@ -261,7 +322,7 @@ export default function InteractionHubVoice() {
                     setConnected(false);
                     setIsConnecting(false);
                     setIsListening(false);
-                    toast.info("Disconnected from AI");
+                    toast.info("Disconnected...");
                 };
 
                 ws.current.onerror = (error) => {
@@ -346,9 +407,69 @@ export default function InteractionHubVoice() {
                         toast.info(msg.status);
                     }
 
+                    else if (msg.type === "text_action") {
+                        toast.info(msg.status);
+                    }
+
+                    else if (msg.type === "ui_action") {
+                        console.log("ui action:", msg.action);
+
+                        if (msg.action === 'toggle_credits') {
+                            toggleCreditsOverlay(true);
+                            console.log("Credits Overlay Opened");
+                        }
+
+                        else if (msg.action === 'toggle_auth') {
+                            toggleAuthOverlay(true);
+                            console.log("Auth Overlay Opened");
+                        }
+
+                        else if (msg.action === 'toggle_settings') {
+                            toggleSettingsOverlay(true);
+                            console.log("Settings Overlay Opened");
+                        }
+                        
+                        else if (msg.action === 'toggle_conversation_history') {
+                            toggleHistoryOverlay(true);
+                            console.log("Conversation History Overlay Opened");
+                        }
+
+                        else if (msg.action === 'toggle_knowledge_base') {
+                            toggleKnowledgeOverlay(true);
+                            console.log("Knowledge Overlay Opened");
+                        }
+
+                        else if (msg.action === 'toggle_inoformation') {
+                            toggleInfoOverlay(true);
+                            console.log("Information Overlay Opened");
+                        }
+
+                        toast.info(msg.action);
+                    }
+
                     else if (msg.type === "error") {
-                        console.error("Error:", msg.text);
-                        toast.error(msg.text);
+
+                        if (msg.text === 'NO_CREDITS') {
+                            // Open credits overlay immediately
+                            toggleCreditsOverlay(true);
+
+                            toast.info(
+                                <div>
+                                    <h3 className="font-medium">Credits Required</h3>
+                                    <p className="text-sm">You&apos;ve run out of credits. Please purchase more to continue.</p>
+                                </div>,
+                                { duration: 4000 }
+                            );
+                        }
+                        else if (msg.text === 'UNAUTHENTICATED') {
+                            toggleAuthOverlay(true);
+                            toast.error("Please login again");
+                        }
+                        else 
+                        {
+                            console.error("Error:", msg.text);
+                            toast.error(msg.text);
+                        }
                     }
 
                     else {
@@ -389,11 +510,11 @@ export default function InteractionHubVoice() {
             reader.onloadend = () => {
                 const base64Audio = (reader.result as string).split(",")[1];
                 
-                const audioMsg: AudioMessage = { type: "audio", audio: base64Audio, voice: selectedVoice, extract: extractKnowledge, summarize: summarizeFrequency };
+                const audioMsg: AudioMessage = { type: "audio", audio: base64Audio, voice: selectedVoice};
                 ws.current?.send(JSON.stringify(audioMsg));
 
 
-                const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: userTranscript }
+                const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: userTranscript, extract: extractKnowledge, summarize: summarizeFrequency }
                 ws.current?.send(JSON.stringify(orchestrationMessage));
             };
             reader.readAsDataURL(audioBlob);
@@ -481,7 +602,7 @@ export default function InteractionHubVoice() {
                                 <>
                                     {aiResponse ? (
                                         <div className="prose prose-sm text-left w-full max-w-none animate-in fade-in duration-500 ease-out">
-                                            <MarkdownRenderer content={aiResponse} />
+                                            <MarkdownRenderer>{aiResponse}</MarkdownRenderer>
                                         </div>
                                     ) : (
                                         <p className="opacity-90">How are you today?</p>
@@ -558,64 +679,101 @@ export default function InteractionHubVoice() {
 
             {/* Input Area - DO NOT CHANGE */}
             {connected && (
-                <div className={`flex w-full items-start gap-2 rounded-4xl border p-2 shadow-sm bg-background transition-opacity ${isListening ? 'opacity-70 cursor-not-allowed' : 'opacity-100'}`}>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-full flex-shrink-0 self-center"
-                        onClick={handleMicClick}
-                        title="Use Voice"
-                        // disabled={isListening}
-                    >
-                        {isListening ? <Ear className="h-5 w-5" /> : <EarOff className="h-5 w-5" />}
-                    </Button>
+                <>
+                    <div className={`flex w-full items-start gap-2 rounded-4xl border p-2 shadow-sm bg-background transition-opacity ${isListening ? 'opacity-70 cursor-not-allowed' : 'opacity-100'}`}>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full flex-shrink-0 self-center"
+                            onClick={handleMicClick}
+                            title="Use Voice"
+                            // disabled={isListening}
+                        >
+                            {isListening ? <Ear className="h-5 w-5" /> : <EarOff className="h-5 w-5" />}
+                        </Button>
 
-                    {/* Text Input Area */}
-                    <form onSubmit={handleSendText} className="flex-1 flex">
-                        <Textarea
-                            ref={textareaRef}
-                            placeholder="Ask anything..."
-                            className="w-full focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none resize-none min-h-[40px] max-h-[200px] text-md bg-transparent rounded-lg px-4 py-2 border-none scrollbar-hide overflow-y-scroll"
-                            rows={1}
-                            value={inputText}
-                            onChange={(e) => setInputText(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' && !e.shiftKey) {
-                                    e.preventDefault()
-                                    handleSendText()
-                                }
-                            }}
-                            disabled={isListening}
-                        />
-                        <button type="submit" disabled={isListening} className="hidden" />
-                    </form>
+                        {/* Text Input Area */}
+                        <form onSubmit={handleSendText} className="flex-1 flex">
+                            <Textarea
+                                ref={textareaRef}
+                                placeholder="Ask anything..."
+                                className="w-full focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none resize-none min-h-[40px] max-h-[200px] text-md bg-transparent rounded-lg px-4 py-2 border-none scrollbar-hide overflow-y-scroll"
+                                rows={1}
+                                value={inputText}
+                                onChange={(e) => setInputText(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault()
+                                        handleSendText()
+                                    }
+                                }}
+                                disabled={isListening}
+                            />
+                            <button type="submit" disabled={isListening} className="hidden" />
+                        </form>
 
-                    {/* Send Button */}
-                    <Button
-                        type="button"
-                        size="icon"
-                        className="rounded-full flex-shrink-0 self-center accent"
-                        onClick={handleSendText}
-                        title={isWaitingForResponse ? "Waiting for response..." : "Send Message"}
-                        disabled={!inputText.trim() || isListening || isWaitingForResponse}
-                    >
-                        {isWaitingForResponse ? (
-                            <Loader2 className="h-5 w-5 animate-spin" />
-                        ) : isListening ? (
-                            <Spinner />
-                        ) : (
-                            <Send className="h-5 w-5" />
-                        )}
-                    </Button>
-                </div>
+                        {/* Send Button */}
+                        <Button
+                            type="button"
+                            size="icon"
+                            className="rounded-full flex-shrink-0 self-center accent"
+                            onClick={handleSendText}
+                            title={isWaitingForResponse ? "Waiting for response..." : "Send Message"}
+                            disabled={(!inputText.trim() && capturedImages.length === 0) || isListening || isWaitingForResponse}
+                        >
+                            {isWaitingForResponse ? (
+                                <Loader2 className="h-5 w-5 animate-spin" />
+                            ) : isListening ? (
+                                <Spinner />
+                            ) : (
+                                <Send className="h-5 w-5" />
+                            )}
+                        </Button>
+                    </div>
+
+                    {/* Display captured images */}
+                    {capturedImages.length > 0 && (
+                        <div className="flex flex-wrap gap-2 w-full mt-2">
+                            {capturedImages.map(img => (
+                                <div 
+                                    key={img.id} 
+                                    className="relative w-12 h-12 rounded-md overflow-hidden cursor-pointer border-2 border-accent/50 group"
+                                    onClick={() => removeImage(img.id)}
+                                    title="Click to remove"
+                                >
+                                    <img 
+                                        src={`data:image/jpeg;base64,${img.data}`} 
+                                        alt="Captured" 
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center">
+                                        <X className="text-white opacity-0 group-hover:opacity-100 h-6 w-6" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </>
             )}
 
 
             {/* Voice Mode Button */}
-            <div className="flex flex-col items-center justify-center gap-2 mt-2">
+            <div className="flex items-center justify-center gap-4 mt-2 relative w-full">
+                {/* Camera Button - Left Side */}
+                {connected && (
+                    <Button
+                        onClick={() => toggleCaptureOverlay(true)}
+                        disabled={isConnecting || isWaitingForResponse}
+                        className="rounded-full w-16 h-16 flex items-center justify-center text-white shadow-lg transition bg-accent/80 hover:bg-accent/90"
+                    >
+                        <Camera className="h-8 w-8" />
+                    </Button>
+                )}
+                
+                {/* Mic Button - Center */}
                 <Button
                     size="icon"
-                    className={`w-20 h-20 rounded-full flex-shrink-0 self-center transition-colors
+                    className={`w-20 h-20 rounded-full flex-shrink-0 transition-colors
                         ${!connected
                             ? 'bg-accent-foreground/60 hover:bg-accent-foreground'
                             : isListening
@@ -650,18 +808,31 @@ export default function InteractionHubVoice() {
                     )}
                 </Button>
 
+                {/* TODO: Video Button - Left Side */}
                 {connected && (
                     <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={disconnectSocket}
-                        className="rounded-full w-8 h-8 bg-accent-foreground/60 hover:bg-accent-foreground transition-colors"
+                        onClick={() => toggleCaptureOverlay(true)}
+                        disabled={true}//isConnecting || isWaitingForResponse}
+                        className="rounded-full w-16 h-16 flex items-center justify-center text-white shadow-lg transition bg-accent/80 hover:bg-accent/90"
                     >
-                        <X className="h-4 w-4 text-white" />
+                        <Video className="h-8 w-8" />
                     </Button>
                 )}
-            </div>
 
+
+            </div>
+            
+            {/* Disconnect button - Right Side */}
+            {connected && (
+                <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={disconnectSocket}
+                    className="rounded-full w-8 h-8 bg-accent-foreground/60 hover:bg-accent-foreground transition-colors"
+                >
+                    <X className="h-4 w-4 text-white" />
+                </Button>
+            )}
 
             {/* Disclaimer Area - DO NOT CHANGE */}
             <div className="text-xs text-gray-600/60 text-center px-4 max-w-md mb-2">
