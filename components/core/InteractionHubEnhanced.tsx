@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react";
-import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera } from "lucide-react";
-import { AudioMessage, GPSMessage, OrchestrateMessage, TextMessage, TimeMessage } from "@/types/messages";
+import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera, Video } from "lucide-react";
+import { AudioMessage, GPSMessage, ImageMessage, OrchestrateMessage, TextMessage, TimeMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -13,13 +13,6 @@ import { useUIStore } from '@/store'; // Import the store
 import { MarkdownRenderer } from "../MarkdownRenderer";
 
 
-// TypeScript to stop complaining about ImageCapture
-declare var ImageCapture: {
-    new(videoTrack: MediaStreamTrack): {
-        takePhoto: () => Promise<Blob>;
-        grabFrame: () => Promise<ImageBitmap>;
-    }
-};
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
@@ -78,6 +71,9 @@ export default function InteractionHubVoice() {
     const [toolcalls, setToolcalls] = useState('');
     const [toolresults, setToolresults] = useState('');
     const [agentUpdated, setAgentUpdated] = useState('');
+    
+    // Add state for captured images
+    const [capturedImages, setCapturedImages] = useState<{id: string, data: string}[]>([]);
 
     // Feedback
     const [isFeedbackMode, setIsFeedbackMode] = useState(false);
@@ -96,7 +92,34 @@ export default function InteractionHubVoice() {
         }
     }, [aiResponse]); // Make sure this triggers on every aiResponse change
 
+    // Effect to handle captured images from sessionStorage
+    useEffect(() => {
+        // Listen for custom event from CaptureOverlay
+        const handleImageCaptured = (event: CustomEvent) => {
+            const { imageId, imageData } = event.detail;
+            setCapturedImages(prev => [...prev, {
+                id: imageId,
+                data: imageData
+            }]);
+            
+            // Clear the storage immediately to prevent double adding
+            sessionStorage.removeItem('capturedImage');
+        };
+        
+        window.addEventListener('imageCaptured', handleImageCaptured as EventListener);
+        
+        // We no longer need the interval check or focus/storage events
+        // since we're using custom events for direct communication
+        
+        return () => {
+            window.removeEventListener('imageCaptured', handleImageCaptured as EventListener);
+        };
+    }, []);
 
+    // Function to remove an image when clicked
+    const removeImage = (id: string) => {
+        setCapturedImages(prev => prev.filter(img => img.id !== id));
+    };
 
     // Handler for sending text via button click or Enter key
     const handleSendText = async (e?: React.FormEvent | React.MouseEvent) => {
@@ -105,19 +128,28 @@ export default function InteractionHubVoice() {
         }
 
         const messageToSend = inputText.trim();
-        if (!messageToSend) return; // Prevent multiple streams
+        if (!messageToSend && capturedImages.length === 0) return; // Prevent empty messages
     
         try {
-            setAiResponse('');
+            if (messageToSend) {
+                const textMessage: TextMessage = { type: "text", text: messageToSend };
+                ws.current?.send(JSON.stringify(textMessage));
 
-            const textMessage: TextMessage = { type: "text", text: messageToSend };
+                if (capturedImages.length > 0) {    
+                    // Send all captured images
+                    const imageMessage: ImageMessage = { type: "image", format: "jpeg", data: capturedImages.map(img => img.data), input: messageToSend };
+                    ws.current?.send(JSON.stringify(imageMessage));
+                }
 
-            ws.current?.send(JSON.stringify(textMessage));
+                const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: messageToSend, extract: extractKnowledge, summarize: summarizeFrequency };
+                ws.current?.send(JSON.stringify(orchestrationMessage));
+            }
 
-            const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: messageToSend, extract: extractKnowledge, summarize: summarizeFrequency }
-            ws.current?.send(JSON.stringify(orchestrationMessage));
 
+            // Clear images after sending
+            // setCapturedImages([]);
             setIsWaitingForResponse(true);
+            setInputText('');
 
         } catch (error) {
             console.error("Streaming error:", error);
@@ -272,6 +304,9 @@ export default function InteractionHubVoice() {
                     toast.success("Connected successfully!");
                     sendGPS();
                     sendTime();
+                    
+                    // Make the WebSocket available globally
+                    (window as any).currentWebSocket = ws.current;
                 };
 
                 ws.current.onclose = () => {
@@ -333,6 +368,14 @@ export default function InteractionHubVoice() {
                                 toast.error("Failed to play audio response");
                             }
                         })();
+                    }
+
+                    else if (msg.type === "image_analysis") {
+                        // Do something here
+                    }
+
+                    else if (msg.type === "info") {
+                        toast.info(msg.text);
                     }
 
                     // Info Events
@@ -471,10 +514,17 @@ export default function InteractionHubVoice() {
                 ws.current?.send(JSON.stringify(audioMsg));
 
 
+                if (capturedImages.length > 0) {
+                    // Send all captured images
+                    const imageMessage: ImageMessage = { type: "image", format: "jpeg", data: capturedImages.map(img => img.data) };
+                    ws.current?.send(JSON.stringify(imageMessage));
+                }
+
                 const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: userTranscript, extract: extractKnowledge, summarize: summarizeFrequency }
                 ws.current?.send(JSON.stringify(orchestrationMessage));
             };
             reader.readAsDataURL(audioBlob);
+
         };
 
         recorder.start();
@@ -531,47 +581,6 @@ export default function InteractionHubVoice() {
         ws.current?.send(JSON.stringify(timeMsg));
     };
 
-    const handleImageCapture = async () => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            const track = stream.getVideoTracks()[0];
-
-            // @ts-ignore - until TypeScript supports ImageCapture natively
-            const imageCapture = new ImageCapture(track);
-            const bitmap = await imageCapture.grabFrame();
-
-            const canvas = document.createElement("canvas");
-            canvas.width = bitmap.width;
-            canvas.height = bitmap.height;
-
-            const ctx = canvas.getContext("2d");
-            if (!ctx) throw new Error("Failed to get canvas context");
-            ctx.drawImage(bitmap, 0, 0);
-
-            canvas.toBlob((blob) => {
-                if (!blob) {
-                    console.error("Failed to convert canvas to Blob.");
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    const base64Image = (reader.result as string).split(",")[1];
-                    const imageMessage = {
-                        type: "image",
-                        format: "jpeg",
-                        image: base64Image,
-                    };
-                    ws.current?.send(JSON.stringify(imageMessage));
-                };
-                reader.readAsDataURL(blob);
-            }, "image/jpeg");
-
-            track.stop(); // cleanup
-        } catch (error) {
-            console.error("Failed to capture image:", error);
-        }
-    };
 
 
 
@@ -677,64 +686,103 @@ export default function InteractionHubVoice() {
 
             {/* Input Area - DO NOT CHANGE */}
             {connected && (
-                <div className={`flex w-full items-start gap-2 rounded-4xl border p-2 shadow-sm bg-background transition-opacity ${isListening ? 'opacity-70 cursor-not-allowed' : 'opacity-100'}`}>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-full flex-shrink-0 self-center"
-                        onClick={handleMicClick}
-                        title="Use Voice"
-                        // disabled={isListening}
-                    >
-                        {isListening ? <Ear className="h-5 w-5" /> : <EarOff className="h-5 w-5" />}
-                    </Button>
+                <>
+                    <div className={`flex w-full items-start gap-2 rounded-4xl border p-2 shadow-sm bg-background transition-opacity ${isListening ? 'opacity-70 cursor-not-allowed' : 'opacity-100'}`}>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full flex-shrink-0 self-center"
+                            onClick={handleMicClick}
+                            title="Use Voice"
+                            // disabled={isListening}
+                        >
+                            {isListening ? <Ear className="h-5 w-5" /> : <EarOff className="h-5 w-5" />}
+                        </Button>
 
-                    {/* Text Input Area */}
-                    <form onSubmit={handleSendText} className="flex-1 flex">
-                        <Textarea
-                            ref={textareaRef}
-                            placeholder="Ask anything..."
-                            className="w-full focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none resize-none min-h-[40px] max-h-[200px] text-md bg-transparent rounded-lg px-4 py-2 border-none scrollbar-hide overflow-y-scroll"
-                            rows={1}
-                            value={inputText}
-                            onChange={(e) => setInputText(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' && !e.shiftKey) {
-                                    e.preventDefault()
-                                    handleSendText()
-                                }
-                            }}
-                            disabled={isListening}
-                        />
-                        <button type="submit" disabled={isListening} className="hidden" />
-                    </form>
+                        {/* Text Input Area */}
+                        <form onSubmit={handleSendText} className="flex-1 flex">
+                            <Textarea
+                                ref={textareaRef}
+                                placeholder="Ask anything..."
+                                className="w-full focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none resize-none min-h-[40px] max-h-[200px] text-md bg-transparent rounded-lg px-4 py-2 border-none scrollbar-hide overflow-y-scroll"
+                                rows={1}
+                                value={inputText}
+                                onChange={(e) => setInputText(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault()
+                                        handleSendText()
+                                    }
+                                }}
+                                disabled={isListening}
+                            />
+                            <button type="submit" disabled={isListening} className="hidden" />
+                        </form>
 
-                    {/* Send Button */}
-                    <Button
-                        type="button"
-                        size="icon"
-                        className="rounded-full flex-shrink-0 self-center accent"
-                        onClick={handleSendText}
-                        title={isWaitingForResponse ? "Waiting for response..." : "Send Message"}
-                        disabled={!inputText.trim() || isListening || isWaitingForResponse}
-                    >
-                        {isWaitingForResponse ? (
-                            <Loader2 className="h-5 w-5 animate-spin" />
-                        ) : isListening ? (
-                            <Spinner />
-                        ) : (
-                            <Send className="h-5 w-5" />
-                        )}
-                    </Button>
-                </div>
+                        {/* Send Button */}
+                        <Button
+                            type="button"
+                            size="icon"
+                            className="rounded-full flex-shrink-0 self-center accent"
+                            onClick={handleSendText}
+                            title={isWaitingForResponse ? "Waiting for response..." : "Send Message"}
+                            disabled={(!inputText.trim() && capturedImages.length === 0) || isListening || isWaitingForResponse}
+                        >
+                            {isWaitingForResponse ? (
+                                <Loader2 className="h-5 w-5 animate-spin" />
+                            ) : isListening ? (
+                                <Spinner />
+                            ) : (
+                                <Send className="h-5 w-5" />
+                            )}
+                        </Button>
+                    </div>
+
+
+                    {/* Captured images row - positioned below the buttons */}
+                    {connected && capturedImages.length > 0 && (
+                        <div className="flex justify-start items-center gap-2">
+                            {capturedImages.map(img => (
+                                <div
+                                    key={img.id}
+                                    className="relative w-12 h-12 rounded-full overflow-hidden cursor-pointer group"
+                                    onClick={() => removeImage(img.id)}
+                                    title="Click to remove"
+                                >
+                                    <img
+                                        src={`data:image/jpeg;base64,${img.data}`}
+                                        alt="Captured"
+                                        className="w-full h-full object-cover"
+                                    />
+                                    {/* Red overlay with X icon on hover */}
+                                    <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/60 transition-all duration-200 flex items-center justify-center">
+                                        <X className="text-white opacity-0 group-hover:opacity-100 h-6 w-6 transition-opacity" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </>
             )}
 
 
             {/* Voice Mode Button */}
-            <div className="flex flex-col items-center justify-center gap-2 mt-2">
+            <div className="flex items-center justify-center gap-4 mt-2 relative w-full">
+                {/* Camera Button - Left Side */}
+                {connected && (
+                    <Button
+                        onClick={() => toggleCaptureOverlay(true)}
+                        disabled={isConnecting || isWaitingForResponse}
+                        className="rounded-full w-16 h-16 flex items-center justify-center text-white shadow-lg transition bg-accent/80 hover:bg-accent/90"
+                    >
+                        <Camera className="h-8 w-8" />
+                    </Button>
+                )}
+                
+                {/* Mic Button - Center */}
                 <Button
                     size="icon"
-                    className={`w-20 h-20 rounded-full flex-shrink-0 self-center transition-colors
+                    className={`w-20 h-20 rounded-full flex-shrink-0 transition-colors
                         ${!connected
                             ? 'bg-accent-foreground/60 hover:bg-accent-foreground'
                             : isListening
@@ -769,29 +817,32 @@ export default function InteractionHubVoice() {
                     )}
                 </Button>
 
-                {connected && (
-                    <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={disconnectSocket}
-                        className="rounded-full w-8 h-8 bg-accent-foreground/60 hover:bg-accent-foreground transition-colors"
-                    >
-                        <X className="h-4 w-4 text-white" />
-                    </Button>
-                )}
-
-                {/* Camera Button */}
+                {/* TODO: Video Button - Left Side */}
                 {connected && (
                     <Button
                         onClick={() => toggleCaptureOverlay(true)}
-                        disabled={isConnecting || isWaitingForResponse}
-                        className="rounded-full w-16 h-16 flex items-center justify-center text-white shadow-lg transition bg-brandpink/80 hover:bg-brandpink"
+                        disabled={true}//isConnecting || isWaitingForResponse}
+                        className="rounded-full w-16 h-16 flex items-center justify-center text-white shadow-lg transition bg-accent/80 hover:bg-accent/90"
                     >
-                        <Camera className="h-8 w-8" />
+                        <Video className="h-8 w-8" />
                     </Button>
                 )}
-            </div>
 
+
+            </div>
+            
+            
+            {/* Disconnect button - Right Side */}
+            {connected && (
+                <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={disconnectSocket}
+                    className="rounded-full w-8 h-8 bg-accent-foreground/60 hover:bg-accent-foreground transition-colors"
+                >
+                    <X className="h-4 w-4 text-white" />
+                </Button>
+            )}
 
             {/* Disclaimer Area - DO NOT CHANGE */}
             <div className="text-xs text-gray-600/60 text-center px-4 max-w-md mb-2">

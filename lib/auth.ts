@@ -37,8 +37,6 @@ export const authOptions: NextAuthOptions = {
             async authorize(credentials) {
                 // Validate that credentials exist (NextAuth already does some validation)
 
-                console.log("✅ HI");
-
                 if (!credentials?.email || !credentials?.password) {
                     console.log('Missing email or password in authorize');
                     return null; // Returning null indicates failure

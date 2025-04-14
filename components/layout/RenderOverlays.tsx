@@ -71,7 +71,7 @@ export function RenderOverlays() {
             <KnowledgeOverlay open={isKnowledgeOpen} onOpenChange={toggleKnowledgeOverlay} />
             <InfoOverlay open={isInfoOpen} onOpenChange={toggleInfoOverlay} />
             <CaptureOverlay open={isCaptureOpen} onOpenChange={toggleCaptureOverlay} />
-
+            
             {/* <SettingsOverlay open={isSettingsOpen} onOpenChange={toggleSettingsOverlay} /> */}
         </>
     );
