@@ -19,6 +19,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Knolia",
   description: "The Personalized AI Companion for your life",
+  manifest: "/manifest.json", // 👈 this registers your manifest
+
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
