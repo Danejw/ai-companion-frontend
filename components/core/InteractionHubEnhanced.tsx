@@ -402,20 +402,20 @@ export default function InteractionHubVoice() {
                     }
 
                     else if (msg.type === "orchestration") {
-                        toast.info(msg.status);
+                        toast.info("Orchestration Status: " + msg.status);
                     }
                     
                     // Actions
                     else if (msg.type === "gps_action") {
-                        toast.info(msg.status);
+                        toast.info("GPS Action: " + msg.status);
                     }
 
                     else if (msg.type === "time_action") {
-                        toast.info(msg.status);
+                        toast.info("Time Action: " + msg.status);
                     }
 
                     else if (msg.type === "text_action") {
-                        toast.info(msg.status);
+                        toast.info("Text Action: " + msg.status);
                     }
 
                     else if (msg.type === "ui_action") {
