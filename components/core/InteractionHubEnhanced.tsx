@@ -834,7 +834,7 @@ export default function InteractionHubVoice() {
                 </Button>
 
                 {/* TODO: Video Button - Left Side */}
-                {connected && (
+                {/* {connected && (
                     <Button
                         onClick={() => toggleCaptureOverlay(true)}
                         disabled={true}//isConnecting || isWaitingForResponse}
@@ -842,23 +842,25 @@ export default function InteractionHubVoice() {
                     >
                         <Video className="h-8 w-8" />
                     </Button>
+                )} */}
+
+                {/* Disconnect button - Right Side */}
+                {connected && (
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={disconnectSocket}
+                        className="rounded-full w-8 h-8 bg-accent-foreground/60 hover:bg-accent-foreground transition-colors"
+                    >
+                        <X className="h-4 w-4 text-white" />
+                    </Button>
                 )}
 
 
             </div>
 
             
-            {/* Disconnect button - Right Side */}
-            {connected && (
-                <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={disconnectSocket}
-                    className="rounded-full w-8 h-8 bg-accent-foreground/60 hover:bg-accent-foreground transition-colors"
-                >
-                    <X className="h-4 w-4 text-white" />
-                </Button>
-            )}
+
 
             {/* Disclaimer Area - DO NOT CHANGE */}
             <div className="text-xs text-gray-600/60 text-center px-4 max-w-md mb-2">
