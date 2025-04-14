@@ -402,20 +402,24 @@ export default function InteractionHubVoice() {
                     }
 
                     else if (msg.type === "orchestration") {
-                        toast.info("Orchestration Status: " + msg.status);
+                        toast.info("Status " + msg.status);
                     }
                     
                     // Actions
                     else if (msg.type === "gps_action") {
-                        toast.info("GPS Action: " + msg.status);
+                        // toast.info("GPS Action: " + msg.status);
                     }
 
                     else if (msg.type === "time_action") {
-                        toast.info("Time Action: " + msg.status);
+                        // toast.info("Time Action: " + msg.status);
                     }
 
                     else if (msg.type === "text_action") {
-                        toast.info("Text Action: " + msg.status);
+                        toast.info("Text recieved " + msg.status);
+                    }
+
+                    else if (msg.type === "audio_action") {
+                        toast.info("Audio recieved " + msg.status);
                     }
 
                     else if (msg.type === "ui_action") {
@@ -449,6 +453,11 @@ export default function InteractionHubVoice() {
                         else if (msg.action === 'toggle_inoformation') {
                             toggleInfoOverlay(true);
                             console.log("Information Overlay Opened");
+                        }
+
+                        else if (msg.action === 'toggle_capture') {
+                            toggleCaptureOverlay(true);
+                            console.log("Capture Overlay Opened");
                         }
 
                         toast.info(msg.action);
@@ -780,7 +789,7 @@ export default function InteractionHubVoice() {
                     <Button
                         onClick={() => toggleCaptureOverlay(true)}
                         disabled={isConnecting || isWaitingForResponse}
-                        className="rounded-full w-16 h-16 flex items-center justify-center text-white shadow-lg transition bg-accent/80 hover:bg-accent/90"
+                        className="rounded-full w-12 h-12 flex items-center justify-center text-white shadow-lg transition bg-accent/80 hover:bg-accent/90"
                     >
                         <Camera className="h-8 w-8" />
                     </Button>
@@ -789,7 +798,7 @@ export default function InteractionHubVoice() {
                 {/* Mic Button - Center */}
                 <Button
                     size="icon"
-                    className={`w-20 h-20 rounded-full flex-shrink-0 transition-colors
+                    className={`w-15 h-15 rounded-full flex-shrink-0 transition-colors
                         ${!connected
                             ? 'bg-accent-foreground/60 hover:bg-accent-foreground'
                             : isListening
@@ -829,7 +838,7 @@ export default function InteractionHubVoice() {
                     <Button
                         onClick={() => toggleCaptureOverlay(true)}
                         disabled={true}//isConnecting || isWaitingForResponse}
-                        className="rounded-full w-16 h-16 flex items-center justify-center text-white shadow-lg transition bg-accent/80 hover:bg-accent/90"
+                        className="rounded-full w-12 h-12 flex items-center justify-center text-white shadow-lg transition bg-accent/80 hover:bg-accent/90"
                     >
                         <Video className="h-8 w-8" />
                     </Button>
