@@ -82,10 +82,6 @@ export const useUIStore = create<UIState>()(
                 isInfoOpen: isOpen !== undefined ? isOpen : !state.isInfoOpen 
             })),
 
-            toggleCaptureOverlay: (isOpen) => set((state) => ({
-                isCaptureOpen: isOpen !== undefined ? isOpen : !state.isCaptureOpen
-            })),
-
             // setConfirmationAction: (action) => set({ confirmationAction: action }),
 
             // NEW: Settings toggle functions
