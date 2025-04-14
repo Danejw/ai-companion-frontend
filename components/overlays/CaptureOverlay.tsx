@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { X, Camera, Loader2 } from "lucide-react";
+import { X, Camera, Loader2, Check } from "lucide-react";
 import { toast } from "sonner";
 
 interface Props {
@@ -17,23 +17,35 @@ export default function CaptureOverlay({ open, onOpenChange }: Props) {
     const [stream, setStream] = useState<MediaStream | null>(null);
     const [isCapturing, setIsCapturing] = useState(false);
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
+    const [capturedImagesCount, setCapturedImagesCount] = useState(0);
     const [cameraError, setCameraError] = useState<string | null>(null);
+    
+    // Add state to track if camera is ready
+    const [isCameraReady, setIsCameraReady] = useState(false);
 
     useEffect(() => {
         let mounted = true;
+        let mediaStream: MediaStream | null = null;
         
         if (open) {
-            // Reset state when opening
+            // Only reset the captured image when opening
             setCapturedImage(null);
             setCameraError(null);
             
             const startCamera = async () => {
                 try {
+                    // Don't reinitialize if we already have a stream
+                    if (stream && stream.active) {
+                        console.log("Camera already active");
+                        setIsCameraReady(true);
+                        return;
+                    }
+                    
                     toast.info("Accessing camera...");
                     
-                    // First stop any existing streams
+                    // Stop any existing tracks
                     if (stream) {
-                        stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+                        stream.getTracks().forEach(track => track.stop());
                     }
                     
                     const constraints = { 
@@ -44,28 +56,34 @@ export default function CaptureOverlay({ open, onOpenChange }: Props) {
                         } 
                     };
                     
-                    const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+                    mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
                     
-                    if (!mounted) return;
+                    if (!mounted) {
+                        if (mediaStream) {
+                            mediaStream.getTracks().forEach(track => track.stop());
+                        }
+                        return;
+                    }
                     
                     setStream(mediaStream);
                     
-                    // Make sure videoRef has been initialized
                     if (videoRef.current) {
                         videoRef.current.srcObject = mediaStream;
                         
-                        // Let's be extra certain the video loads
                         videoRef.current.onloadedmetadata = () => {
                             if (videoRef.current) {
-                                videoRef.current.play().catch((err: Error) => {
-                                    console.error("Error playing video:", err);
-                                    setCameraError("Could not play video stream");
-                                    toast.error("Camera error: Could not play video");
-                                });
+                                videoRef.current.play()
+                                    .then(() => {
+                                        setIsCameraReady(true);
+                                        toast.success("Camera ready");
+                                    })
+                                    .catch(err => {
+                                        console.error("Error playing video:", err);
+                                        setCameraError("Could not play video stream");
+                                        toast.error("Camera error: Could not play video");
+                                    });
                             }
                         };
-                        
-                        toast.success("Camera ready");
                     } else {
                         throw new Error("Video element not found");
                     }
@@ -83,18 +101,20 @@ export default function CaptureOverlay({ open, onOpenChange }: Props) {
         
         return () => {
             mounted = false;
-            if (stream) {
-                stream.getTracks().forEach((track: MediaStreamTrack) => {
-                    track.stop();
-                });
-                setStream(null);
+            
+            // Only stop camera when closing the overlay completely
+            if (!open) {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    setStream(null);
+                }
+                setIsCameraReady(false);
             }
-            setCapturedImage(null);
         };
-    }, [open]);
+    }, [open, stream]);
 
     const handleTakePhoto = async () => {
-        if (!videoRef.current || !stream) {
+        if (!videoRef.current || !stream || !stream.active) {
             toast.error("Camera not ready");
             return;
         }
@@ -143,28 +163,8 @@ export default function CaptureOverlay({ open, onOpenChange }: Props) {
                             return;
                         }
                         
-                        // Store the image data in sessionStorage
+                        // Store the image data in sessionStorage - we'll keep it ready
                         sessionStorage.setItem('capturedImage', base64Image);
-                        
-                        // Dispatch a custom event that InteractionHub can listen for
-                        window.dispatchEvent(new CustomEvent('imageCaptured', {
-                            detail: { imageId: Date.now().toString(), imageData: base64Image }
-                        }));
-                        
-                        // Show success toast with image preview
-                        toast.success(
-                            <div className="flex items-center gap-2">
-                                <div className="flex-shrink-0 w-12 h-12 rounded overflow-hidden">
-                                    <img 
-                                        src={imageDataUrl} 
-                                        alt="Captured" 
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                                <span>Photo captured!</span>
-                            </div>,
-                            { duration: 3000 }
-                        );
                     };
                     
                     reader.onerror = () => {
@@ -184,88 +184,149 @@ export default function CaptureOverlay({ open, onOpenChange }: Props) {
         }
     };
 
+    // Function to accept the current image and continue
+    const handleAcceptImage = () => {
+        const base64Image = sessionStorage.getItem('capturedImage');
+        if (!base64Image) {
+            toast.error("No image data found");
+            setCapturedImage(null);
+            return;
+        }
+
+        // Dispatch a custom event that InteractionHub can listen for
+        window.dispatchEvent(new CustomEvent('imageCaptured', {
+            detail: { imageId: Date.now().toString(), imageData: base64Image }
+        }));
+        
+        // Show success toast with image preview
+        toast.success(
+            <div className="flex items-center gap-2">
+                <div className="flex-shrink-0 w-12 h-12 rounded overflow-hidden">
+                    <img 
+                        src={`data:image/jpeg;base64,${base64Image}`} 
+                        alt="Captured" 
+                        className="w-full h-full object-cover"
+                    />
+                </div>
+                <span>Photo added!</span>
+            </div>,
+            { duration: 2000 }
+        );
+        
+        // Important: Clear the captured image first, then ensure video element is ok
+        setCapturedImage(null);
+        
+        // Increment the counter of captured images
+        setCapturedImagesCount(prev => prev + 1);
+        
+        // Clear the storage
+        sessionStorage.removeItem('capturedImage');
+    };
+    
+    // Function to reset the camera view (cancel the current capture)
+    const handleResetCamera = () => {
+        setCapturedImage(null);
+        
+        // No need to call play() here as the video element should still be playing
+        // Just switch back to the video view
+    };
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="bg-transparent w-[90vw] h-[90vh] max-w-[90vw] max-h-[90vh] p-4 rounded-xl overflow-hidden fixed top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2">
                 <DialogHeader className="pb-2">
-                    <DialogTitle className="text-lg sm:text-xl flex items-center justify-center gap-2 pr-8 pt-2">
-                        <Camera className="h-5 w-5" />
-                        Take a Photo
+                    <DialogTitle className="text-lg sm:text-xl flex items-center justify-center gap-2 pt-2">
+                        <Camera className="h-5 w-5 text-primary-foreground" />
+                        Take Photos
+                        {capturedImagesCount > 0 && (
+                            <span className="bg-accent text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                                {capturedImagesCount}
+                            </span>
+                        )}
                     </DialogTitle>
-                    <DialogDescription className="text-sm text-center text-white pt-1">
-                        {cameraError ? 
-                            `Camera error: ${cameraError}` : 
-                            "Frame it up and click capture when ready."}
+                    <DialogDescription className="text-sm pt-1 text-white">
+                        {cameraError 
+                            ? `Camera error: ${cameraError}` 
+                            : capturedImagesCount > 0
+                                ? "Keep taking photos or close to finish"
+                                : "Frame it up and click capture when ready"}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="flex flex-col flex-1 h-[calc(90vh-160px)]">
                     <div className="relative flex-1 rounded-xl overflow-hidden shadow-lg bg-black flex items-center justify-center">
-                        {capturedImage ? (
+                        {/* Video element is ALWAYS in the DOM but hidden/shown with CSS */}
+                        <video
+                            ref={videoRef}
+                            autoPlay
+                            playsInline
+                            muted
+                            className={`w-full h-full object-contain ${capturedImage ? 'hidden' : 'block'}`}
+                        />
+                        
+                        {capturedImage && (
                             <img 
                                 src={capturedImage} 
                                 alt="Captured" 
                                 className="w-full h-full object-contain"
                             />
-                        ) : cameraError ? (
-                            <div className="text-white text-center p-4">
-                                <p className="mb-2">😕 Camera error</p>
-                                <p className="text-sm opacity-80">{cameraError}</p>
-                                <Button 
-                                    variant="outline" 
-                                    className="mt-4" 
-                                    onClick={() => onOpenChange(false)}
-                                >
-                                    Close
-                                </Button>
+                        )}
+                        
+                        {cameraError && (
+                            <div className="absolute inset-0 flex items-center justify-center text-white text-center p-4">
+                                <div>
+                                    <p className="mb-2">😕 Camera error</p>
+                                    <p className="text-sm opacity-80">{cameraError}</p>
+                                    <Button 
+                                        variant="outline" 
+                                        className="mt-4" 
+                                        onClick={() => onOpenChange(false)}
+                                    >
+                                        Close
+                                    </Button>
+                                </div>
                             </div>
-                        ) : (
-                            <video
-                                ref={videoRef}
-                                autoPlay
-                                playsInline
-                                muted
-                                className="w-full h-full object-contain"
-                            />
                         )}
                     </div>
 
                     <div className="flex justify-center gap-3 py-4">
-                        {cameraError ? (
-                            <Button 
-                                variant="destructive"
-                                onClick={() => onOpenChange(false)}
-                                className="rounded-full px-6"
-                            >
-                                Close
-                            </Button>
-                        ) : capturedImage ? (
+                        {capturedImage ? (
                             <div className="flex gap-3">
                                 <Button
-                                    onClick={() => setCapturedImage(null)}
-                                    className="rounded-full w-16 h-16 flex items-center justify-center bg-destructive hover:bg-destructive/90"
+                                    onClick={handleResetCamera}
+                                    className="rounded-full w-16 h-16 flex items-center justify-center bg-accent-foreground hover:bg-accent-foreground/90"
                                 >
                                     <X className="h-8 w-8" />
                                 </Button>
                                 <Button
-                                    onClick={() => onOpenChange(false)}
+                                    onClick={handleAcceptImage}
                                     className="rounded-full w-16 h-16 flex items-center justify-center bg-primary hover:bg-primary/90"
                                 >
-                                    <span className="text-xl">✓</span>
+                                    <Check className="h-8 w-8" />
                                 </Button>
                             </div>
                         ) : (
-                            <Button
-                                onClick={handleTakePhoto}
-                                disabled={isCapturing || !stream}
-                                className="rounded-full w-16 h-16 flex items-center justify-center text-white shadow-lg transition bg-accent hover:bg-accent/90"
-                            >
-                                {isCapturing ? (
-                                    <Loader2 className="h-8 w-8 animate-spin" />
-                                ) : (
-                                    <Camera className="h-8 w-8" />
+                            <div className="flex gap-3">
+                                {capturedImagesCount > 0 && (
+                                    <Button
+                                        onClick={() => onOpenChange(false)}
+                                        className="rounded-full w-16 h-16 flex items-center justify-center bg-primary hover:bg-primary/90"
+                                    >
+                                        <span className="text-xl">✓</span>
+                                    </Button>
                                 )}
-                            </Button>
+                                <Button
+                                    onClick={handleTakePhoto}
+                                    disabled={isCapturing || !isCameraReady || !stream || !stream.active}
+                                    className="rounded-full w-16 h-16 flex items-center justify-center text-white shadow-lg transition bg-accent hover:bg-accent/90"
+                                >
+                                    {isCapturing ? (
+                                        <Loader2 className="h-8 w-8 animate-spin" />
+                                    ) : (
+                                        <Camera className="h-8 w-8" />
+                                    )}
+                                </Button>
+                            </div>
                         )}
                     </div>
                 </div>

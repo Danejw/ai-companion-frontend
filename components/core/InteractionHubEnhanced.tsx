@@ -167,7 +167,7 @@ export default function InteractionHubVoice() {
 
 
     // Voice Recognition
-    const startListening = () => {
+        const startListening = () => {
             const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognitionAPI) {
                 toast.error("Speech Recognition not supported");
@@ -176,10 +176,10 @@ export default function InteractionHubVoice() {
 
             // Prevent starting if already listening or sending text
             if (isListening) return;
-            
+
             setInputText(''); // Clear any existing input text at the start
             setIsListening(true);
-            
+
             recognitionRef.current = new SpeechRecognitionAPI();
             const recognition = recognitionRef.current;
 
@@ -213,19 +213,19 @@ export default function InteractionHubVoice() {
                 if (recognitionRef.current) { recognitionRef.current = null; }
                 setIsListening(false);
             };
-    };
+        };
 
-    const stopListening = () => {
+        const stopListening = () => {
             if (recognitionRef.current) {
                 recognitionRef.current.stop(); // User manually stopped it
                 setIsListening(false);
             }
-    };
+        };
 
 
 
-    // handleMicClick toggles start/stop as before
-    const handleMicClick = () => {
+        // handleMicClick toggles start/stop as before
+        const handleMicClick = () => {
             if (voiceModeEnabled) {
                 // handleVoiceModeRequest();
                 startListening()
@@ -233,17 +233,17 @@ export default function InteractionHubVoice() {
                 if (isListening) stopListening();
                 else startListening();
             }
-    };
+        };
 
 
-    // Handler for toggling feedback mode
-    const handleToggleFeedbackMode = () => {
+        // Handler for toggling feedback mode
+        const handleToggleFeedbackMode = () => {
             setIsFeedbackMode(true);
             setFeedbackText('');
-    };
+        };
 
-    // Handler for submitting feedback
-    const handleSubmitFeedback = async (teachAi: boolean) => {
+        // Handler for submitting feedback
+        const handleSubmitFeedback = async (teachAi: boolean) => {
             if (!feedbackText.trim()) {
                 toast.error("Please enter feedback before submitting.");
                 return;
@@ -261,13 +261,13 @@ export default function InteractionHubVoice() {
             } finally {
                 setIsSubmittingFeedback(false);
             }
-    };
+        };
 
-    // Handler for canceling feedback
-    const handleCancelFeedback = () => {
+        // Handler for canceling feedback
+        const handleCancelFeedback = () => {
             setIsFeedbackMode(false);
             setFeedbackText('');
-    };
+        };
 
 
     const truncateText = (text: string, maxLength: number = 100) => {
@@ -281,7 +281,7 @@ export default function InteractionHubVoice() {
             setIsConnecting(true);
             toast.info("Connecting...");
 
-            const session = await getSession();
+        const session = await getSession();
             const accessToken = session?.user?.accessToken;
 
             if (!accessToken) {
@@ -290,7 +290,7 @@ export default function InteractionHubVoice() {
                 return;
             }
 
-            if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
+        if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
                 ws.current = new WebSocket(`${BACKEND_URL.replace("https", "wss")}/ws/main?token=${accessToken}`);
 
                 // Set a connection timeout
@@ -302,10 +302,10 @@ export default function InteractionHubVoice() {
                     }
                 }, 10000); // 10 second timeout
 
-                ws.current.onopen = () => {
+            ws.current.onopen = () => {
                     clearTimeout(connectionTimeout);
-                    console.log("WebSocket connected");
-                    setConnected(true);
+                console.log("WebSocket connected");
+                setConnected(true);
                     setIsConnecting(false);
                     toast.success("Connected successfully!");
                     sendGPS();
@@ -314,11 +314,11 @@ export default function InteractionHubVoice() {
 
                     // Make the WebSocket available globally
                     window.currentWebSocket = ws.current as WebSocket;
-                };
+            };
 
-                ws.current.onclose = () => {
-                    console.log("WebSocket disconnected");
-                    setConnected(false);
+            ws.current.onclose = () => {
+                console.log("WebSocket disconnected");
+                setConnected(false);
                     setIsConnecting(false);
                     setIsListening(false);
                     toast.info("Disconnected...");
@@ -328,15 +328,15 @@ export default function InteractionHubVoice() {
                     console.error("WebSocket error:", error);
                     toast.error("Connection error. Please try again.");
                     setIsConnecting(false);
-                };
+            };
 
-                ws.current.onmessage = (event) => {
-                    const msg = JSON.parse(event.data);
-
+            ws.current.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                
                     // Responses
-                    if (msg.type === "user_transcript") {
-                        setMessages((prev) => [...prev, `🧍 You said: ${msg.text}`]);
-                    }
+                if (msg.type === "user_transcript") {
+                    setMessages((prev) => [...prev, `🧍 You said: ${msg.text}`]);
+                }
 
                     else if (msg.type === "ai_transcript" || msg.type === "ai_response" || msg.type === "message_output_item") {                        
                         setAiResponse(msg.text);
@@ -387,7 +387,7 @@ export default function InteractionHubVoice() {
 
                     // Info Events
                     else if (msg.type === "tool_call_item") {
-                        setToolcalls(msg.text);
+                    setToolcalls(msg.text);
                         toast.info(msg.text);
                     }
 
@@ -474,7 +474,7 @@ export default function InteractionHubVoice() {
                         }
                         else 
                         {
-                            console.error("Error:", msg.text);
+                    console.error("Error:", msg.text);
                             toast.error(msg.text);
                         }
                     }
@@ -706,25 +706,25 @@ export default function InteractionHubVoice() {
                             {isListening ? <Ear className="h-5 w-5" /> : <EarOff className="h-5 w-5" />}
                         </Button>
 
-                        {/* Text Input Area */}
+            {/* Text Input Area */}
                         <form onSubmit={handleSendText} className="flex-1 flex">
-                            <Textarea
-                                ref={textareaRef}
-                                placeholder="Ask anything..."
+                <Textarea
+                    ref={textareaRef}
+                    placeholder="Ask anything..."
                                 className="w-full focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none resize-none min-h-[40px] max-h-[200px] text-md bg-transparent rounded-lg px-4 py-2 border-none scrollbar-hide overflow-y-scroll"
-                                rows={1}
-                                value={inputText}
-                                onChange={(e) => setInputText(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && !e.shiftKey) {
+                    rows={1}
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
                                         e.preventDefault()
                                         handleSendText()
-                                    }
-                                }}
+                        }
+                    }}
                                 disabled={isListening}
-                            />
+                />
                             <button type="submit" disabled={isListening} className="hidden" />
-                        </form>
+            </form>
 
                         {/* Send Button */}
                         <Button
@@ -837,7 +837,7 @@ export default function InteractionHubVoice() {
 
 
             </div>
-            
+
             
             {/* Disconnect button - Right Side */}
             {connected && (
