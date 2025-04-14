@@ -19,6 +19,12 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:800
 // Simple Spinner component reused
 const Spinner = () => <Loader2 className="h-4 w-4 animate-spin" />;
 
+declare global {
+    interface Window {
+        currentWebSocket?: WebSocket;
+    }
+}
+
 
 export default function InteractionHubVoice() {
     const {
@@ -82,7 +88,7 @@ export default function InteractionHubVoice() {
     const [teachAi, setTeachAi] = useState(false);
 
 
-    // console.log(recording, messages, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated);
+    console.log(recording, messages, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated);
 
 
     // Add effect to scroll to bottom when content changes
@@ -305,8 +311,9 @@ export default function InteractionHubVoice() {
                     sendGPS();
                     sendTime();
                     
+
                     // Make the WebSocket available globally
-                    (window as any).currentWebSocket = ws.current;
+                    window.currentWebSocket = ws.current as WebSocket;
                 };
 
                 ws.current.onclose = () => {

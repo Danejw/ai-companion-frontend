@@ -1,0 +1,9 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+DO NOT USE ANY TYPES because they will no pass the linting process
