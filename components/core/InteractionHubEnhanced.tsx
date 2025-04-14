@@ -13,13 +13,6 @@ import { useUIStore } from '@/store'; // Import the store
 import { MarkdownRenderer } from "../MarkdownRenderer";
 
 
-// TypeScript to stop complaining about ImageCapture
-declare var ImageCapture: {
-    new(videoTrack: MediaStreamTrack): {
-        takePhoto: () => Promise<Blob>;
-        grabFrame: () => Promise<ImageBitmap>;
-    }
-};
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
@@ -138,33 +131,23 @@ export default function InteractionHubVoice() {
         if (!messageToSend && capturedImages.length === 0) return; // Prevent empty messages
     
         try {
-            setAiResponse('');
-
             if (messageToSend) {
                 const textMessage: TextMessage = { type: "text", text: messageToSend };
                 ws.current?.send(JSON.stringify(textMessage));
 
-                const orchestrationMessage: OrchestrateMessage = { 
-                    type: "orchestrate", 
-                    user_input: messageToSend, 
-                    extract: extractKnowledge, 
-                    summarize: summarizeFrequency 
-                };
+                if (capturedImages.length > 0) {    
+                    // Send all captured images
+                    const imageMessage: ImageMessage = { type: "image", format: "jpeg", data: capturedImages.map(img => img.data), input: messageToSend };
+                    ws.current?.send(JSON.stringify(imageMessage));
+                }
+
+                const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: messageToSend, extract: extractKnowledge, summarize: summarizeFrequency };
                 ws.current?.send(JSON.stringify(orchestrationMessage));
             }
 
-            // Send all captured images
-            for (const img of capturedImages) {
-                const imageMessage : ImageMessage = {
-                    type: "image",
-                    format: "jpeg",
-                    data: img.data,
-                };
-                ws.current?.send(JSON.stringify(imageMessage));
-            }
 
             // Clear images after sending
-            setCapturedImages([]);
+            // setCapturedImages([]);
             setIsWaitingForResponse(true);
             setInputText('');
 
@@ -387,6 +370,14 @@ export default function InteractionHubVoice() {
                         })();
                     }
 
+                    else if (msg.type === "image_analysis") {
+                        // Do something here
+                    }
+
+                    else if (msg.type === "info") {
+                        toast.info(msg.text);
+                    }
+
                     // Info Events
                     else if (msg.type === "tool_call_item") {
                         setToolcalls(msg.text);
@@ -523,10 +514,17 @@ export default function InteractionHubVoice() {
                 ws.current?.send(JSON.stringify(audioMsg));
 
 
+                if (capturedImages.length > 0) {
+                    // Send all captured images
+                    const imageMessage: ImageMessage = { type: "image", format: "jpeg", data: capturedImages.map(img => img.data) };
+                    ws.current?.send(JSON.stringify(imageMessage));
+                }
+
                 const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: userTranscript, extract: extractKnowledge, summarize: summarizeFrequency }
                 ws.current?.send(JSON.stringify(orchestrationMessage));
             };
             reader.readAsDataURL(audioBlob);
+
         };
 
         recorder.start();
@@ -740,29 +738,30 @@ export default function InteractionHubVoice() {
                         </Button>
                     </div>
 
-                    {/* Display captured images */}
-                    {capturedImages.length > 0 && (
-                        <div className="flex flex-wrap gap-2 w-full mt-2">
+
+                    {/* Captured images row - positioned below the buttons */}
+                    {connected && capturedImages.length > 0 && (
+                        <div className="flex justify-start items-center gap-2">
                             {capturedImages.map(img => (
-                                <div 
-                                    key={img.id} 
-                                    className="relative w-12 h-12 rounded-md overflow-hidden cursor-pointer border-2 border-accent/50 group"
+                                <div
+                                    key={img.id}
+                                    className="relative w-12 h-12 rounded-full overflow-hidden cursor-pointer group"
                                     onClick={() => removeImage(img.id)}
                                     title="Click to remove"
                                 >
-                                    <img 
-                                        src={`data:image/jpeg;base64,${img.data}`} 
-                                        alt="Captured" 
+                                    <img
+                                        src={`data:image/jpeg;base64,${img.data}`}
+                                        alt="Captured"
                                         className="w-full h-full object-cover"
                                     />
-                                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center">
-                                        <X className="text-white opacity-0 group-hover:opacity-100 h-6 w-6" />
+                                    {/* Red overlay with X icon on hover */}
+                                    <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/60 transition-all duration-200 flex items-center justify-center">
+                                        <X className="text-white opacity-0 group-hover:opacity-100 h-6 w-6 transition-opacity" />
                                     </div>
                                 </div>
                             ))}
                         </div>
                     )}
-
                 </>
             )}
 
@@ -832,30 +831,6 @@ export default function InteractionHubVoice() {
 
             </div>
             
-
-            {/* Captured images row - positioned below the buttons */}
-            {connected && capturedImages.length > 0 && (
-                <div className="flex justify-start items-center gap-2 mt-4 pl-2">
-                    {capturedImages.map(img => (
-                        <div 
-                            key={img.id} 
-                            className="relative w-12 h-12 rounded-full overflow-hidden cursor-pointer group"
-                            onClick={() => removeImage(img.id)}
-                            title="Click to remove"
-                        >
-                            <img 
-                                src={`data:image/jpeg;base64,${img.data}`} 
-                                alt="Captured" 
-                                className="w-full h-full object-cover"
-                            />
-                            {/* Red overlay with X icon on hover */}
-                            <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/60 transition-all duration-200 flex items-center justify-center">
-                                <X className="text-white opacity-0 group-hover:opacity-100 h-6 w-6 transition-opacity" />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
             
             {/* Disconnect button - Right Side */}
             {connected && (

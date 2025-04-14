@@ -16,7 +16,8 @@ export type AudioMessage = {
 export type ImageMessage = {
     type: "image";
     format: "jpeg" | "png";
-    data: string; // base64
+    input?: string;
+    data: string[]; // base64[]
 };
 
 export interface GPSMessage {
@@ -49,6 +50,8 @@ export type UIActionMessage = {
 export type OrchestrateMessage = {
     type: "orchestrate";
     user_input: string;
+    extract?: boolean;
+    summarize?: number;
 };
 
 export type WebSocketMessage =
