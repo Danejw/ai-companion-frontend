@@ -101,17 +101,26 @@ export default function InteractionHubVoice() {
 
     // Effect to handle captured images from sessionStorage
     useEffect(() => {
-        const capturedImage = sessionStorage.getItem('capturedImage');
-        if (capturedImage) {
-            // Add image to the captured images array
+        // Listen for custom event from CaptureOverlay
+        const handleImageCaptured = (event: CustomEvent) => {
+            const { imageId, imageData } = event.detail;
             setCapturedImages(prev => [...prev, {
-                id: Date.now().toString(),
-                data: capturedImage
+                id: imageId,
+                data: imageData
             }]);
             
-            // Clear the storage
+            // Clear the storage immediately to prevent double adding
             sessionStorage.removeItem('capturedImage');
-        }
+        };
+        
+        window.addEventListener('imageCaptured', handleImageCaptured as EventListener);
+        
+        // We no longer need the interval check or focus/storage events
+        // since we're using custom events for direct communication
+        
+        return () => {
+            window.removeEventListener('imageCaptured', handleImageCaptured as EventListener);
+        };
     }, []);
 
     // Function to remove an image when clicked
@@ -753,6 +762,7 @@ export default function InteractionHubVoice() {
                             ))}
                         </div>
                     )}
+
                 </>
             )}
 
@@ -821,6 +831,31 @@ export default function InteractionHubVoice() {
 
 
             </div>
+            
+
+            {/* Captured images row - positioned below the buttons */}
+            {connected && capturedImages.length > 0 && (
+                <div className="flex justify-start items-center gap-2 mt-4 pl-2">
+                    {capturedImages.map(img => (
+                        <div 
+                            key={img.id} 
+                            className="relative w-12 h-12 rounded-full overflow-hidden cursor-pointer group"
+                            onClick={() => removeImage(img.id)}
+                            title="Click to remove"
+                        >
+                            <img 
+                                src={`data:image/jpeg;base64,${img.data}`} 
+                                alt="Captured" 
+                                className="w-full h-full object-cover"
+                            />
+                            {/* Red overlay with X icon on hover */}
+                            <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/60 transition-all duration-200 flex items-center justify-center">
+                                <X className="text-white opacity-0 group-hover:opacity-100 h-6 w-6 transition-opacity" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
             
             {/* Disconnect button - Right Side */}
             {connected && (

@@ -146,6 +146,11 @@ export default function CaptureOverlay({ open, onOpenChange }: Props) {
                         // Store the image data in sessionStorage
                         sessionStorage.setItem('capturedImage', base64Image);
                         
+                        // Dispatch a custom event that InteractionHub can listen for
+                        window.dispatchEvent(new CustomEvent('imageCaptured', {
+                            detail: { imageId: Date.now().toString(), imageData: base64Image }
+                        }));
+                        
                         // Show success toast with image preview
                         toast.success(
                             <div className="flex items-center gap-2">
@@ -160,11 +165,6 @@ export default function CaptureOverlay({ open, onOpenChange }: Props) {
                             </div>,
                             { duration: 3000 }
                         );
-                        
-                        // Close the overlay after a short delay
-                        setTimeout(() => {
-                            onOpenChange(false);
-                        }, 1000);
                     };
                     
                     reader.onerror = () => {
