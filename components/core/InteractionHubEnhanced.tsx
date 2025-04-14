@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react";
-import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera, Video } from "lucide-react";
+import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera } from "lucide-react"; //Video
 import { AudioMessage, GPSMessage, ImageMessage, OrchestrateMessage, TextMessage, TimeMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
