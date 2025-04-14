@@ -9,6 +9,7 @@ interface UIState {
     isAuthOpen: boolean;
     isKnowledgeOpen: boolean;
     isInfoOpen: boolean;
+    isCaptureOpen: boolean;
 
     // Add state for confirmation modal later
     // confirmationAction: null | object;
@@ -19,6 +20,7 @@ interface UIState {
     toggleAuthOverlay: (isOpen: boolean) => void;
     toggleKnowledgeOverlay: (isOpen: boolean) => void;
     toggleInfoOverlay: (isOpen: boolean) => void;
+    toggleCaptureOverlay: (isOpen: boolean) => void;
 
     // setConfirmationAction: (action: object | null) => void;
 
@@ -45,6 +47,7 @@ export const useUIStore = create<UIState>()(
             isAuthOpen: false,
             isKnowledgeOpen: false,
             isInfoOpen: false,
+            isCaptureOpen: false,
             // confirmationAction: null,
 
             // Settings values
@@ -94,6 +97,10 @@ export const useUIStore = create<UIState>()(
             setSelectedVoice: (voice) => set({
                 selectedVoice: voice
             }),
+
+            toggleCaptureOverlay: (isOpen) => set((state) => ({
+                isCaptureOpen: isOpen !== undefined ? isOpen : !state.isCaptureOpen
+            })),
         }),
         {
             name: 'ui-settings', // Storage key

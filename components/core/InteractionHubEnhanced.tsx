@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react";
-import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X } from "lucide-react";
+import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera } from "lucide-react";
 import { AudioMessage, GPSMessage, OrchestrateMessage, TextMessage, TimeMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +13,13 @@ import { useUIStore } from '@/store'; // Import the store
 import { MarkdownRenderer } from "../MarkdownRenderer";
 
 
+// TypeScript to stop complaining about ImageCapture
+declare var ImageCapture: {
+    new(videoTrack: MediaStreamTrack): {
+        takePhoto: () => Promise<Blob>;
+        grabFrame: () => Promise<ImageBitmap>;
+    }
+};
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
@@ -24,7 +31,8 @@ export default function InteractionHubVoice() {
     const {
         extractKnowledge,
         summarizeFrequency,
-        selectedVoice
+        selectedVoice,
+        toggleCaptureOverlay
     } = useUIStore();
     
 
@@ -361,8 +369,7 @@ export default function InteractionHubVoice() {
                     }
 
                     else if (msg.type === "ui_action") {
-                        console.log("UI Action:", msg);
-                        console.log("Message:", msg.action);
+                        console.log("ui action:", msg.action);
 
                         if (msg.action === 'toggle_credits') {
                             toggleCreditsOverlay(true);
@@ -524,6 +531,47 @@ export default function InteractionHubVoice() {
         ws.current?.send(JSON.stringify(timeMsg));
     };
 
+    const handleImageCapture = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const track = stream.getVideoTracks()[0];
+
+            // @ts-ignore - until TypeScript supports ImageCapture natively
+            const imageCapture = new ImageCapture(track);
+            const bitmap = await imageCapture.grabFrame();
+
+            const canvas = document.createElement("canvas");
+            canvas.width = bitmap.width;
+            canvas.height = bitmap.height;
+
+            const ctx = canvas.getContext("2d");
+            if (!ctx) throw new Error("Failed to get canvas context");
+            ctx.drawImage(bitmap, 0, 0);
+
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    console.error("Failed to convert canvas to Blob.");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64Image = (reader.result as string).split(",")[1];
+                    const imageMessage = {
+                        type: "image",
+                        format: "jpeg",
+                        image: base64Image,
+                    };
+                    ws.current?.send(JSON.stringify(imageMessage));
+                };
+                reader.readAsDataURL(blob);
+            }, "image/jpeg");
+
+            track.stop(); // cleanup
+        } catch (error) {
+            console.error("Failed to capture image:", error);
+        }
+    };
 
 
 
@@ -729,6 +777,17 @@ export default function InteractionHubVoice() {
                         className="rounded-full w-8 h-8 bg-accent-foreground/60 hover:bg-accent-foreground transition-colors"
                     >
                         <X className="h-4 w-4 text-white" />
+                    </Button>
+                )}
+
+                {/* Camera Button */}
+                {connected && (
+                    <Button
+                        onClick={() => toggleCaptureOverlay(true)}
+                        disabled={isConnecting || isWaitingForResponse}
+                        className="rounded-full w-16 h-16 flex items-center justify-center text-white shadow-lg transition bg-brandpink/80 hover:bg-brandpink"
+                    >
+                        <Camera className="h-8 w-8" />
                     </Button>
                 )}
             </div>
