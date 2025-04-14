@@ -192,7 +192,7 @@ export default function CaptureOverlay({ open, onOpenChange }: Props) {
                         <Camera className="h-5 w-5" />
                         Take a Photo
                     </DialogTitle>
-                    <DialogDescription className="text-sm text-white pt-1">
+                    <DialogDescription className="text-sm text-center text-white pt-1">
                         {cameraError ? 
                             `Camera error: ${cameraError}` : 
                             "Frame it up and click capture when ready."}
