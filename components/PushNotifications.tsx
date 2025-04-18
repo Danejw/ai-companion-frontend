@@ -26,7 +26,7 @@ export default function PushDebugger() {
             }
         };
 
-        navigator.serviceWorker.ready.then((reg) => {
+        navigator.serviceWorker.ready.then(() => {
             navigator.serviceWorker.addEventListener("message", handleMessage);
         });
 

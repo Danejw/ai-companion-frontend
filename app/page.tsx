@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import Background from '@/components/Background'
 import InteractionHubEnhanced from '@/components/core/InteractionHubEnhanced'
-import PushDebugger from '@/components/PushNotifications'
+
 
 export default function Home() {
   // Disable scroll when this page is mounted
