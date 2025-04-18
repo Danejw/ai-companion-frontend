@@ -459,6 +459,10 @@ export default function InteractionHubVoice() {
                             toggleCaptureOverlay(true);
                             console.log("Capture Overlay Opened");
                         }
+                        else if (msg.action === 'toggle_notifications') {
+                            // toggleNotificationsOverlay(true);
+                            console.log("Notifications Overlay Opened");
+                        }
 
                         toast.info(msg.action);
                     }

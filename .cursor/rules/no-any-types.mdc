@@ -1,9 +1,15 @@
 ---
 description: 
 globs: 
+alwaysApply: false
+---
+---
+description: 
+globs: 
 alwaysApply: true
 ---
 
 # Your rule content
 
 DO NOT USE ANY TYPES because they will no pass the linting process
+Use oneline for code and not do break it apart, in to multiple lines

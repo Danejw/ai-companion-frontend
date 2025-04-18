@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import Background from '@/components/Background'
 import InteractionHubEnhanced from '@/components/core/InteractionHubEnhanced'
+import PushDebugger from '@/components/PushNotifications'
 
 export default function Home() {
   // Disable scroll when this page is mounted
@@ -21,6 +22,11 @@ export default function Home() {
       {/* Background */}
       <div className="absolute inset-0">
         <Background />
+      </div>
+
+      {/* PushDebugger */}
+      <div className="absolute top-18 left-1/2 transform -translate-x-1/2 z-1 w-full max-w-xl px-4">
+        <PushDebugger />
       </div>
 
       {/* InteractionHub */}
