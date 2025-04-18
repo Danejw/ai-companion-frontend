@@ -24,11 +24,6 @@ export default function Home() {
         <Background />
       </div>
 
-      {/* PushDebugger */}
-      <div className="absolute top-18 left-1/2 transform -translate-x-1/2 z-1 w-full max-w-xl px-4">
-        <PushDebugger />
-      </div>
-
       {/* InteractionHub */}
       <div className="absolute bottom-18 left-1/2 transform -translate-x-1/2 z-0 w-full max-w-xl px-4">
         <InteractionHubEnhanced />

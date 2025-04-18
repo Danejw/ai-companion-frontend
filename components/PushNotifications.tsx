@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { subscribeToPush, ScheduledTask, unsubscribe } from "@/lib/api/push_notifications";
 import { schedulePushNotification } from "@/lib/api/push_notifications";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function PushDebugger() {
     const [isSubscribed, setIsSubscribed] = useState(false);

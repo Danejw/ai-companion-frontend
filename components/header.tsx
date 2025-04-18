@@ -4,7 +4,7 @@ import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useUIStore } from '@/store';
-import { History, CreditCard, LogIn, LogOut, Loader2, Brain, Info, Settings } from 'lucide-react';
+import { History, CreditCard, LogIn, LogOut, Loader2, Brain, Info, Settings, Bell } from 'lucide-react';
 import AnimatedBlobLogo from '@/components/Logo';
 
 export default function Header() {
@@ -15,6 +15,7 @@ export default function Header() {
     const toggleHistoryOverlay = useUIStore((state) => state.toggleHistoryOverlay);
     const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
     const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
+    const toggleNotificationsOverlay = useUIStore((state) => state.toggleNotificationsOverlay);
 
     return (
         <header className="sticky top-0 z-10 w-screenf border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -79,6 +80,7 @@ export default function Header() {
                                 <Brain className="h-4 w-4" />
                             </Button>
 
+                            {/* --- Credits Button (Icon only) --- */}
                             <Button
                                 variant="ghost"
                                 size="icon"
@@ -91,6 +93,7 @@ export default function Header() {
                                 <CreditCard className="h-4 w-4" />
                             </Button>
                             
+                            {/* --- Settings Button (Icon only) --- */}
                             <Button
                                 variant="ghost"
                                 size="icon"
@@ -100,6 +103,16 @@ export default function Header() {
                                 <Settings className="h-4 w-4" />
                             </Button>
 
+                            {/* --- Notifications Button (Icon only) --- */}
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => toggleNotificationsOverlay(true)}
+                                title="Notifications"
+                            >
+                                <Bell className="h-4 w-4" />
+                            </Button>
+                            
                             {/* --- Logout Button (Icon only) --- */}
                             <Button
                                 variant="ghost"

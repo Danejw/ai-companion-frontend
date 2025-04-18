@@ -42,7 +42,7 @@ export default function InteractionHubVoice() {
     const toggleHistoryOverlay = useUIStore((state) => state.toggleHistoryOverlay);
     const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
     const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
-
+    const toggleNotificationsOverlay = useUIStore((state) => state.toggleNotificationsOverlay);
 
 
     // States
@@ -460,7 +460,7 @@ export default function InteractionHubVoice() {
                             console.log("Capture Overlay Opened");
                         }
                         else if (msg.action === 'toggle_notifications') {
-                            // toggleNotificationsOverlay(true);
+                            toggleNotificationsOverlay(true);
                             console.log("Notifications Overlay Opened");
                         }
 

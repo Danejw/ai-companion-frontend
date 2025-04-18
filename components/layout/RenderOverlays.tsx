@@ -16,6 +16,7 @@ import KnowledgeOverlay from '@/components/overlays/KnowledgeOverlay';
 import InfoOverlay from '@/components/overlays/InfoOverlay';
 import SettingsOverlay from '@/components/overlays/SettingsOverlay';
 import CaptureOverlay from '@/components/overlays/CaptureOverlay';
+import PushNotificationOverlay from '@/components/overlays/PushNotificationsOverlay';
 
 // import SettingsOverlay from '@/components/overlays/SettingsOverlay'; // Uncomment when ready
 
@@ -28,6 +29,7 @@ export function RenderOverlays() {
     const isKnowledgeOpen = useUIStore((state) => state.isKnowledgeOpen);
     const isInfoOpen = useUIStore((state) => state.isInfoOpen);
     const isCaptureOpen = useUIStore((state) => state.isCaptureOpen);
+    const isNotificationsOpen = useUIStore((state) => state.isNotificationsOpen);
 
     const toggleAuthOverlay = useUIStore((state) => state.toggleAuthOverlay);
     const toggleCreditsOverlay = useUIStore((state) => state.toggleCreditsOverlay);
@@ -36,6 +38,8 @@ export function RenderOverlays() {
     const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
     const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
     const toggleCaptureOverlay = useUIStore((state) => state.toggleCaptureOverlay);
+    const toggleNotificationsOverlay = useUIStore((state) => state.toggleNotificationsOverlay);
+
 
     // Get session status
     const { status } = useSession(); // Only need status here
@@ -71,6 +75,7 @@ export function RenderOverlays() {
             <KnowledgeOverlay open={isKnowledgeOpen} onOpenChange={toggleKnowledgeOverlay} />
             <InfoOverlay open={isInfoOpen} onOpenChange={toggleInfoOverlay} />
             <CaptureOverlay open={isCaptureOpen} onOpenChange={toggleCaptureOverlay} />
+            <PushNotificationOverlay open={isNotificationsOpen} onOpenChange={toggleNotificationsOverlay} />
             
             {/* <SettingsOverlay open={isSettingsOpen} onOpenChange={toggleSettingsOverlay} /> */}
         </>

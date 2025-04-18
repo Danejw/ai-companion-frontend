@@ -10,6 +10,7 @@ interface UIState {
     isKnowledgeOpen: boolean;
     isInfoOpen: boolean;
     isCaptureOpen: boolean;
+    isNotificationsOpen: boolean;
 
     // Add state for confirmation modal later
     // confirmationAction: null | object;
@@ -21,6 +22,7 @@ interface UIState {
     toggleKnowledgeOverlay: (isOpen: boolean) => void;
     toggleInfoOverlay: (isOpen: boolean) => void;
     toggleCaptureOverlay: (isOpen: boolean) => void;
+    toggleNotificationsOverlay: (isOpen: boolean) => void;
 
     // setConfirmationAction: (action: object | null) => void;
 
@@ -48,6 +50,7 @@ export const useUIStore = create<UIState>()(
             isKnowledgeOpen: false,
             isInfoOpen: false,
             isCaptureOpen: false,
+            isNotificationsOpen: false,
             // confirmationAction: null,
 
             // Settings values
@@ -100,6 +103,10 @@ export const useUIStore = create<UIState>()(
 
             toggleCaptureOverlay: (isOpen) => set((state) => ({
                 isCaptureOpen: isOpen !== undefined ? isOpen : !state.isCaptureOpen
+            })),
+
+            toggleNotificationsOverlay: (isOpen) => set((state) => ({
+                isNotificationsOpen: isOpen !== undefined ? isOpen : !state.isNotificationsOpen
             })),
         }),
         {
