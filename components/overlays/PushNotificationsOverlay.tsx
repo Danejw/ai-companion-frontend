@@ -219,7 +219,7 @@ export default function PushNotificationOverlay({ open, onOpenChange }: PushNoti
                   <label className="block text-sm font-semibold text-gray-700">Repeat</label>
                   <select
                     value={recurrence}
-                    onChange={(e) => setRecurrence(e.target.value as any)}
+                    onChange={(e) => setRecurrence(e.target.value as "one-time" | "daily" | "weekly" | "monthly")}
                     className="w-full border rounded-md px-2 py-1 text-sm mb-2"
                   >
                     <option value="one-time">One-time</option>
