@@ -50,3 +50,35 @@ export const startVoiceInteraction = async (recordedBlob: Blob, selectedVoice: s
 
     return { transcript, audioUrl };
 };
+
+
+export const textToSpeech = async (text: string, voice: string) => {
+    const authToken = await getAuthToken();
+
+    const response = await fetch(`${BACKEND_URL}/voice/text-to-speech`, {
+        method: "POST",
+        body: JSON.stringify({ text, voice }),
+        headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch text to speech");
+    }
+
+    // Convert stream to audio
+    const audioBlob = await response.blob();
+    console.log("Received audio blob:", audioBlob);
+
+    const audioUrl = URL.createObjectURL(audioBlob);
+    console.log("Audio URL:", audioUrl);
+
+    const audio = new Audio(audioUrl);
+    audio.play().catch((err) => {
+        console.error("Playback error:", err);
+    });
+
+    return audioUrl;
+};

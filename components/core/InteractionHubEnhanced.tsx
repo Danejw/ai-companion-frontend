@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react";
-import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera } from "lucide-react"; //Video
+import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera, Volume2 } from "lucide-react"; // Added Volume2 and VolumeX icons
 import { AudioMessage, GPSMessage, ImageMessage, OrchestrateMessage, TextMessage, TimeMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { submitFeedback } from "@/lib/api/feedback";
+import { textToSpeech } from "@/lib/api/voice"; // Import textToSpeech function
 import AudioVisualizer from "../Visualizer";
 import { Button } from "../ui/button";
 import { useUIStore } from '@/store'; // Import the store
@@ -601,8 +602,18 @@ export default function InteractionHubVoice() {
         ws.current?.send(JSON.stringify(timeMsg));
     };
 
-
-
+    // Add this function inside your component
+    const handleSpeakResponse = async () => {
+        if (!aiResponse) return;
+        
+        try {
+            toast.info("Speaking response with " + selectedVoice + "...");
+            await textToSpeech(aiResponse, selectedVoice);
+        } catch (error) {
+            console.error("Failed to speak response:", error);
+            toast.error("Failed to speak response");
+        }
+    };
 
     return (
         <div className="flex flex-col items-center gap-6 w-full max-w-xl px-4">
@@ -628,8 +639,21 @@ export default function InteractionHubVoice() {
                             ) : (
                                 <>
                                     {aiResponse ? (
-                                        <div className="prose prose-sm text-left w-full max-w-none animate-in fade-in duration-500 ease-out">
+                                        <div className="prose prose-sm text-left w-full max-w-none animate-in fade-in duration-500 ease-out relative">
                                             <MarkdownRenderer>{aiResponse}</MarkdownRenderer>
+
+                                            {/* Text-to-Speech Button - positioned at bottom right with more space */}
+                                            <div className="relative h-6 w-full mt-4 flex justify-end">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="px-2 py-0 text-xs flex items-center gap-1 text-gray-400"
+                                                    onClick={handleSpeakResponse}
+                                                    title="Speak this response"
+                                                >
+                                                    <Volume2 size={16} />
+                                                </Button>
+                                            </div>
                                         </div>
                                     ) : (
                                         <p className="opacity-90">How are you today?</p>

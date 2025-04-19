@@ -27,6 +27,7 @@ export default function PushNotificationOverlay({ open, onOpenChange }: PushNoti
   const [selectedHour, setSelectedHour] = useState<number>(12);
   const [selectedMinute, setSelectedMinute] = useState<number>(0);
   const [selectedPeriod, setSelectedPeriod] = useState<string>("AM");
+  const [recurrence, setRecurrence] = useState<"one-time" | "daily" | "weekly" | "monthly">("one-time");
 
   useEffect(() => {
     checkSubscription();
@@ -65,15 +66,27 @@ export default function PushNotificationOverlay({ open, onOpenChange }: PushNoti
     if (!selectedDate) return;
 
     const scheduled = new Date(selectedDate);
+
+    // If the scheduled date is in the past, bump to tomorrow
+    const now = new Date();
+    if (scheduled < now) {
+      scheduled.setDate(scheduled.getDate() + 1); // bump to tomorrow
+    }
+
     scheduled.setHours(selectedHour);
     scheduled.setMinutes(selectedMinute);
     scheduled.setSeconds(0);
-    scheduled.setHours(selectedHour + (selectedPeriod === "PM" ? 12 : 0));
+
+    // Convert 12-hour time to 24-hour time
+    let hour = selectedHour % 12;
+    if (selectedPeriod === "PM") hour += 12;
+    scheduled.setHours(hour);
 
     const task: ScheduledTask = {
       title,
       body,
       send_at: scheduled.toISOString(),
+      recurrence,
     };
 
     setStatus(`📅 Scheduling for ${scheduled.toLocaleString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true, month: 'short', day: 'numeric' })}...`);
@@ -152,6 +165,7 @@ export default function PushNotificationOverlay({ open, onOpenChange }: PushNoti
                       selected={selectedDate}
                       onSelect={setSelectedDate}
                       initialFocus
+                      disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                     />
                   </PopoverContent>
                 </Popover>
@@ -198,8 +212,21 @@ export default function PushNotificationOverlay({ open, onOpenChange }: PushNoti
                   >
                     <option value="AM">AM</option>
                     <option value="PM">PM</option>
-                  </select>
+                  </select>     
                 </div>
+
+                {/* --- Repeat --- */}
+                  <label className="block text-sm font-semibold text-gray-700">Repeat</label>
+                  <select
+                    value={recurrence}
+                    onChange={(e) => setRecurrence(e.target.value as any)}
+                    className="w-full border rounded-md px-2 py-1 text-sm mb-2"
+                  >
+                    <option value="one-time">One-time</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
               </div>
 
 

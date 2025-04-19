@@ -14,6 +14,7 @@ export interface ScheduledTask {
   title: string;
   body: string;
   send_at: string;
+  recurrence?: "one-time" | "daily" | "weekly" | "monthly";
 }
 
 export function encodeKey(key: ArrayBuffer | null): string {

@@ -211,7 +211,7 @@ export default function Header() {
                                                 }}
                                             >
                                                 <Bell className="h-4 w-4 mr-2" />
-                                                Notifications
+                                                Notifications <span className="text-xs text-accent-foreground">Beta</span>
                                             </Button>
 
                                             <Button 
