@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera, Volume2 } from "lucide-react"; // Added Volume2 and VolumeX icons
-import { AudioMessage, GPSMessage, ImageMessage, OrchestrateMessage, RawModeMessage, TextMessage, TimeMessage } from "@/types/messages";
+import { AudioMessage, GPSMessage, ImageMessage, OrchestrateMessage, RawMessage, TextMessage, TimeMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -325,15 +325,15 @@ export default function InteractionHubVoice() {
             ws.current.onopen = () => {
                     clearTimeout(connectionTimeout);
                 console.log("WebSocket connected");
-                setConnected(true);
-                    setIsConnecting(false);
-                    toast.success("Connected successfully!");
-                    sendGPS();
-                    sendTime();
-                    sendRawMode();
 
-                    // Make the WebSocket available globally
-                    window.currentWebSocket = ws.current as WebSocket;
+                setConnected(true);
+                setIsConnecting(false);
+                toast.success("Connected successfully!");
+                sendGPS();
+                sendTime();
+
+                // Make the WebSocket available globally
+                window.currentWebSocket = ws.current as WebSocket;
             };
 
             ws.current.onclose = () => {
@@ -508,8 +508,8 @@ export default function InteractionHubVoice() {
                         }
                         else 
                         {
-                    console.error("Error:", msg.text);
-                            toast.error(msg.text);
+                            console.error("Error:", msg.text);
+                            toast.error("Error: " + msg.text);
                         }
                     }
 
@@ -625,7 +625,7 @@ export default function InteractionHubVoice() {
 
     // Send raw mode message
     const sendRawMode = () => {
-        const rawModeMsg: RawModeMessage = { type: "raw_mode", is_raw: isRawMode };
+        const rawModeMsg: RawMessage = { type: "raw_mode", is_raw: isRawMode };
         console.log("Sending raw mode message:", JSON.stringify(rawModeMsg));
         ws.current?.send(JSON.stringify(rawModeMsg));
     };
