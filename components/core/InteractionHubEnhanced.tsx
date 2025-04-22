@@ -94,7 +94,7 @@ export default function InteractionHubVoice() {
     const [isSubmittingFinetuneFeedback, setIsSubmittingFinetuneFeedback] = useState(false);
 
 
-    //console.log(recording, messages, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated);
+    console.log(recording, messages, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated);
 
 
     // Add effect to scroll to bottom when content changes
