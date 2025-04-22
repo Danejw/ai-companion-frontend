@@ -48,6 +48,11 @@ export type RawMessage = {
     is_raw: boolean;
 };
 
+export type FeedbackMessage = {
+    type: "feedback";
+    feedback_type: boolean;
+};
+
 export type OrchestrateMessage = {
     type: "orchestrate";
     user_input: string;

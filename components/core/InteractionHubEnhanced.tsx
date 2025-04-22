@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react";
-import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera, Volume2 } from "lucide-react"; // Added Volume2 and VolumeX icons
-import { AudioMessage, GPSMessage, ImageMessage, OrchestrateMessage, RawMessage, TextMessage, TimeMessage } from "@/types/messages";
+import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera, Volume2, ThumbsUp, ThumbsDown } from "lucide-react"; // Added ThumbsUp and ThumbsDown icons
+import { AudioMessage, FeedbackMessage, GPSMessage, ImageMessage, OrchestrateMessage, RawMessage, TextMessage, TimeMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -12,7 +12,8 @@ import AudioVisualizer from "../Visualizer";
 import { Button } from "../ui/button";
 import { useUIStore } from '@/store'; // Import the store
 import { MarkdownRenderer } from "../MarkdownRenderer";
-
+import { submitFinetuneFeedback } from "@/lib/api/finetune_feedback"; // Import the new function
+import { FinetuneFeedbackPayload } from "@/lib/api/finetune_feedback";
 
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
@@ -68,9 +69,12 @@ export default function InteractionHubVoice() {
 
     // Text Input
     const [inputText, setInputText] = useState("");
+    const [lastUserInput, setLastUserInput] = useState(""); // Cache the last user input for feedback
 
     // Text Output
     const [aiResponse, setAiResponse] = useState('');
+    const [lastAiResponse, setLastAiResponse] = useState('');
+    const [feedbackSubmittedResponses, setFeedbackSubmittedResponses] = useState<Set<string>>(new Set());
 
     const [userTranscript, setUserTranscript] = useState('');
     const [aiTranscript, setAiTranscript] = useState('');
@@ -86,9 +90,11 @@ export default function InteractionHubVoice() {
     const [feedbackText, setFeedbackText] = useState('');
     const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
     const [teachAi, setTeachAi] = useState(false);
+    const [showFeedbackButtons, setShowFeedbackButtons] = useState(true);
+    const [isSubmittingFinetuneFeedback, setIsSubmittingFinetuneFeedback] = useState(false);
 
 
-    console.log(recording, messages, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated);
+    //console.log(recording, messages, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated);
 
 
     // Add effect to scroll to bottom when content changes
@@ -143,6 +149,9 @@ export default function InteractionHubVoice() {
     
         try {
             if (messageToSend) {
+                // Cache the user input before sending
+                setLastUserInput(messageToSend);
+                
                 const textMessage: TextMessage = { type: "text", text: messageToSend };
                 ws.current?.send(JSON.stringify(textMessage));
 
@@ -156,11 +165,11 @@ export default function InteractionHubVoice() {
                 ws.current?.send(JSON.stringify(orchestrationMessage));
             }
 
-
             // Clear images after sending
             // setCapturedImages([]);
             setIsWaitingForResponse(true);
             setInputText('');
+            setShowFeedbackButtons(false); // Hide feedback buttons while waiting for new response
 
         } catch (error) {
             console.error("Streaming error:", error);
@@ -169,9 +178,13 @@ export default function InteractionHubVoice() {
     };
 
     const handleSendAudio = async (base64Audio: string) => {
+        // If there's user transcript from voice, cache it
+        if (userTranscript) {
+            setLastUserInput(userTranscript);
+        }
+        
         const audioMsg: AudioMessage = { type: "audio", audio: base64Audio, voice: selectedVoice };
         ws.current?.send(JSON.stringify(audioMsg));
-
 
         if (capturedImages.length > 0) {
             // Send all captured images
@@ -181,6 +194,8 @@ export default function InteractionHubVoice() {
 
         const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: userTranscript, extract: extractKnowledge, summarize: summarizeFrequency }
         ws.current?.send(JSON.stringify(orchestrationMessage));
+        
+        setShowFeedbackButtons(false); // Hide feedback buttons while waiting for new response
     }
 
 
@@ -287,6 +302,60 @@ export default function InteractionHubVoice() {
             setFeedbackText('');
     };
 
+    // Handle finetune feedback submission
+    const handleFinetuneFeedback = async (isPositive: boolean) => {
+        
+        console.log(lastUserInput, userTranscript, aiResponse);
+        
+        // Use the cached user input instead of the current inputText
+        if (!lastUserInput && !userTranscript) {
+            toast.error("No user input to provide feedback on");
+            return;
+        }
+
+        if (!aiResponse) {
+            toast.error("No AI response to provide feedback on");
+            return;
+        }
+
+        // Check if feedback has already been submitted for this response
+        if (feedbackSubmittedResponses.has(aiResponse)) {
+            toast.info("Feedback already submitted for this response");
+            return;
+        }
+
+        console.log(isPositive);
+
+        try {
+            setIsSubmittingFinetuneFeedback(true);
+
+            const payload: FinetuneFeedbackPayload = {
+                message_input: lastUserInput || userTranscript,
+                message_output: aiResponse,
+                feedback_type: isPositive
+            };
+
+            await submitFinetuneFeedback(payload);
+            
+            // Mark this response as having received feedback
+            setFeedbackSubmittedResponses(prev => {
+                const newSet = new Set(prev);
+                newSet.add(aiResponse);
+                return newSet;
+            });
+
+            const feedbackMessage: FeedbackMessage = { type: "feedback", feedback_type: isPositive };
+            ws.current?.send(JSON.stringify(feedbackMessage));
+            
+            setShowFeedbackButtons(false);
+            toast.success(isPositive ? "Thanks for the positive feedback!" : "Thanks for helping us improve!");
+        } catch (error) {
+            console.error("Error submitting finetune feedback:", error);
+            toast.error("Failed to submit feedback. Please try again.");
+        } finally {
+            setIsSubmittingFinetuneFeedback(false);
+        }
+    };
 
     const truncateText = (text: string, maxLength: number = 100) => {
         if (text.length <= maxLength) return text;
@@ -298,8 +367,13 @@ export default function InteractionHubVoice() {
         try {
             setIsConnecting(true);
             toast.info("Connecting...");
+            
+            // Reset states when starting a new connection
+            setLastUserInput('');
+            setAiResponse('');
+            setFeedbackSubmittedResponses(new Set()); // Reset the feedback tracking
 
-        const session = await getSession();
+            const session = await getSession();
             const accessToken = session?.user?.accessToken;
 
             if (!accessToken) {
@@ -329,6 +403,7 @@ export default function InteractionHubVoice() {
                 toast.success("Connected successfully!");
                 sendGPS();
                 sendTime();
+                setShowFeedbackButtons(true);
 
                 // Make the WebSocket available globally
                 window.currentWebSocket = ws.current as WebSocket;
@@ -337,11 +412,13 @@ export default function InteractionHubVoice() {
             ws.current.onclose = () => {
                 console.log("WebSocket disconnected");
                 setConnected(false);
-                    setIsConnecting(false);
-                    setIsListening(false);
-                    setIsWaitingForResponse(false);
-                    toast.info("Disconnected...");
-                };
+                setIsConnecting(false);
+                setIsListening(false);
+                setIsWaitingForResponse(false);
+                setLastUserInput(''); // Clear cached input when disconnected
+                setFeedbackSubmittedResponses(new Set()); // Reset the feedback tracking
+                toast.info("Disconnected...");
+            };
 
                 ws.current.onerror = (error) => {
                     console.error("WebSocket error:", error);
@@ -355,12 +432,19 @@ export default function InteractionHubVoice() {
                     // Responses
                 if (msg.type === "user_transcript") {
                     setMessages((prev) => [...prev, `🧍 You said: ${msg.text}`]);
+                    setUserTranscript(msg.text);
+                    setLastUserInput(msg.text); // Cache the user transcript for feedback
                 }
 
                     else if (msg.type === "ai_transcript" || msg.type === "ai_response" || msg.type === "message_output_item") {                        
-                        setAiResponse(msg.text);
-                        setIsWaitingForResponse(false);
-                        setInputText('');
+                        // Only consider it a new response that needs feedback if text has changed
+                        if (msg.text !== aiResponse) {
+                            setAiResponse(msg.text);
+                            setLastAiResponse(msg.text);
+                            setIsWaitingForResponse(false);
+                            setInputText('');
+                            setShowFeedbackButtons(true);
+                        }
                     }
 
                     else if (msg.type === "audio_response") {
@@ -568,6 +652,8 @@ export default function InteractionHubVoice() {
         ws.current?.close();
         setConnected(false);
         setIsListening(false);
+        setLastUserInput(''); // Clear cached input when manually disconnected
+        setFeedbackSubmittedResponses(new Set()); // Reset the feedback tracking
     };
 
 
@@ -651,26 +737,50 @@ export default function InteractionHubVoice() {
                                 <p className="opacity-90">How are you today?</p>
                             ) : (
                                 <>
-                                    {aiResponse ? (
-                                        <div className="prose prose-sm text-left w-full max-w-none animate-in fade-in duration-500 ease-out relative">
-                                            <MarkdownRenderer>{aiResponse}</MarkdownRenderer>
+                                    <div className="prose prose-sm text-left w-full max-w-none animate-in fade-in duration-500 ease-out relative">
+                                        <MarkdownRenderer>{aiResponse}</MarkdownRenderer>
 
-                                            {/* Text-to-Speech Button - positioned at bottom right with more space */}
-                                            <div className="relative h-6 w-full mt-4 flex justify-end">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="px-2 py-0 text-xs flex items-center gap-1 text-gray-400"
-                                                    onClick={handleSpeakResponse}
-                                                    title="Speak this response"
-                                                >
-                                                    <Volume2 size={16} />
-                                                </Button>
-                                            </div>
+                                        {/* Combined feedback and speak button row */}
+                                        <div className="relative w-full mt-4 flex justify-between items-center">
+                                            {/* Thumbs up/down on the left */}
+                                            {showFeedbackButtons && aiResponse && !feedbackSubmittedResponses.has(aiResponse) && (
+                                                <div className="flex items-center gap-1 text-gray-400">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="p-1 h-6 w-6 flex items-center justify-center"
+                                                        onClick={() => handleFinetuneFeedback(true)}
+                                                        disabled={isSubmittingFinetuneFeedback}
+                                                        title="Helpful"
+                                                    >
+                                                        {isSubmittingFinetuneFeedback ? <Spinner /> : <ThumbsUp size={10} />}                  
+                                                    </Button>
+                                                    <span className="text-gray-400">/</span>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="p-1 h-6 w-6 flex items-center justify-center"
+                                                        onClick={() => handleFinetuneFeedback(false)}
+                                                        disabled={isSubmittingFinetuneFeedback}
+                                                        title="Not Helpful"
+                                                    >
+                                                        {isSubmittingFinetuneFeedback ? <Spinner /> : <ThumbsDown size={10} />}
+                                                    </Button>
+                                                </div>
+                                            )}
+                                            
+                                            {/* Text-to-Speech Button on the right */}
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="px-2 py-0 text-xs flex items-center gap-1 text-gray-400"
+                                                onClick={handleSpeakResponse}
+                                                title="Speak this response"
+                                            >
+                                                <Volume2 size={16} />
+                                            </Button>
                                         </div>
-                                    ) : (
-                                        <p className="opacity-90">How are you today?</p>
-                                    )}
+                                    </div>
 
                                     {/* Feedback button */}
                                     {aiResponse && !isFeedbackMode && (
