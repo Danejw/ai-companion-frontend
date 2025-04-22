@@ -29,11 +29,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {/* ClientProviders MUST wrap everything needing client context */}
         <ClientProviders>
-          <Header /> {/* Header is inside Providers */}
-          <main className="flex-1"> {/* Adjust pt-14 if header height changes */}
+          <Header />
+          <main className="flex-1">
             {children}
           </main>
-          <RenderOverlays /> {/* <-- Render the wrapper here, also inside Providers */}
+          <RenderOverlays />
         </ClientProviders>
       </body>
     </html>

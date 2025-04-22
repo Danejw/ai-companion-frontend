@@ -34,6 +34,19 @@ export default function CaptureOverlay({ open, onOpenChange }: Props) {
             
             const startCamera = async () => {
                 try {
+                    // Get the camera permission
+                    const permissionStatus = await navigator.permissions.query({ name: 'camera' as PermissionName });
+
+                    if (permissionStatus.state === 'denied') {
+                        toast.error("Camera access has been denied. Please enable it in your browser settings.");
+                        setCameraError("Permission denied. Enable camera access in browser settings.");
+                        return;
+                    }
+
+                    if (permissionStatus.state === 'prompt') {
+                        toast.info("Requesting camera permission...");
+                    }
+
                     // Don't reinitialize if we already have a stream
                     if (stream && stream.active) {
                         console.log("Camera already active");

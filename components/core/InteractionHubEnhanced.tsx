@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera, Volume2 } from "lucide-react"; // Added Volume2 and VolumeX icons
-import { AudioMessage, GPSMessage, ImageMessage, OrchestrateMessage, TextMessage, TimeMessage } from "@/types/messages";
+import { AudioMessage, GPSMessage, ImageMessage, OrchestrateMessage, RawModeMessage, TextMessage, TimeMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -32,11 +32,9 @@ export default function InteractionHubVoice() {
         extractKnowledge,
         summarizeFrequency,
         selectedVoice,
-        toggleCaptureOverlay
+        isRawMode,
     } = useUIStore();
     
-
-
     const toggleCreditsOverlay = useUIStore((state) => state.toggleCreditsOverlay);
     const toggleAuthOverlay = useUIStore((state) => state.toggleAuthOverlay);
     const toggleSettingsOverlay = useUIStore((state) => state.toggleSettingsOverlay);
@@ -44,6 +42,9 @@ export default function InteractionHubVoice() {
     const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
     const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
     const toggleNotificationsOverlay = useUIStore((state) => state.toggleNotificationsOverlay);
+    const toggleCaptureOverlay = useUIStore((state) => state.toggleCaptureOverlay);
+
+    const toggleRawMode = useUIStore((state) => state.toggleRawMode);
 
 
     // States
@@ -123,6 +124,11 @@ export default function InteractionHubVoice() {
         };
     }, []);
 
+    // NEW: Effect to send raw mode status when it changes and connection is active
+    useEffect(() => {
+        if (connected) { sendRawMode(); }
+    }, [isRawMode, connected]);
+
     // Function to remove an image when clicked
     const removeImage = (id: string) => {
         setCapturedImages(prev => prev.filter(img => img.id !== id));
@@ -164,11 +170,24 @@ export default function InteractionHubVoice() {
         }
     };
 
+    const handleSendAudio = async (base64Audio: string) => {
+        const audioMsg: AudioMessage = { type: "audio", audio: base64Audio, voice: selectedVoice };
+        ws.current?.send(JSON.stringify(audioMsg));
 
+
+        if (capturedImages.length > 0) {
+            // Send all captured images
+            const imageMessage: ImageMessage = { type: "image", format: "jpeg", data: capturedImages.map(img => img.data) };
+            ws.current?.send(JSON.stringify(imageMessage));
+        }
+
+        const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: userTranscript, extract: extractKnowledge, summarize: summarizeFrequency }
+        ws.current?.send(JSON.stringify(orchestrationMessage));
+    }
 
 
     // Voice Recognition
-        const startListening = () => {
+    const startListening = () => {
             const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognitionAPI) {
                 toast.error("Speech Recognition not supported");
@@ -206,6 +225,7 @@ export default function InteractionHubVoice() {
                 // Make sure to clean up state and ref even with continuous
                 if (recognitionRef.current) { recognitionRef.current = null; }
                 setIsListening(false);
+                setConnected(false);
             };
 
             recognition.onend = () => {
@@ -214,19 +234,18 @@ export default function InteractionHubVoice() {
                 if (recognitionRef.current) { recognitionRef.current = null; }
                 setIsListening(false);
             };
-        };
+    };
 
-        const stopListening = () => {
+    const stopListening = () => {
             if (recognitionRef.current) {
                 recognitionRef.current.stop(); // User manually stopped it
                 setIsListening(false);
             }
-        };
+    };
 
 
-
-        // handleMicClick toggles start/stop as before
-        const handleMicClick = () => {
+    // handleMicClick toggles start/stop as before
+    const handleMicClick = () => {
             if (voiceModeEnabled) {
                 // handleVoiceModeRequest();
                 startListening()
@@ -234,17 +253,17 @@ export default function InteractionHubVoice() {
                 if (isListening) stopListening();
                 else startListening();
             }
-        };
+    };
 
 
-        // Handler for toggling feedback mode
-        const handleToggleFeedbackMode = () => {
+    // Handler for toggling feedback mode
+    const handleToggleFeedbackMode = () => {
             setIsFeedbackMode(true);
             setFeedbackText('');
-        };
+    };
 
-        // Handler for submitting feedback
-        const handleSubmitFeedback = async (teachAi: boolean) => {
+    // Handler for submitting feedback
+    const handleSubmitFeedback = async (teachAi: boolean) => {
             if (!feedbackText.trim()) {
                 toast.error("Please enter feedback before submitting.");
                 return;
@@ -262,13 +281,13 @@ export default function InteractionHubVoice() {
             } finally {
                 setIsSubmittingFeedback(false);
             }
-        };
+    };
 
-        // Handler for canceling feedback
-        const handleCancelFeedback = () => {
+    // Handler for canceling feedback
+    const handleCancelFeedback = () => {
             setIsFeedbackMode(false);
             setFeedbackText('');
-        };
+    };
 
 
     const truncateText = (text: string, maxLength: number = 100) => {
@@ -311,7 +330,7 @@ export default function InteractionHubVoice() {
                     toast.success("Connected successfully!");
                     sendGPS();
                     sendTime();
-                    
+                    sendRawMode();
 
                     // Make the WebSocket available globally
                     window.currentWebSocket = ws.current as WebSocket;
@@ -322,6 +341,7 @@ export default function InteractionHubVoice() {
                 setConnected(false);
                     setIsConnecting(false);
                     setIsListening(false);
+                    setIsWaitingForResponse(false);
                     toast.info("Disconnected...");
                 };
 
@@ -530,19 +550,7 @@ export default function InteractionHubVoice() {
             
             reader.onloadend = () => {
                 const base64Audio = (reader.result as string).split(",")[1];
-                
-                const audioMsg: AudioMessage = { type: "audio", audio: base64Audio, voice: selectedVoice};
-                ws.current?.send(JSON.stringify(audioMsg));
-
-
-                if (capturedImages.length > 0) {
-                    // Send all captured images
-                    const imageMessage: ImageMessage = { type: "image", format: "jpeg", data: capturedImages.map(img => img.data) };
-                    ws.current?.send(JSON.stringify(imageMessage));
-                }
-
-                const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: userTranscript, extract: extractKnowledge, summarize: summarizeFrequency }
-                ws.current?.send(JSON.stringify(orchestrationMessage));
+                handleSendAudio(base64Audio);
             };
             reader.readAsDataURL(audioBlob);
 
@@ -613,6 +621,13 @@ export default function InteractionHubVoice() {
             console.error("Failed to speak response:", error);
             toast.error("Failed to speak response");
         }
+    };
+
+    // Send raw mode message
+    const sendRawMode = () => {
+        const rawModeMsg: RawModeMessage = { type: "raw_mode", is_raw: isRawMode };
+        console.log("Sending raw mode message:", JSON.stringify(rawModeMsg));
+        ws.current?.send(JSON.stringify(rawModeMsg));
     };
 
     return (

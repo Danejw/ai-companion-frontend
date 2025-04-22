@@ -43,6 +43,11 @@ export type UIActionMessage = {
     params?: Record<string, string>;
 };
 
+export type RawModeMessage = {
+    type: "raw_mode";
+    is_raw: boolean;
+};
+
 export type OrchestrateMessage = {
     type: "orchestrate";
     user_input: string;
@@ -57,4 +62,5 @@ export type WebSocketMessage =
     | TimeMessage
     | UIActionMessage
     | TextMessage
+    | RawModeMessage
     | OrchestrateMessage;

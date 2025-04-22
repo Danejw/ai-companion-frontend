@@ -35,7 +35,9 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
         summarizeFrequency,
         setSummarizeFrequency,
         selectedVoice,
-        setSelectedVoice
+        setSelectedVoice,
+        isRawMode,
+        toggleRawMode
     } = useUIStore();
 
     return (
@@ -147,6 +149,32 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
                                     ))}
                                 </div>
                             </RadioGroup>
+                        </div>
+                    </div>
+
+                    <Separator className="my-6" />
+
+                    {/* Raw Mode Setting */}
+                    <div className="flex-1 py-8 mx-8 px-1 space-y-10">
+                        <div className="space-y-5">
+                            <h3 className="text-lg font-medium flex items-center">
+                                <Brain className="mr-3 h-5 w-5" /> Raw Mode
+                            </h3>
+
+                            <div className="flex items-center justify-between px-2">
+                                <div className="space-y-2">
+                                    <Label htmlFor="raw-mode" className="text-base">Raw Mode</Label>
+                                    <p className="text-sm text-muted-foreground">
+                                        Gives unfiltered, objective answers. May be blunt or uncomfortable. <br />
+                                        <span className="text-xs text-red-500">Use at your own risk.</span>
+                                    </p>
+                                </div>
+                                <Switch
+                                    id="raw-mode"
+                                    checked={isRawMode}
+                                    onCheckedChange={toggleRawMode}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
