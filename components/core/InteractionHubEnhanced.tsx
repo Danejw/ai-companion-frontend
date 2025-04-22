@@ -44,8 +44,6 @@ export default function InteractionHubVoice() {
     const toggleNotificationsOverlay = useUIStore((state) => state.toggleNotificationsOverlay);
     const toggleCaptureOverlay = useUIStore((state) => state.toggleCaptureOverlay);
 
-    const toggleRawMode = useUIStore((state) => state.toggleRawMode);
-
 
     // States
     const [connected, setConnected] = useState(false);
@@ -626,7 +624,7 @@ export default function InteractionHubVoice() {
     // Send raw mode message
     const sendRawMode = () => {
         const rawModeMsg: RawMessage = { type: "raw_mode", is_raw: isRawMode };
-        console.log("Sending raw mode message:", JSON.stringify(rawModeMsg));
+        //console.log("Sending raw mode message:", JSON.stringify(rawModeMsg));
         ws.current?.send(JSON.stringify(rawModeMsg));
     };
 
