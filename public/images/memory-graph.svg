@@ -1,0 +1,244 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Definitions -->
+  <defs>
+    <!-- Background: Soft gradient -->
+    <!-- <linearGradient id="backgroundGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fafaff" />
+      <stop offset="100%" stop-color="#f4f2fe" />
+    </linearGradient> -->
+    
+    <!-- Refined Node Gradients (Softer) -->
+    <radialGradient id="memoryGrad" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#c0b6f0" />
+      <stop offset="100%" stop-color="#9f8bf5" />
+    </radialGradient>
+    <radialGradient id="thoughtsGrad" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#fcaedb" />
+      <stop offset="100%" stop-color="#f68cc0" />
+    </radialGradient>
+    <radialGradient id="feelingsGrad" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#b8d7fe" />
+      <stop offset="100%" stop-color="#96a9f9" />
+    </radialGradient>
+    <radialGradient id="patternsGrad" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#fef4aa" />
+      <stop offset="100%" stop-color="#fbd85b" />
+    </radialGradient>
+    <radialGradient id="insightsGrad" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#d1c4fd" />
+      <stop offset="100%" stop-color="#b09bf8" />
+    </radialGradient>
+    
+    <!-- Filters: Subtle Glows -->
+    <filter id="nodeGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    
+    <!-- Elegant Arrowheads -->
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="4" refY="3" orient="auto-start-reverse">
+      <path d="M0,0 L4,3 L0,6" fill="none" stroke="#f472b6" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="0.8" />
+    </marker>
+    <marker id="arrowhead2" markerWidth="8" markerHeight="6" refX="4" refY="3" orient="auto-start-reverse">
+      <path d="M0,0 L4,3 L0,6" fill="none" stroke="#facc15" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="0.8" />
+    </marker>
+    <marker id="arrowhead3" markerWidth="8" markerHeight="6" refX="4" refY="3" orient="auto-start-reverse">
+      <path d="M0,0 L4,3 L0,6" fill="none" stroke="#818cf8" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="0.8" />
+    </marker>
+    <marker id="arrowhead4" markerWidth="8" markerHeight="6" refX="4" refY="3" orient="auto-start-reverse">
+      <path d="M0,0 L4,3 L0,6" fill="none" stroke="#a78bfa" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="0.8" />
+    </marker>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="400" fill="url(#backgroundGrad)" rx="12" ry="12" />
+  
+  <!-- Ambient Particles -->
+  <g class="particles">
+    <circle cx="130" cy="90" r="1.5" fill="#f472b6" class="particle1" />
+    <circle cx="670" cy="340" r="1" fill="#facc15" class="particle2" />
+    <circle cx="280" cy="360" r="1.2" fill="#8b5cf6" class="particle3" />
+    <circle cx="500" cy="70" r="1" fill="#a78bfa" class="particle1" />
+    <circle cx="400" cy="60" r="0.8" fill="#818cf8" class="particle2" />
+    <circle cx="720" cy="180" r="1" fill="#f472b6" class="particle3" />
+    <circle cx="100" cy="270" r="1" fill="#facc15" class="particle1" />
+    <circle cx="620" cy="310" r="0.8" fill="#8b5cf6" class="particle2" />
+    <circle cx="310" cy="120" r="1" fill="#f472b6" class="particle3" />
+    <circle cx="460" cy="130" r="1.2" fill="#facc15" class="particle1" />
+    <circle cx="200" cy="300" r="0.8" fill="#818cf8" class="particle2" />
+    <circle cx="600" cy="270" r="1" fill="#a78bfa" class="particle3" />
+  </g>
+  
+  <!-- Connections (Layered for effect) -->
+  <g class="connections">
+    <!-- Secondary Connections (Finer) -->
+    <path d="M250,150 C235,175 195,195 180,220" fill="none" stroke="#f472b6" stroke-width="0.8" opacity="0.5" class="connection secondary" />
+    <path d="M550,150 C565,175 605,195 620,220" fill="none" stroke="#facc15" stroke-width="0.8" opacity="0.5" class="connection secondary" />
+    <path d="M250,150 C270,125 310,95 350,80" fill="none" stroke="#f472b6" stroke-width="0.8" opacity="0.5" class="connection secondary" />
+    <path d="M550,150 C530,125 490,95 450,80" fill="none" stroke="#facc15" stroke-width="0.8" opacity="0.5" class="connection secondary" />
+    <path d="M300,300 C315,308 335,314 350,320" fill="none" stroke="#818cf8" stroke-width="0.8" opacity="0.5" class="connection secondary" />
+    <path d="M500,300 C485,308 465,314 450,320" fill="none" stroke="#a78bfa" stroke-width="0.8" opacity="0.5" class="connection secondary" />
+    
+    <!-- Primary Connections (Removed Glow, adjusted style) -->
+    <!-- Removed filter="url(#nodeGlow)" from this group -->
+    <g> 
+      <path d="M400,200 C355,190 295,168 250,150" fill="none" stroke="#f472b6" stroke-width="1.8" opacity="0.7" class="connection primary" marker-end="url(#arrowhead)" />
+      <path d="M400,200 C365,225 325,285 300,300" fill="none" stroke="#818cf8" stroke-width="1.8" opacity="0.7" class="connection primary" marker-end="url(#arrowhead3)" />
+      <path d="M400,200 C445,190 505,168 550,150" fill="none" stroke="#facc15" stroke-width="1.8" opacity="0.7" class="connection primary" marker-end="url(#arrowhead2)" />
+      <path d="M400,200 C435,225 475,285 500,300" fill="none" stroke="#a78bfa" stroke-width="1.8" opacity="0.7" class="connection primary" marker-end="url(#arrowhead4)" />
+    </g>
+  </g>
+  
+  <!-- Secondary Nodes (Subtle) -->
+  <g class="nodes secondary-nodes node-group">
+    <circle cx="180" cy="220" r="11" fill="#f472b6" opacity="0.8" class="node small-node" />
+    <circle cx="620" cy="220" r="11" fill="#facc15" opacity="0.8" class="node small-node" />
+    <circle cx="350" cy="80" r="9" fill="#f472b6" opacity="0.8" class="node small-node" />
+    <circle cx="450" cy="80" r="9" fill="#facc15" opacity="0.8" class="node small-node" />
+    <circle cx="350" cy="320" r="9" fill="#818cf8" opacity="0.8" class="node small-node" />
+    <circle cx="450" cy="320" r="9" fill="#a78bfa" opacity="0.8" class="node small-node" />
+  </g>
+  
+  <!-- Topic Nodes (Professional Look) -->
+  <g class="nodes topic-nodes node-group">
+    <g class="topic-node-container">
+      <circle cx="250" cy="150" r="30" fill="url(#thoughtsGrad)" class="node topic-node" stroke="#fff" stroke-width="1" stroke-opacity="0.6" />
+      <text x="250" y="155" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="500" class="node-label">Thoughts</text>
+    </g>
+    <g class="topic-node-container">
+      <circle cx="300" cy="300" r="30" fill="url(#feelingsGrad)" class="node topic-node" stroke="#fff" stroke-width="1" stroke-opacity="0.6" />
+      <text x="300" y="305" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="500" class="node-label">Feelings</text>
+    </g>
+    <g class="topic-node-container">
+      <circle cx="550" cy="150" r="30" fill="url(#patternsGrad)" class="node topic-node" stroke="#fff" stroke-width="1" stroke-opacity="0.6" />
+      <text x="550" y="155" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="500" class="node-label">Patterns</text>
+    </g>
+    <g class="topic-node-container">
+      <circle cx="500" cy="300" r="30" fill="url(#insightsGrad)" class="node topic-node" stroke="#fff" stroke-width="1" stroke-opacity="0.6" />
+      <text x="500" y="305" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="500" class="node-label">Insights</text>
+    </g>
+  </g>
+  
+  <!-- Main Memory Node (Clean & Prominent) -->
+  <g class="nodes memory-node node-group">
+    <circle cx="400" cy="200" r="42" fill="url(#memoryGrad)" class="mainNode" stroke="#fff" stroke-width="1.5" stroke-opacity="0.7" />
+    <circle cx="400" cy="200" r="48" fill="none" stroke="url(#memoryGrad)" stroke-width="0.8" stroke-opacity="0.2" class="orbit" />
+    <text x="400" y="205" text-anchor="middle" fill="#ffffff" font-size="15" font-weight="600" class="node-label main-label">Memory</text>
+  </g>
+  
+  <style>
+    /* Professional Font */
+    svg {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    /* Smoother Animations */
+    @keyframes pulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+    
+    @keyframes glow {
+      0%, 100% { r: 42; }
+      50% { r: 43.5; }
+    }
+    
+    @keyframes orbit {
+      from { transform: rotate(0deg) translateX(1px) rotate(0deg); }
+      to { transform: rotate(360deg) translateX(1px) rotate(-360deg); }
+    }
+    
+    @keyframes topicPulse {
+      0%, 100% { r: 30; }
+      50% { r: 31; }
+    }
+    
+    @keyframes pathAnim {
+      from { stroke-dashoffset: 20; }
+      to { stroke-dashoffset: 0; }
+    }
+    
+    @keyframes particleFloat {
+      0%, 100% { transform: translate(0, 0); opacity: 0.1; }
+      25% { transform: translate(2px, -3px); opacity: 0.3; }
+      50% { transform: translate(-1px, 2px); opacity: 0.4; }
+      75% { transform: translate(3px, 1px); opacity: 0.3; }
+    }
+    
+    @keyframes labelPulse {
+      0%, 100% { opacity: 0.9; }
+      50% { opacity: 1; }
+    }
+    
+    /* NEW: Random-like Drift Animation */
+    @keyframes nodeDrift {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(4px, -2px); }
+      50% { transform: translate(-3px, 3px); }
+      75% { transform: translate(2px, 4px); }
+      100% { transform: translate(0, 0); }
+    }
+    
+    /* Apply Animations with Professional Timing */
+    .mainNode {
+      animation: glow 6s ease-in-out infinite;
+    }
+    
+    .orbit {
+      transform-origin: 400px 200px;
+      animation: orbit 25s linear infinite;
+    }
+    
+    .topic-node {
+      animation: topicPulse 7s ease-in-out infinite;
+    }
+    
+    .primary-connection {
+      /* Changed stroke-dasharray */
+      stroke-dasharray: 3 3; 
+      animation: pulse 5s ease-in-out infinite, pathAnim 22s linear infinite reverse;
+    }
+    
+    .secondary {
+      /* Changed stroke-dasharray */
+      stroke-dasharray: 2 3; 
+      animation: pulse 6s ease-in-out infinite, pathAnim 28s linear infinite;
+    }
+    
+    .node-label {
+      animation: labelPulse 5s ease-in-out infinite;
+    }
+    
+    .main-label {
+      animation: labelPulse 4s ease-in-out infinite;
+    }
+    
+    .small-node {
+      animation: pulse 8s ease-in-out infinite;
+    }
+    
+    /* Refined Staggering */
+    .topic-node-container:nth-child(1) .topic-node { animation-delay: 0s; }
+    .topic-node-container:nth-child(2) .topic-node { animation-delay: 1.8s; }
+    .topic-node-container:nth-child(3) .topic-node { animation-delay: 3.6s; }
+    .topic-node-container:nth-child(4) .topic-node { animation-delay: 5.4s; }
+    
+    /* Particle Animations */
+    .particle1 { animation: particleFloat 14s ease-in-out infinite; animation-delay: 0s; }
+    .particle2 { animation: particleFloat 18s ease-in-out infinite; animation-delay: 1s; }
+    .particle3 { animation: particleFloat 16s ease-in-out infinite; animation-delay: 2s; }
+    
+    .particles circle:nth-child(3n) { animation-delay: calc(var(--base-delay, 0s) + 0.5s); }
+    .particles circle:nth-child(4n) { animation-delay: calc(var(--base-delay, 0s) + 1s); }
+    .particles circle:nth-child(5n) { animation-delay: calc(var(--base-delay, 0s) + 1.5s); }
+    
+    /* Apply Node Drift Animation */
+    .node-group {
+      /* animation: nodeDrift 15s ease-in-out infinite alternate; */ /* Apply to all node groups */
+    }
+    /* Apply slightly different drift to different groups for variety */
+     .memory-node { animation: nodeDrift 18s ease-in-out infinite alternate; animation-delay: -2s; }
+     .topic-nodes { animation: nodeDrift 22s ease-in-out infinite alternate; animation-delay: 0s; }
+     .secondary-nodes { animation: nodeDrift 25s ease-in-out infinite alternate; animation-delay: -5s; }
+  </style>
+</svg> 

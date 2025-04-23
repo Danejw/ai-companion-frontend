@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "@/app/globals.css";
 import Header from "@/components/header";
 import { ClientProviders } from "@/components/providers/ClientProviders";
 import { RenderOverlays } from "@/components/layout/RenderOverlays";
@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Knolia",
   description: "The Personalized AI Companion for your life",
-  manifest: "/manifest.json", // 👈 this registers your manifest
+  manifest: "/manifest.json", // 👈 this registers your manifest for PWA
 
 };
 
