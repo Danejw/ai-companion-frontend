@@ -17,7 +17,7 @@ export default function Header() {
     const toggleSettingsOverlay = useUIStore((state) => state.toggleSettingsOverlay);
     const toggleHistoryOverlay = useUIStore((state) => state.toggleHistoryOverlay);
     const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
-    const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
+    // onst toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
     const toggleNotificationsOverlay = useUIStore((state) => state.toggleNotificationsOverlay);
     
     // Add state for mobile detection

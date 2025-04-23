@@ -36,7 +36,7 @@ export function RenderOverlays() {
     const toggleSettingsOverlay = useUIStore((state) => state.toggleSettingsOverlay);
     const toggleHistoryOverlay = useUIStore((state) => state.toggleHistoryOverlay);
     const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
-    const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
+    // const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
     const toggleCaptureOverlay = useUIStore((state) => state.toggleCaptureOverlay);
     const toggleNotificationsOverlay = useUIStore((state) => state.toggleNotificationsOverlay);
 
@@ -73,7 +73,7 @@ export function RenderOverlays() {
             <SettingsOverlay open={isSettingsOpen} onOpenChange={toggleSettingsOverlay} />
             <HistoryOverlay open={isHistoryOpen} onOpenChange={toggleHistoryOverlay} />
             <KnowledgeOverlay open={isKnowledgeOpen} onOpenChange={toggleKnowledgeOverlay} />
-            <InfoOverlay open={isInfoOpen} onOpenChange={toggleInfoOverlay} />
+            {/* <InfoOverlay open={isInfoOpen} onOpenChange={toggleInfoOverlay} /> */}
             <CaptureOverlay open={isCaptureOpen} onOpenChange={toggleCaptureOverlay} />
             <PushNotificationOverlay open={isNotificationsOpen} onOpenChange={toggleNotificationsOverlay} />
             
