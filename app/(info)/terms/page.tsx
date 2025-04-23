@@ -20,7 +20,7 @@ export default function TermsOfServicePage() {
       {/* Using prose for nice typography - requires @tailwindcss/typography */}
       <div className="prose prose-lg dark:prose-invert max-w-none space-y-6">
         <p>
-            <span className="font-bold">Welcome to Knolia!</span> These Terms of Service ("Terms") govern your access to and use of the Knolia AI companion application, website, APIs, and related services (collectively, the "Services") provided by Knolia ("Knolia," "we," "us," or "our").
+            <span className="font-bold">Welcome to Knolia!</span> These Terms of Service (&quot;Terms&quot;) govern your access to and use of the Knolia AI companion application, website, APIs, and related services (collectively, the &quot;Services&quot;) provided by Knolia (&quot;Knolia,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;).
         </p>
         <p>
           Please read these Terms carefully before using our Services. By accessing or using the Services, you agree to be bound by these Terms and our <Link href={privacyPolicyPath} className="text-primary hover:underline">Privacy Policy</Link>. If you do not agree to these Terms, you may not access or use the Services.
@@ -39,7 +39,7 @@ export default function TermsOfServicePage() {
         </p>
         <ul className="list-disc pl-6 space-y-2">
           <li>Conversational interaction with an AI model.</li>
-          <li>A "memory" system where Knolia learns from your conversations to provide a more personalized and continuous experience.</li>
+          <li>A &quot;memory&quot; system where Knolia learns from your conversations to provide a more personalized and continuous experience.</li>
           <li>Features related to recalling past thoughts or themes based on conversation history.</li>
         </ul>
          <p>
@@ -73,7 +73,7 @@ export default function TermsOfServicePage() {
         <h2 className="text-2xl font-semibold pt-4">5. Content</h2>
         <h3 className="text-xl font-medium">User Content:</h3>
         <p>
-            You retain ownership of the content you create during your conversations with Knolia ("User Content"). By using the Services, you grant Knolia a worldwide, non-exclusive, royalty-free, sublicensable, and transferable license to use, reproduce, modify, adapt, distribute, store, and process your User Content solely for the purposes of operating, providing, improving, and developing the Services. This includes using User Content (often in anonymized and aggregated forms) to train the AI models that power Knolia. Our use of your User Content is also governed by our <Link href={privacyPolicyPath} className="text-primary hover:underline">Privacy Policy</Link>. You are solely responsible for your User Content and the consequences of sharing it.
+            You retain ownership of the content you create during your conversations with Knolia (&quot;User Content&quot;). By using the Services, you grant Knolia a worldwide, non-exclusive, royalty-free, sublicensable, and transferable license to use, reproduce, modify, adapt, distribute, store, and process your User Content solely for the purposes of operating, providing, improving, and developing the Services. This includes using User Content (often in anonymized and aggregated forms) to train the AI models that power Knolia. Our use of your User Content is also governed by our <Link href={privacyPolicyPath} className="text-primary hover:underline">Privacy Policy</Link>. You are solely responsible for your User Content and the consequences of sharing it.
         </p>
          <h3 className="text-xl font-medium">Knolia Content:</h3>
         <p>
@@ -110,19 +110,19 @@ export default function TermsOfServicePage() {
         {/* --- Section 10 --- */}
         <h2 className="text-2xl font-semibold pt-4">10. Disclaimers of Warranties</h2>
         <p>
-            THE SERVICES ARE PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, OR COURSE OF PERFORMANCE. KNOLIA DOES NOT WARRANT THAT THE SERVICES WILL BE UNINTERRUPTED, SECURE, ERROR-FREE, ACCURATE, RELIABLE, OR THAT ANY DEFECTS WILL BE CORRECTED.
+            THE SERVICES ARE PROVIDED ON AN &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, OR COURSE OF PERFORMANCE. KNOLIA DOES NOT WARRANT THAT THE SERVICES WILL BE UNINTERRUPTED, SECURE, ERROR-FREE, ACCURATE, RELIABLE, OR THAT ANY DEFECTS WILL BE CORRECTED.
         </p>
 
         {/* --- Section 11 --- */}
         <h2 className="text-2xl font-semibold pt-4">11. Limitation of Liability</h2>
         <p>
-            TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL KNOLIA, ITS AFFILIATES, DIRECTORS, EMPLOYEES, OR LICENSORS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES, RESULTING FROM (A) YOUR ACCESS TO OR USE OF OR INABILITY TO ACCESS OR USE THE SERVICES; (B) ANY CONDUCT OR CONTENT OF ANY THIRD PARTY ON THE SERVICES; (C) ANY CONTENT OBTAINED FROM THE SERVICES (INCLUDING ANY RELIANCE ON SUCH CONTENT); OR (D) UNAUTHORIZED ACCESS, USE, OR ALTERATION OF YOUR TRANSMISSIONS OR CONTENT, WHETHER BASED ON WARRANTY, CONTRACT, TORT (INCLUDING NEGLIGENCE), OR ANY OTHER LEGAL THEORY, WHETHER OR NOT WE HAVE BEEN INFORMED OF THE POSSIBILITY OF SUCH DAMAGE. IN NO EVENT SHALL KNOLIA'S AGGREGATE LIABILITY EXCEED THE GREATER OF ONE HUNDRED U.S. DOLLARS (USD $100.00) OR THE AMOUNT YOU PAID KNOLIA, IF ANY, IN THE PAST SIX MONTHS FOR THE SERVICES GIVING RISE TO THE CLAIM.
+            TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL KNOLIA, ITS AFFILIATES, DIRECTORS, EMPLOYEES, OR LICENSORS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES, RESULTING FROM (A) YOUR ACCESS TO OR USE OF OR INABILITY TO ACCESS OR USE THE SERVICES; (B) ANY CONDUCT OR CONTENT OF ANY THIRD PARTY ON THE SERVICES; (C) ANY CONTENT OBTAINED FROM THE SERVICES (INCLUDING ANY RELIANCE ON SUCH CONTENT); OR (D) UNAUTHORIZED ACCESS, USE, OR ALTERATION OF YOUR TRANSMISSIONS OR CONTENT, WHETHER BASED ON WARRANTY, CONTRACT, TORT (INCLUDING NEGLIGENCE), OR ANY OTHER LEGAL THEORY, WHETHER OR NOT WE HAVE BEEN INFORMED OF THE POSSIBILITY OF SUCH DAMAGE. IN NO EVENT SHALL KNOLIA&apos;S AGGREGATE LIABILITY EXCEED THE GREATER OF ONE HUNDRED U.S. DOLLARS (USD $100.00) OR THE AMOUNT YOU PAID KNOLIA, IF ANY, IN THE PAST SIX MONTHS FOR THE SERVICES GIVING RISE TO THE CLAIM.
         </p>
 
         {/* --- Section 12 --- */}
         <h2 className="text-2xl font-semibold pt-4">12. Indemnification</h2>
         <p>
-            You agree to defend, indemnify, and hold harmless Knolia and its licensee and licensors, and their employees, contractors, agents, officers, and directors, from and against any and all claims, damages, obligations, losses, liabilities, costs or debt, and expenses (including but not limited to attorney's fees), resulting from or arising out of (a) your use and access of the Service, by you or any person using your account and password; or (b) a breach of these Terms, or (c) your User Content.
+            You agree to defend, indemnify, and hold harmless Knolia and its licensee and licensors, and their employees, contractors, agents, officers, and directors, from and against any and all claims, damages, obligations, losses, liabilities, costs or debt, and expenses (including but not limited to attorney&apos;s fees), resulting from or arising out of (a) your use and access of the Service, by you or any person using your account and password; or (b) a breach of these Terms, or (c) your User Content.
         </p>
 
         {/* --- Section 13 --- */}
@@ -140,7 +140,7 @@ export default function TermsOfServicePage() {
         {/* --- Section 15 --- */}
         <h2 className="text-2xl font-semibold pt-4">15. Changes to Terms</h2>
         <p>
-            We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days' notice prior to any new terms taking effect, which may be provided via the Services or by email. What constitutes a material change will be determined at our sole discretion. By continuing to access or use our Services after any revisions become effective, you agree to be bound by the revised terms.
+            We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days&apos; notice prior to any new terms taking effect, which may be provided via the Services or by email. What constitutes a material change will be determined at our sole discretion. By continuing to access or use our Services after any revisions become effective, you agree to be bound by the revised terms.
         </p>
 
         {/* --- Section 16 --- */}

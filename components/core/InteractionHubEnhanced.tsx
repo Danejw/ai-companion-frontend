@@ -8,10 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { submitFeedback } from "@/lib/api/feedback";
 import { textToSpeech } from "@/lib/api/voice"; // Import textToSpeech function
-import AudioVisualizer from "../Visualizer";
-import { Button } from "../ui/button";
+import AudioVisualizer from "@/components/Visualizer";
+import { Button } from "@/components/ui/button";
 import { useUIStore } from '@/store'; // Import the store
-import { MarkdownRenderer } from "../MarkdownRenderer";
+import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { submitFinetuneFeedback } from "@/lib/api/finetune_feedback"; // Import the new function
 import { FinetuneFeedbackPayload } from "@/lib/api/finetune_feedback";
 

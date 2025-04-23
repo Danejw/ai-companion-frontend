@@ -8,10 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from 'lucide-react';
 import { toast } from "sonner"; // Assuming sonner is used for notifications
 
-const metadata = {
-  title: "Knolia - Contact Us",
-  description: "Get in touch with the Knolia team.",
-};
+// const metadata = {
+//   title: "Knolia - Contact Us",
+//   description: "Get in touch with the Knolia team.",
+// };
 
 export default function ContactPage() {
   const [name, setName] = useState('');
@@ -46,10 +46,10 @@ export default function ContactPage() {
       setEmail('');
       setMessage('');
 
-    } catch (err: any) {
+    } catch (err) {
       console.error("Contact form error:", err);
-      setError(err.message || 'Failed to send message. Please try again later.');
-      toast.error(err.message || 'Failed to send message.');
+      setError('Failed to send message. Please try again later.');
+      toast.error('Failed to send message.');
     } finally {
       setIsLoading(false);
     }

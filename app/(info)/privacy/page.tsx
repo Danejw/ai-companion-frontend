@@ -19,7 +19,7 @@ export default function PrivacyPolicyPage() {
 
       <div className="prose prose-lg dark:prose-invert max-w-none space-y-6">
         <p>
-          Welcome to Knolia! We are committed to protecting your privacy and handling your data in an open and transparent manner. This Privacy Policy explains how we collect, use, store, share, and protect your information when you interact with Knolia, our AI companion application, website, and related services (collectively, the "Services").
+          Welcome to Knolia! We are committed to protecting your privacy and handling your data in an open and transparent manner. This Privacy Policy explains how we collect, use, store, share, and protect your information when you interact with Knolia, our AI companion application, website, and related services (collectively, the &quot;Services&quot;).
         </p>
         <p>
           By using our Services, you agree to the collection and use of information in accordance with this policy.
@@ -61,7 +61,7 @@ export default function PrivacyPolicyPage() {
         <ul className="list-disc pl-6 space-y-2">
             <li><strong>To Provide and Maintain Our Services:</strong> To operate Knolia, enable conversations, personalize your experience, and provide customer support.</li>
             <li><strong>To Improve Our Services:</strong> To understand how users interact with Knolia, analyze usage patterns, train our AI models (using anonymized and aggregated data where possible), develop new features, and fix bugs.</li>
-            <li><strong>To Personalize Your Experience:</strong> Knolia uses your past interactions (your "memory") to provide more relevant, contextual, and personalized conversations over time. This memory is core to the Knolia experience.</li>
+            <li><strong>To Personalize Your Experience:</strong> Knolia uses your past interactions (your &quot;memory&quot;) to provide more relevant, contextual, and personalized conversations over time. This memory is core to the Knolia experience.</li>
             <li><strong>To Communicate With You:</strong> To send you important updates, security alerts, support messages, and information about features or changes (you can opt-out of non-essential communications).</li>
             <li><strong>For Safety and Security:</strong> To detect and prevent fraud, abuse, security risks, and technical issues.</li>
             <li><strong>To Comply with Legal Obligations:</strong> To comply with applicable laws, regulations, legal processes, or enforceable governmental requests.</li>
@@ -71,7 +71,7 @@ export default function PrivacyPolicyPage() {
         <ul className="list-disc pl-6 space-y-2">
             <li><strong>Data Storage:</strong> Your conversation data and account information are stored on secure servers. We utilize cloud infrastructure providers known for their robust security practices.</li>
             <li><strong>Security Measures:</strong> We implement industry-standard technical and organizational security measures designed to protect your information from unauthorized access, disclosure, alteration, and destruction. These include encryption (both in transit and at rest where appropriate), access controls, and regular security reviews. However, please note that no method of transmission over the Internet or electronic storage is 100% secure.</li>
-            <li><strong>Data Retention:</strong> We retain your personal information for as long as necessary to provide the Services, fulfill the purposes outlined in this policy, comply with our legal obligations, resolve disputes, and enforce our agreements. Conversation history may be retained to maintain Knolia's memory unless you choose to delete specific interactions or your entire account.</li>
+            <li><strong>Data Retention:</strong> We retain your personal information for as long as necessary to provide the Services, fulfill the purposes outlined in this policy, comply with our legal obligations, resolve disputes, and enforce our agreements. Conversation history may be retained to maintain Knolia&apos;s memory unless you choose to delete specific interactions or your entire account.</li>
         </ul>
 
         <h2 className="text-2xl font-semibold pt-4">4. How We Share Your Information</h2>
@@ -107,14 +107,14 @@ export default function PrivacyPolicyPage() {
           We use cookies and similar technologies (like web beacons or pixels) to operate and personalize the Services, analyze usage, and manage sessions. {/* Optional: Our Cookie Policy [Link] provides more detail. */}
         </p>
 
-        <h2 className="text-2xl font-semibold pt-4">7. Children's Privacy</h2>
+        <h2 className="text-2xl font-semibold pt-4">7. Children&apos;s Privacy</h2>
         <p>
           Knolia is not intended for use by individuals under the age of 13 (or a higher age threshold depending on the jurisdiction). We do not knowingly collect personal information from children under this age. If we become aware that we have collected such information, we will take steps to delete it.
         </p>
 
         <h2 className="text-2xl font-semibold pt-4">8. Changes to This Privacy Policy</h2>
         <p>
-          We may update this Privacy Policy from time to time. We will notify you of any significant changes by posting the new policy on this page and updating the "Last Updated" date. We may also provide notice through the Services or via email. We encourage you to review this Privacy Policy periodically.
+          We may update this Privacy Policy from time to time. We will notify you of any significant changes by posting the new policy on this page and updating the &quot;Last Updated&quot; date. We may also provide notice through the Services or via email. We encourage you to review this Privacy Policy periodically.
         </p>
 
         <h2 className="text-2xl font-semibold pt-4">9. Contact Us</h2>
