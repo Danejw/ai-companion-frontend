@@ -41,7 +41,7 @@ export default function InteractionHubVoice() {
     const toggleSettingsOverlay = useUIStore((state) => state.toggleSettingsOverlay);
     const toggleHistoryOverlay = useUIStore((state) => state.toggleHistoryOverlay);
     const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
-    const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
+    // const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
     const toggleNotificationsOverlay = useUIStore((state) => state.toggleNotificationsOverlay);
     const toggleCaptureOverlay = useUIStore((state) => state.toggleCaptureOverlay);
 
