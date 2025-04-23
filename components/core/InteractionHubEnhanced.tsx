@@ -95,7 +95,7 @@ export default function InteractionHubVoice() {
 
 
     console.log(recording, messages, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated, lastAiResponse);
-
+    console.log("Knolia is running");
 
     // Add effect to scroll to bottom when content changes
     useEffect(() => {
