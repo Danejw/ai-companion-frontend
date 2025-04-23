@@ -66,11 +66,10 @@ export default function Header() {
 
                     {/* --- Unauthenticated State --- */}
                     {status === 'unauthenticated' && (
-                        // Single button to open the Auth Overlay
                         <Button variant="outline" size="sm" onClick={() => toggleAuthOverlay(true)}>
-                            <LogIn className="mr-1 h-4 w-4 sm:mr-2" /> {/* Adjusted margin for mobile */}
-                            <span className="hidden sm:inline">Login / Sign Up</span> {/* Hide text on mobile */}
-                            <span className="sm:hidden">Login</span> {/* Show shorter text on mobile */}
+                            <LogIn className="mr-1 h-4 w-4 sm:mr-2" />
+                            <span className="hidden sm:inline">Login / Sign Up</span>
+                            <span className="sm:hidden">Login</span>
                         </Button>
                     )}
 
