@@ -63,7 +63,7 @@ export default function InfoHeader() {
                             <SheetContent side="right" className="w-60">
                                 <div className="flex flex-col space-y-3 py-4">
                                     <Button asChild variant="ghost" size="sm" className="justify-start">
-                                        <Link href="/about">About</Link>
+                                        <Link href="/welcome">Home</Link>
                                     </Button>
                                      <Button asChild variant="ghost" size="sm" className="justify-start">
                                         <Link href="/privacy">Privacy</Link>

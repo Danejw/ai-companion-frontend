@@ -52,7 +52,17 @@ export default function AudioVisualizer() {
     // useEffect(() => { setSpeed(0.08) }, [someTrigger])
 
     return (
-        <svg width="200" height="200" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+        <svg width="200" height="200" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+            {/* Temporary background rectangle
+            <rect
+                x="0"       // Corresponds to viewBox min-x
+                y="40"      // Corresponds to viewBox min-y
+                width="200" // Corresponds to viewBox width
+                height="200"// Corresponds to viewBox height
+                fill="rgba(200, 200, 200, 0.3)" // Light gray, semi-transparent
+            /> */}
+
+            {/* Existing circles */}
             {colors.map((color, i) => (
                 <circle
                     key={i}

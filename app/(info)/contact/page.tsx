@@ -56,64 +56,66 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="container mx-auto max-w-2xl px-4 py-12 md:py-16">
-      <h1 className="text-3xl md:text-4xl font-bold mb-6 text-center">Contact Us</h1>
-      <p className="text-muted-foreground mb-8 text-center">
-        Have questions, feedback, or just want to say hello? Fill out the form below.
-      </p>
+    <div className="min-h-screen flex items-center justify-center bg-accent/20 p-4">
+      <div className="w-full max-w-lg bg-white rounded-lg shadow-lg p-8">
+        <h1 className="text-3xl md:text-4xl font-bold mb-6 text-center">Contact Us</h1>
+        <p className="text-gray-700 mb-8 text-center">
+          Have questions, feedback, or just want to say hello? Fill out the form below.
+        </p>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="name">Name</Label>
-          <Input
-            id="name"
-            type="text"
-            placeholder="Your Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            disabled={isLoading}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="your.email@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            disabled={isLoading}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="message">Message</Label>
-          <Textarea
-            id="message"
-            placeholder="Your message..."
-            rows={5}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            required
-            disabled={isLoading}
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              type="text"
+              placeholder="Your Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              disabled={isLoading}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="your.email@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={isLoading}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="message">Message</Label>
+            <Textarea
+              id="message"
+              placeholder="Your message..."
+              rows={5}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              required
+              disabled={isLoading}
+            />
+          </div>
 
-        {error && (
-          <p className="text-sm text-red-600 dark:text-red-500">{error}</p>
-        )}
-
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
-            </>
-          ) : (
-            'Send Message'
+          {error && (
+            <p className="text-sm text-red-600 dark:text-red-500">{error}</p>
           )}
-        </Button>
-      </form>
+
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
+              </>
+            ) : (
+              'Send Message'
+            )}
+          </Button>
+        </form>
+      </div>
     </div>
   );
 } 
