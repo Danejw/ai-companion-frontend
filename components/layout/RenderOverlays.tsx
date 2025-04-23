@@ -13,7 +13,7 @@ import AuthOverlay from '@/components/overlays/AuthOverlay';
 import CreditsOverlay from '@/components/overlays/CreditsOverlay';
 import HistoryOverlay from '@/components/overlays/HistoryOverlay';
 import KnowledgeOverlay from '@/components/overlays/KnowledgeOverlay';
-import InfoOverlay from '@/components/overlays/InfoOverlay';
+// import InfoOverlay from '@/components/overlays/InfoOverlay';
 import SettingsOverlay from '@/components/overlays/SettingsOverlay';
 import CaptureOverlay from '@/components/overlays/CaptureOverlay';
 import PushNotificationOverlay from '@/components/overlays/PushNotificationsOverlay';
@@ -27,7 +27,7 @@ export function RenderOverlays() {
     const isSettingsOpen = useUIStore((state) => state.isSettingsOpen);
     const isHistoryOpen = useUIStore((state) => state.isHistoryOpen);
     const isKnowledgeOpen = useUIStore((state) => state.isKnowledgeOpen);
-    const isInfoOpen = useUIStore((state) => state.isInfoOpen);
+    // const isInfoOpen = useUIStore((state) => state.isInfoOpen);
     const isCaptureOpen = useUIStore((state) => state.isCaptureOpen);
     const isNotificationsOpen = useUIStore((state) => state.isNotificationsOpen);
 

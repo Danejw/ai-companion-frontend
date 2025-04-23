@@ -8,7 +8,7 @@ interface UIState {
     isSettingsOpen: boolean;
     isAuthOpen: boolean;
     isKnowledgeOpen: boolean;
-    isInfoOpen: boolean;
+    // isInfoOpen: boolean;
     isCaptureOpen: boolean;
     isNotificationsOpen: boolean;
     isRawMode: boolean;
@@ -50,7 +50,7 @@ export const useUIStore = create<UIState>()(
             isSettingsOpen: false,
             isAuthOpen: false,
             isKnowledgeOpen: false,
-            isInfoOpen: false,
+            // isInfoOpen: false,
             isCaptureOpen: false,
             isNotificationsOpen: false,
             isRawMode: false,
