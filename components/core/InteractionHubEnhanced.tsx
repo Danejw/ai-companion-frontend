@@ -554,8 +554,8 @@ export default function InteractionHubVoice() {
                         }
 
                         else if (msg.action === 'toggle_inoformation') {
-                            toggleInfoOverlay(true);
-                            console.log("Information Overlay Opened");
+                            // toggleInfoOverlay(true);
+                            //console.log("Information Overlay Opened");
                         }
 
                         else if (msg.action === 'toggle_capture') {

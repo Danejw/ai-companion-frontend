@@ -42,7 +42,7 @@ export default function Header() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => toggleInfoOverlay(true)}
+                        // onClick={() => toggleInfoOverlay(true)}
                         title="About & Information"
                     >
                         <Info 
