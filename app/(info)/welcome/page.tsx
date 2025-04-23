@@ -42,7 +42,7 @@ export default function WelcomePage() {
       <Background />
 
       {/* Hero Section */}
-      <section className="w-full max-w-6xl mx-auto px-4 py-16 flex flex-col md:flex-row items-center gap-12 relative">
+      <section className="w-full max-w-6xl mx-auto px-4 py-16 flex flex-col md:flex-row items-center gap-12 relative text-gray-700">
         <div className="flex flex-col space-y-6 md:w-1/2 animate-in slide-in-from-left duration-700">
 
         
@@ -95,7 +95,7 @@ export default function WelcomePage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="w-full bg-white/0 py-16">
+      <section className="w-full py-16 bg-white/0">
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-8 animate-in fade-in duration-1000">How It Works</h2>
           <p className="text-xl text-center max-w-3xl mx-auto mb-10 animate-in fade-in duration-1000 delay-200">
@@ -136,7 +136,7 @@ export default function WelcomePage() {
       </section>
 
       {/* What Makes Knolia Different */}
-      <section className="w-full py-16 bg-gradient-to-b from-white to-accent/20">
+      <section className="w-full py-16 bg-gradient-to-b from-white to-accent/20 text-gray-700">
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-8 animate-in fade-in duration-1000">What Makes <span className="text-accent font-bold">Knolia</span> Different</h2>
           <p className="text-xl text-center max-w-3xl mx-auto mb-10 animate-in fade-in duration-1000 delay-200">
@@ -195,14 +195,14 @@ export default function WelcomePage() {
       </section>
 
       {/* Call to Action */}
-      <section className="w-full py-16 bg-gradient-to-b from-accent/20 to-white">
+      <section className="w-full py-16 bg-gradient-to-b from-accent/20 to-white text-gray-700">
         <div className="max-w-4xl mx-auto px-4 text-center animate-in fade-in duration-1000">
           <h2 className="text-3xl font-bold mb-6">When you&apos;re ready, <span className="text-accent">Knolia</span>&apos;s here.</h2>
           
           <div className="space-y-4 mb-8">
             <p className="text-xl">Talk. Vent. Explore. Heal.</p>
-            <p className="text-lg">Speak freely. Reflect deeply. Feel heard.</p>
-            <p className="text-lg">No performance. No perfect words needed. Just be you, your way.</p>
+            <p className="text-xl">Speak freely. Reflect deeply. Feel heard.</p>
+            <p className="text-xl">No performance. No perfect words needed. Just be you, your way.</p>
           </div>
           
           <Link href="/">
