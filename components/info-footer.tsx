@@ -6,7 +6,7 @@ export default function InfoFooter() {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="w-full py-8 border-t bg-background"> {/* Add bg-background or similar */}
+        <footer className="w-full py-8 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container mx-auto px-4 md:px-6">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                     {/* Logo and Copyright */}

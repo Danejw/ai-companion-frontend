@@ -70,7 +70,7 @@ export default function FloatingBlob({
     return (
         <div
             ref={blobRef}
-            className="absolute rounded-full filter blur-[200px] opacity-30"
+            className="absolute rounded-full filter blur-[100px] opacity-30"
             style={{
                 top: initialTop,
                 left: initialLeft,

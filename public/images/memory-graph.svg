@@ -79,8 +79,7 @@
     <path d="M300,300 C315,308 335,314 350,320" fill="none" stroke="#818cf8" stroke-width="0.8" opacity="0.5" class="connection secondary" />
     <path d="M500,300 C485,308 465,314 450,320" fill="none" stroke="#a78bfa" stroke-width="0.8" opacity="0.5" class="connection secondary" />
     
-    <!-- Primary Connections (Removed Glow, adjusted style) -->
-    <!-- Removed filter="url(#nodeGlow)" from this group -->
+    <!-- Primary Connections  -->
     <g> 
       <path d="M400,200 C355,190 295,168 250,150" fill="none" stroke="#f472b6" stroke-width="1.8" opacity="0.7" class="connection primary" marker-end="url(#arrowhead)" />
       <path d="M400,200 C365,225 325,285 300,300" fill="none" stroke="#818cf8" stroke-width="1.8" opacity="0.7" class="connection primary" marker-end="url(#arrowhead3)" />
@@ -91,37 +90,37 @@
   
   <!-- Secondary Nodes (Subtle) -->
   <g class="nodes secondary-nodes node-group">
-    <circle cx="180" cy="220" r="11" fill="#f472b6" opacity="0.8" class="node small-node" />
-    <circle cx="620" cy="220" r="11" fill="#facc15" opacity="0.8" class="node small-node" />
-    <circle cx="350" cy="80" r="9" fill="#f472b6" opacity="0.8" class="node small-node" />
-    <circle cx="450" cy="80" r="9" fill="#facc15" opacity="0.8" class="node small-node" />
-    <circle cx="350" cy="320" r="9" fill="#818cf8" opacity="0.8" class="node small-node" />
-    <circle cx="450" cy="320" r="9" fill="#a78bfa" opacity="0.8" class="node small-node" />
+    <circle cx="180" cy="220" r="11" fill="#f472b6" opacity="1" class="node small-node" />
+    <circle cx="620" cy="220" r="11" fill="#facc15" opacity="1" class="node small-node" />
+    <circle cx="350" cy="80" r="9" fill="#f472b6" opacity="1" class="node small-node" />
+    <circle cx="450" cy="80" r="9" fill="#facc15" opacity="1" class="node small-node" />
+    <circle cx="350" cy="320" r="9" fill="#818cf8" opacity="1" class="node small-node" />
+    <circle cx="450" cy="320" r="9" fill="#a78bfa" opacity="1" class="node small-node" />
   </g>
   
   <!-- Topic Nodes (Professional Look) -->
   <g class="nodes topic-nodes node-group">
     <g class="topic-node-container">
-      <circle cx="250" cy="150" r="30" fill="url(#thoughtsGrad)" class="node topic-node" stroke="#fff" stroke-width="1" stroke-opacity="0.6" />
+      <circle cx="250" cy="150" r="30" fill="url(#thoughtsGrad)" class="node topic-node" stroke="#fff" stroke-width="1" stroke-opacity="1" />
       <text x="250" y="155" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="500" class="node-label">Thoughts</text>
     </g>
     <g class="topic-node-container">
-      <circle cx="300" cy="300" r="30" fill="url(#feelingsGrad)" class="node topic-node" stroke="#fff" stroke-width="1" stroke-opacity="0.6" />
+      <circle cx="300" cy="300" r="30" fill="url(#feelingsGrad)" class="node topic-node" stroke="#fff" stroke-width="1" stroke-opacity="1" />
       <text x="300" y="305" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="500" class="node-label">Feelings</text>
     </g>
     <g class="topic-node-container">
-      <circle cx="550" cy="150" r="30" fill="url(#patternsGrad)" class="node topic-node" stroke="#fff" stroke-width="1" stroke-opacity="0.6" />
+      <circle cx="550" cy="150" r="30" fill="url(#patternsGrad)" class="node topic-node" stroke="#fff" stroke-width="1" stroke-opacity="1" />
       <text x="550" y="155" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="500" class="node-label">Patterns</text>
     </g>
     <g class="topic-node-container">
-      <circle cx="500" cy="300" r="30" fill="url(#insightsGrad)" class="node topic-node" stroke="#fff" stroke-width="1" stroke-opacity="0.6" />
+      <circle cx="500" cy="300" r="30" fill="url(#insightsGrad)" class="node topic-node" stroke="#fff" stroke-width="1" stroke-opacity="1" />
       <text x="500" y="305" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="500" class="node-label">Insights</text>
     </g>
   </g>
   
   <!-- Main Memory Node (Clean & Prominent) -->
   <g class="nodes memory-node node-group">
-    <circle cx="400" cy="200" r="42" fill="url(#memoryGrad)" class="mainNode" stroke="#fff" stroke-width="1.5" stroke-opacity="0.7" />
+    <circle cx="400" cy="200" r="42" fill="url(#memoryGrad)" class="mainNode" stroke="#fff" stroke-width="1.5" stroke-opacity="1" />
     <circle cx="400" cy="200" r="48" fill="none" stroke="url(#memoryGrad)" stroke-width="0.8" stroke-opacity="0.2" class="orbit" />
     <text x="400" y="205" text-anchor="middle" fill="#ffffff" font-size="15" font-weight="600" class="node-label main-label">Memory</text>
   </g>
@@ -134,7 +133,7 @@
     
     /* Smoother Animations */
     @keyframes pulse {
-      0%, 100% { opacity: 0.7; }
+      0%, 100% { opacity: 1; }
       50% { opacity: 1; }
     }
     

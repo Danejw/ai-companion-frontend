@@ -1,9 +1,14 @@
 import FloatingBlob from './FloatingBlob'
+import clsx from 'clsx'
 
-export default function Background() {
+interface BackgroundProps {
+    className?: string;
+}
+
+export default function Background({ className }: BackgroundProps) {
     return (
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-            <div className="absolute w-full h-full bg-gradient-to-br from-[#fdf6f9] via-[#f5f7ff] to-[#fdfaf3] bg-size-200 animate-gradientShift" />
+        <div className={clsx("absolute inset-0 -z-10", className)}>
+            <div className="w-full h-full animate-gradientShift" />
 
             <FloatingBlob size={800} color="#f472b6" initialTop="10%" initialLeft="5%" />
             <FloatingBlob size={900} color="#818cf8" initialTop="60%" initialLeft="20%" />
