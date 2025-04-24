@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react";
-import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera, Volume2, ThumbsUp, ThumbsDown, Square } from "lucide-react"; // Added Square icon for stop button
+import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera, Volume2, ThumbsUp, ThumbsDown, Pause } from "lucide-react"; 
 import { AudioMessage, FeedbackMessage, GPSMessage, ImageMessage, LocalLingoMessage, OrchestrateMessage, RawMessage, TextMessage, TimeMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
@@ -336,35 +336,34 @@ export default function InteractionHubVoice() {
     // Handle finetune feedback submission
     const handleFinetuneFeedback = async (isPositive: boolean) => {
         
-        console.log(lastUserInput, userTranscript);
-        
-        // Use the cached user input instead of the current inputText
+        // Make sure we have a valid user message and AI response
         if (!lastUserInput && !userTranscript) {
             toast.error("No user input to provide feedback on");
             return;
         }
 
-        if (!thinkResponse) {
+        if (!lastAiResponse) {
             toast.error("No AI response to provide feedback on");
             return;
         }
 
         // Check if feedback has already been submitted for this response
-        if (feedbackSubmittedResponses.has(thinkResponse)) {
+        if (feedbackSubmittedResponses.has(lastAiResponse)) {
             toast.info("Feedback already submitted for this response");
             return;
         }
 
-        console.log(isPositive);
-
         try {
             setIsSubmittingFinetuneFeedback(true);
 
+            // Create the feedback payload with the correct message context
             const payload: FinetuneFeedbackPayload = {
                 message_input: lastUserInput || userTranscript,
                 message_output: lastAiResponse,
                 feedback_type: isPositive
             };
+
+            console.log("Submitting feedback:", payload); // Add this for debugging
 
             await submitFinetuneFeedback(payload);
             
@@ -375,7 +374,10 @@ export default function InteractionHubVoice() {
                 return newSet;
             });
 
-            const feedbackMessage: FeedbackMessage = { type: "feedback", feedback_type: isPositive };
+            const feedbackMessage: FeedbackMessage = { 
+                type: "feedback", 
+                feedback_type: isPositive 
+            };
             ws.current?.send(JSON.stringify(feedbackMessage));
             
             setShowFeedbackButtons(false);
@@ -494,9 +496,9 @@ export default function InteractionHubVoice() {
                             });
                             setLastAiResponse(msg.text);
                             setIsWaitingForResponse(false);
+                            setShowFeedbackButtons(true); // Show feedback buttons when AI response is complete
                         } else {
                             setIsWaitingForResponse(false);
-                            setShowFeedbackButtons(false);
                         }
                     }
 
@@ -872,8 +874,10 @@ export default function InteractionHubVoice() {
                         {/* Conversation History */}
                         <div className="w-full px-4 space-y-3 mb-4">
                             {conversationHistory.map((message, index) => (
-                                <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`relative group rounded-lg p-2 px-3 max-w-[85%] text-sm shadow-sm ${message.type === 'user' ? 'bg-accent/10 text-accent-foreground' : 'bg-secondary text-secondary-foreground'}`}>
+                                <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start mb-10 '}` }>
+                                    <div className={`relative group rounded-lg p-2 px-3 max-w-[85%] text-sm shadow-md 
+                                        ${message.type === 'user' ? 'bg-accent/10 text-accent-foreground hover:bg-accent/20' : 'bg-secondary text-secondary-foreground hover:bg-secondary/90'} 
+                                        transition-all duration-300 hover:shadow-xl hover:scale-[1.05] cursor-pointer`}>
                                         <MarkdownRenderer>{message.content}</MarkdownRenderer>
                                         
                                         {/* Speak/Stop button for AI messages */}
@@ -881,41 +885,39 @@ export default function InteractionHubVoice() {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="absolute -bottom-2 -right-2 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
-                                                // Call handleSpeakResponse if not playing, stopCurrentAudio if playing
+                                                className="absolute -bottom-7 right-1 h-5 w-5 transition-transform hover:scale-110"
                                                 onClick={() => currentlyPlayingIndex === index ? stopCurrentAudio() : handleSpeakResponse(message.content, index)}
                                                 title={currentlyPlayingIndex === index ? "Stop Speaking" : "Speak this response"}
                                             >
                                                 {currentlyPlayingIndex === index ? (
-                                                    currentAudio ? <Square size={12} /> : <Loader2 size={12} className="animate-spin" /> // Show spinner while loading
+                                                    currentAudio ? <Pause size={12} className="text-accent" /> : <Loader2 size={12} className="animate-spin" />
                                                 ) : (
-                                                    <Volume2 size={12} />
+                                                    <Volume2 size={12} className="opacity-70 group-hover:opacity-100" />
                                                 )}
                                             </Button>
                                         )}
 
-                                        {/* Feedback buttons for AI messages - using lastAiResponse for consistency */}
-                                        {message.type === 'ai' && index === conversationHistory.length - 1 && lastAiResponse && showFeedbackButtons && !feedbackSubmittedResponses.has(lastAiResponse) && (
-                                            <div className="absolute -bottom-3 -left-0 flex items-center gap-0 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        {/* Feedback buttons for AI messages - always visible - DO NOT CHANGE */}
+                                        {message.type === 'ai' && index === conversationHistory.length - 1 && lastAiResponse && !feedbackSubmittedResponses.has(lastAiResponse) && (
+                                            <div className="absolute -bottom-7 gap-2 left-3 flex items-center text-gray-400">
                                                 <Button
                                                     variant="ghost"
-                                                    size="sm"
-                                                    className="p-1 h-5 w-5 flex items-center justify-center rounded-full hover:bg-green-100"
+                                                    className="p-1 h-3 w-3 flex items-center justify-center rounded-full"
                                                     onClick={() => handleFinetuneFeedback(true)}
                                                     disabled={isSubmittingFinetuneFeedback}
                                                     title="Helpful"
                                                 >
-                                                    {isSubmittingFinetuneFeedback ? <Spinner /> : <ThumbsUp size={10} className="text-green-600" />}
+                                                    {isSubmittingFinetuneFeedback ? <Spinner /> : <ThumbsUp size={3} />}
                                                 </Button>
+                                                /
                                                 <Button
                                                     variant="ghost"
-                                                    size="sm"
-                                                    className="p-1 h-5 w-5 flex items-center justify-center rounded-full hover:bg-red-100"
+                                                    className="p-1 h-3 w-3 flex items-center justify-center rounded-full"
                                                     onClick={() => handleFinetuneFeedback(false)}
                                                     disabled={isSubmittingFinetuneFeedback}
                                                     title="Not Helpful"
                                                 >
-                                                    {isSubmittingFinetuneFeedback ? <Spinner /> : <ThumbsDown size={10} className="text-red-600" />}
+                                                    {isSubmittingFinetuneFeedback ? <Spinner /> : <ThumbsDown size={3}/>}
                                                 </Button>
                                             </div>
                                         )}
@@ -948,7 +950,7 @@ export default function InteractionHubVoice() {
                      onClick={handleToggleFeedbackMode}
                  >
                      <MessageSquarePlus size={14} />
-                     Give general feedback
+                     Give feedback
                  </Button>
              )}
 

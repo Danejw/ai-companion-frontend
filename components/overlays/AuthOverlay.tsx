@@ -17,6 +17,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner'; // For feedback
 import { Loader2 } from 'lucide-react'; // Example icons
+import { sendPasswordReset } from "@/lib/api/account";
 
 // Simple Spinner component (or use one from a library)
 const Spinner = () => <Loader2 className="mr-2 h-4 w-4 animate-spin" />;
@@ -113,13 +114,13 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
                 });
 
                 // Always try to parse the JSON body, even for errors
-                const data = await response.json();
-                console.log("Signup API response:", { status: response.status, body: data });
+                const errorData = await response.json().catch(() => ({}));
+                const errorMessage = errorData?.error || errorData?.message || `Sign up failed (Status: ${response.status})`;
+                setError(errorMessage);
+
+                console.log("Signup API response:", { status: response.status, body: errorData });
 
                 if (!response.ok) {
-                    // Use the message from the API response if available, otherwise generic error
-                    const errorMessage = data?.message || `Sign up failed (Status: ${response.status})`;
-                    setError(errorMessage);
                     toast.error('Sign Up Failed');
                 } else {
                     // Use the success message from the API response
@@ -137,6 +138,31 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
             } finally {
                 setIsLoading(false);
             }
+        }
+    };
+
+    const handleResetPassword = async () => {
+        if (!email.trim()) {
+            setError("Please enter your email address");
+            return;
+        }
+        
+        try {
+            setIsLoading(true);
+            const result = await sendPasswordReset(email);
+            
+            if (result.success) {
+                toast.success("Password reset link sent to your email");
+                // Optionally switch back to login tab
+                setActiveTab("login");
+            } else {
+                setError(result.message || "Failed to send reset email");
+            }
+        } catch (error: any) {
+            console.error("Password reset error:", error);
+            setError(error.message || "Failed to send reset email");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -174,6 +200,7 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
                     }
                 }}
             >
+                
                 <DialogHeader className="mb-4">
                     <DialogTitle className="text-center text-2xl">
                         {activeTab === 'login' ? 'Welcome Back!' : 'Create Account'}
@@ -213,10 +240,25 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
                             {error && activeTab === 'login' && (
                                 <p className="text-sm text-center text-destructive">{error}</p>
                             )}
-                            <Button type="submit" className="w-full" disabled={isLoading}>
+
+                            <Button type="submit" variant="outline" className="w-full hover:scale-105" disabled={isLoading}>
                                 {isLoading ? <Spinner /> : 'Login'}
                             </Button>
                         </form>
+
+                        <div className="relative my-6">
+                            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+                            <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Or</span></div>
+                        </div>
+
+                        <Button 
+                            variant="ghost" 
+                            className="w-full" 
+                            disabled={isLoading}
+                            onClick={handleResetPassword}
+                        >
+                            {isLoading ? <Spinner /> : 'Reset Password'}
+                        </Button>
 
                         {/* OAuth Separator */}
                         {/* <div className="relative my-6">
@@ -226,7 +268,9 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
 
                         {/* OAuth Buttons */}
                         {/* <div className="grid grid-cols-1 gap-2">
-                            <Button variant="outline" onClick={() => handleOAuthSignIn('google')} disabled={isLoading}>
+                            <Button variant="outline" 
+                            onClick={() => handleOAuthSignIn('google')} 
+                            disabled={isLoading}>
                                 {isLoading ? <Spinner /> : <ChromeIcon className="mr-2 h-4 w-4" />} Google
                             </Button>
                         </div> */}
@@ -263,7 +307,7 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
                                 <p className="text-sm text-center text-destructive">{error}</p>
                             )}
 
-                            <Button type="submit" className="w-full" disabled={isLoading}>
+                            <Button type="submit" className="w-full hover:scale-105" disabled={isLoading}>
                                 {isLoading ? <Spinner /> : 'Create Account'}
                             </Button>
 

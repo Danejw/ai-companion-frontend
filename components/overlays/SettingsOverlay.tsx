@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useUIStore } from '@/store';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Switch } from '@/components/ui/switch';
@@ -9,6 +9,13 @@ import { Slider } from '@/components/ui/slider';
 import { Settings, Brain, RefreshCw, Volume2, Angry, Languages } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Button } from '../ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { deleteAccount } from "@/lib/api/account";
+import { signOut } from "next-auth/react";
+import { Loader2 } from "lucide-react";
+
 
 // Voice options array
 const voiceOptions = [
@@ -41,6 +48,34 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
         useLocalLingo,
         toggleLocalLingo
     } = useUIStore();
+
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const toggleSettingsOverlay = useUIStore((state) => state.toggleSettingsOverlay);
+
+    const handleDeleteAccount = async () => {
+        try {
+            setIsDeleting(true);
+            const result = await deleteAccount();
+            
+            if (result.success) {
+                toast.success("Your account has been deleted successfully");
+                toggleSettingsOverlay(false);
+                
+                // Sign the user out
+                await signOut({ redirect: false });
+
+            } else {
+                toast.error(`Account deletion partially completed: ${result.message}`);
+            }
+        } catch (error: any) {
+            console.error("Failed to delete account:", error);
+            toast.error(error.message || "Failed to delete account");
+        } finally {
+            setIsDeleting(false);
+            setShowDeleteConfirmation(false);
+        }
+    };
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
@@ -205,9 +240,56 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
 
                 
              
-                <div className="border-t pt-5 pb-2 text-xs text-muted-foreground text-center">
+                <div className="border-t pt-3 text-xs text-gray-700 text-center">
                     Settings are automatically saved.
+
+                    
                 </div>
+
+                <div className="flex items-center justify-center mb-3">
+                    <div className="flex items-center justify-center mb-3">
+                        <Button
+                            variant="ghost"
+                            className="mt-1 rounded-full text-red-500"
+                            onClick={() => setShowDeleteConfirmation(true)}
+                        >
+                            Delete Account
+                        </Button>
+                    </div>
+
+                    {/* Confirmation Dialog */}
+                    <Dialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>Delete Account</DialogTitle>
+                                <DialogDescription>
+                                    Are you sure you want to delete your account? This action cannot be undone.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter className="flex gap-2">
+                                <Button variant="ghost" onClick={() => setShowDeleteConfirmation(false)}>
+                                    Cancel
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    onClick={handleDeleteAccount}
+                                    disabled={isDeleting}
+                                >
+                                    {isDeleting ? (
+                                        <>
+                                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                            Deleting...
+                                        </>
+                                    ) : (
+                                        "Yes, Delete My Account"
+                                    )}
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                </div>
+
+
             </SheetContent>
         </Sheet>
     );
