@@ -8,7 +8,7 @@ interface UIState {
     isSettingsOpen: boolean;
     isAuthOpen: boolean;
     isKnowledgeOpen: boolean;
-    isInfoOpen: boolean;
+    // isInfoOpen: boolean;
     isCaptureOpen: boolean;
     isNotificationsOpen: boolean;
     isRawMode: boolean;
@@ -22,7 +22,7 @@ interface UIState {
     toggleSettingsOverlay: (isOpen?: boolean) => void;
     toggleAuthOverlay: (isOpen: boolean) => void;
     toggleKnowledgeOverlay: (isOpen: boolean) => void;
-    toggleInfoOverlay: (isOpen: boolean) => void;
+    // toggleInfoOverlay: (isOpen: boolean) => void;
     toggleCaptureOverlay: (isOpen: boolean) => void;
     toggleNotificationsOverlay: (isOpen: boolean) => void;
     toggleRawMode: (isOn: boolean) => void;
@@ -52,7 +52,7 @@ export const useUIStore = create<UIState>()(
             isSettingsOpen: false,
             isAuthOpen: false,
             isKnowledgeOpen: false,
-            isInfoOpen: false,
+            // isInfoOpen: false,
             isCaptureOpen: false,
             isNotificationsOpen: false,
             isRawMode: false,
@@ -88,9 +88,9 @@ export const useUIStore = create<UIState>()(
                 isKnowledgeOpen: isOpen !== undefined ? isOpen : !state.isKnowledgeOpen 
             })),
 
-            toggleInfoOverlay: (isOpen) => set((state) => ({ 
-                isInfoOpen: isOpen !== undefined ? isOpen : !state.isInfoOpen 
-            })),
+            // toggleInfoOverlay: (isOpen) => set((state) => ({ 
+            //     isInfoOpen: isOpen !== undefined ? isOpen : !state.isInfoOpen 
+            // })),
 
             // setConfirmationAction: (action) => set({ confirmationAction: action }),
 

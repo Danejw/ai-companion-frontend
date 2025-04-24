@@ -47,7 +47,7 @@ export default function InteractionHubVoice() {
     const toggleSettingsOverlay = useUIStore((state) => state.toggleSettingsOverlay);
     const toggleHistoryOverlay = useUIStore((state) => state.toggleHistoryOverlay);
     const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
-    const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
+    // const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
     const toggleNotificationsOverlay = useUIStore((state) => state.toggleNotificationsOverlay);
     const toggleCaptureOverlay = useUIStore((state) => state.toggleCaptureOverlay);
 
@@ -609,8 +609,8 @@ export default function InteractionHubVoice() {
                         }
 
                         else if (msg.action === 'toggle_inoformation') {
-                            toggleInfoOverlay(true);
-                            console.log("Information Overlay Opened");
+                            // toggleInfoOverlay(true);
+                            //console.log("Information Overlay Opened");
                         }
 
                         else if (msg.action === 'toggle_capture') {

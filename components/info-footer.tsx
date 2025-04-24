@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import AnimatedBlobLogo from '@/components/Logo'; // Reuse the logo if desired
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 
 export default function InfoFooter() {
     const currentYear = new Date().getFullYear();
@@ -11,9 +10,6 @@ export default function InfoFooter() {
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                     {/* Logo and Copyright */}
                     <div className="flex items-center gap-2">
-                        <div className="scale-75 transform-gpu"> {/* Adjust scale if needed */}
-                            <AnimatedBlobLogo />
-                        </div>
                         <span className="text-sm text-muted-foreground font-bold">
                             &copy; {currentYear} <span className="text-accent">Knolia</span>. All rights reserved.
                         </span>
@@ -22,7 +18,7 @@ export default function InfoFooter() {
                     {/* Footer Links */}
                     <div className="flex text-sm">
                         <Button asChild variant="ghost" size="sm" className="justify-start">
-                            <Link href="/about">About</Link>
+                            <Link href="/welcome">Home</Link>
                         </Button>
                         <Button asChild variant="ghost" size="sm" className="justify-start">
                             <Link href="/privacy">Privacy</Link>
