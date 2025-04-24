@@ -3,7 +3,7 @@
 import Background from "@/components/Background";
 import { ResetPasswordForm } from "@/components/forms/ResetPasswordForm";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -35,7 +35,9 @@ export default function ResetPasswordPage() {
         <Background />
 
         <div className="w-full max-w-md mx-auto p-6 rounded-lg">
+          <Suspense fallback={<div>Loading...</div>}>
             <ResetPasswordForm token={token || undefined} onSuccess={handleSuccess} />
+          </Suspense>
         </div>
       </div>
     </div>
