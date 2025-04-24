@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera, Volume2, ThumbsUp, ThumbsDown } from "lucide-react"; // Added ThumbsUp and ThumbsDown icons
-import { AudioMessage, FeedbackMessage, GPSMessage, ImageMessage, OrchestrateMessage, RawMessage, TextMessage, TimeMessage } from "@/types/messages";
+import { AudioMessage, FeedbackMessage, GPSMessage, ImageMessage, LocalLingoMessage, OrchestrateMessage, RawMessage, TextMessage, TimeMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -14,6 +14,7 @@ import { useUIStore } from '@/store'; // Import the store
 import { MarkdownRenderer } from "../MarkdownRenderer";
 import { submitFinetuneFeedback } from "@/lib/api/finetune_feedback"; // Import the new function
 import { FinetuneFeedbackPayload } from "@/lib/api/finetune_feedback";
+import { ja } from "date-fns/locale";
 
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
@@ -34,6 +35,7 @@ export default function InteractionHubVoice() {
         summarizeFrequency,
         selectedVoice,
         isRawMode,
+        useLocalLingo,
     } = useUIStore();
     
     const toggleCreditsOverlay = useUIStore((state) => state.toggleCreditsOverlay);
@@ -94,7 +96,8 @@ export default function InteractionHubVoice() {
     const [isSubmittingFinetuneFeedback, setIsSubmittingFinetuneFeedback] = useState(false);
 
 
-    console.log(recording, messages, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated);
+    // console.log(recording, messages, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated, lastAiResponse);
+    // console.log("Knolia is running");
 
 
     // Add effect to scroll to bottom when content changes
@@ -132,6 +135,10 @@ export default function InteractionHubVoice() {
     useEffect(() => {
         if (connected) { sendRawMode(); }
     }, [isRawMode, connected]);
+
+    useEffect(() => {
+        if (connected) { sendLocalLingoMessage(); }
+    }, [useLocalLingo, connected]);
 
     // Function to remove an image when clicked
     const removeImage = (id: string) => {
@@ -404,6 +411,7 @@ export default function InteractionHubVoice() {
                 sendGPS();
                 sendTime();
                 setShowFeedbackButtons(true);
+                sendLocalLingoMessage();
 
                 // Make the WebSocket available globally
                 window.currentWebSocket = ws.current as WebSocket;
@@ -713,6 +721,13 @@ export default function InteractionHubVoice() {
         //console.log("Sending raw mode message:", JSON.stringify(rawModeMsg));
         ws.current?.send(JSON.stringify(rawModeMsg));
     };
+
+    const sendLocalLingoMessage = () => {
+        const localLingoMsg: LocalLingoMessage = { type: "local_lingo", local_lingo: useLocalLingo };
+        ws.current?.send(JSON.stringify(localLingoMsg))
+
+        console.log("Local Lingo Message Sent:", JSON.stringify(localLingoMsg));
+    }
 
     return (
         <div className="flex flex-col items-center gap-6 w-full max-w-xl px-4">

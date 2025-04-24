@@ -12,6 +12,7 @@ interface UIState {
     isCaptureOpen: boolean;
     isNotificationsOpen: boolean;
     isRawMode: boolean;
+    useLocalLingo: boolean
 
     // Add state for confirmation modal later
     // confirmationAction: null | object;
@@ -24,7 +25,8 @@ interface UIState {
     toggleInfoOverlay: (isOpen: boolean) => void;
     toggleCaptureOverlay: (isOpen: boolean) => void;
     toggleNotificationsOverlay: (isOpen: boolean) => void;
-    toggleRawMode: (isOpen: boolean) => void;
+    toggleRawMode: (isOn: boolean) => void;
+    toggleLocalLingo: (isOn: boolean) => void;
 
     // setConfirmationAction: (action: object | null) => void;
 
@@ -54,6 +56,8 @@ export const useUIStore = create<UIState>()(
             isCaptureOpen: false,
             isNotificationsOpen: false,
             isRawMode: false,
+            useLocalLingo: false,
+
             // confirmationAction: null,
 
             // Settings values
@@ -115,6 +119,10 @@ export const useUIStore = create<UIState>()(
             toggleRawMode: (isRaw) => set((state) => ({
                 isRawMode: isRaw !== undefined ? isRaw : !state.isRawMode
             })),
+
+            toggleLocalLingo: (useLocalLingo) => set((state) => ({
+                useLocalLingo: useLocalLingo !== undefined ? useLocalLingo : !state.useLocalLingo
+            })),
         }),
         {
             name: 'ui-settings', // Storage key
@@ -124,6 +132,7 @@ export const useUIStore = create<UIState>()(
                 summarizeFrequency: state.summarizeFrequency,
                 selectedVoice: state.selectedVoice, // Add voice to persisted settings
                 isRawMode: state.isRawMode,
+                useLocalLingo: state.useLocalLingo,
             }),
         }
     )

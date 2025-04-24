@@ -48,6 +48,11 @@ export type RawMessage = {
     is_raw: boolean;
 };
 
+export type LocalLingoMessage = {
+    type: "local_lingo";
+    local_lingo: boolean;
+}
+
 export type FeedbackMessage = {
     type: "feedback";
     feedback_type: boolean;
@@ -68,4 +73,5 @@ export type WebSocketMessage =
     | UIActionMessage
     | TextMessage
     | RawMessage
+    | LocalLingoMessage
     | OrchestrateMessage;

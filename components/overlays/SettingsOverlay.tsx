@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { Settings, Brain, RefreshCw, Volume2 } from 'lucide-react';
+import { Settings, Brain, RefreshCw, Volume2, Angry, Languages } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
@@ -37,7 +37,9 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
         selectedVoice,
         setSelectedVoice,
         isRawMode,
-        toggleRawMode
+        toggleRawMode,
+        useLocalLingo,
+        toggleLocalLingo
     } = useUIStore();
 
     return (
@@ -155,30 +157,54 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
                     <Separator className="my-6" />
 
                     {/* Raw Mode Setting */}
-                    <div className="flex-1 py-8 mx-8 px-1 space-y-10">
+                    <div className="space-y-5">
+                        <h3 className="text-lg font-medium flex items-center">
+                            <Angry className="mr-3 h-5 w-5" /> Raw Mode
+                        </h3>
+
+                        <div className="flex items-center justify-between px-2">
+                            <div className="space-y-2">
+                                <Label htmlFor="raw-mode" className="text-base">Raw Mode</Label>
+                                <p className="text-sm text-muted-foreground">
+                                    Gives unfiltered, objective answers. May be blunt or uncomfortable. <br />
+                                    <span className="text-xs text-red-500">Use at your own risk.</span>
+                                </p>
+                            </div>
+                            <Switch
+                                id="raw-mode"
+                                checked={isRawMode}
+                                onCheckedChange={toggleRawMode}
+                            />
+                        </div>
+                    </div>
+
+                    <Separator className="my-6" />
+
+                    {/* Local Lingo Moe Setting */}
                         <div className="space-y-5">
                             <h3 className="text-lg font-medium flex items-center">
-                                <Brain className="mr-3 h-5 w-5" /> Raw Mode
+                                <Languages className="mr-3 h-5 w-5" /> Be Local
                             </h3>
 
                             <div className="flex items-center justify-between px-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="raw-mode" className="text-base">Raw Mode</Label>
+                                    <Label htmlFor="local-lingo" className="text-base">Be Local</Label>
                                     <p className="text-sm text-muted-foreground">
-                                        Gives unfiltered, objective answers. May be blunt or uncomfortable. <br />
-                                        <span className="text-xs text-red-500">Use at your own risk.</span>
+                                        Uses your location to adapt to the local accent in your area.<br />
                                     </p>
                                 </div>
                                 <Switch
-                                    id="raw-mode"
-                                    checked={isRawMode}
-                                    onCheckedChange={toggleRawMode}
+                                    id="local-lingo"
+                                    checked={useLocalLingo}
+                                    onCheckedChange={toggleLocalLingo}
                                 />
                             </div>
                         </div>
-                    </div>
+    
                 </div>
+
                 
+             
                 <div className="border-t pt-5 pb-2 text-xs text-muted-foreground text-center">
                     Settings are automatically saved.
                 </div>
