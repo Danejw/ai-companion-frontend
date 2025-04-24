@@ -68,9 +68,9 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
             } else {
                 toast.error(`Account deletion partially completed: ${result.message}`);
             }
-        } catch (error: any) {
+        } catch (error) {
             console.error("Failed to delete account:", error);
-            toast.error(error.message || "Failed to delete account");
+            toast.error("Failed to delete account");
         } finally {
             setIsDeleting(false);
             setShowDeleteConfirmation(false);

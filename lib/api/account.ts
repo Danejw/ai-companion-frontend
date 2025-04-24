@@ -46,9 +46,9 @@ export async function deleteAccount(): Promise<DeleteAccountResponse> {
     }
 
     return await response.json();
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error deleting account:", error);
-    throw new Error(error.message || "Failed to delete account");
+    throw new Error("Failed to delete account");
   }
 }
 
@@ -75,9 +75,9 @@ export async function sendPasswordReset(email: string): Promise<ResetPasswordRes
     }
 
     return await response.json();
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error sending password reset:", error);
-    throw new Error(error.message || "Failed to send password reset");
+    throw new Error("Failed to send password reset");
   }
 }
 
@@ -99,8 +99,8 @@ export async function changePassword(token: string, new_password: string): Promi
             );
         }
         return await response.json();
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error changing password:", error);
-        throw new Error(error.message || "Failed to change password");
+        throw new Error("Failed to change password");
     }
 }

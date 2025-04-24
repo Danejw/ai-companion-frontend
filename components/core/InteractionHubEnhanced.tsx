@@ -825,9 +825,9 @@ export default function InteractionHubVoice() {
             toast.dismiss(); // Dismiss "Generating audio..." toast
             toast.success("Speaking...");
 
-        } catch (error: any) {
+        } catch (error) {
             console.error("Failed to speak response:", error);
-            toast.error(error.message || "Failed to generate or play audio");
+            toast.error("Failed to generate or play audio");
             stopCurrentAudio(); // Reset state on fetch/setup error
              // Ensure URL is revoked even if audio object wasn't fully set up
             if (audioUrl) {

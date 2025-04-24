@@ -158,9 +158,9 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
             } else {
                 setError(result.message || "Failed to send reset email");
             }
-        } catch (error: any) {
+        } catch (error) {
             console.error("Password reset error:", error);
-            setError(error.message || "Failed to send reset email");
+            setError("Failed to send reset email");
         } finally {
             setIsLoading(false);
         }

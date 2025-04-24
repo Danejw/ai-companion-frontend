@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { changePassword } from "@/lib/api/account";
-import Background from "../Background";
+
 
 // Spinner component
 const Spinner = () => <Loader2 className="mr-2 h-4 w-4 animate-spin" />;
@@ -68,9 +68,9 @@ export function ResetPasswordForm({ token, onSuccess }: ResetPasswordFormProps) 
       } else {
         setError(result.message || "Failed to update password");
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error updating password:", error);
-      setError(error.message || "Failed to update password");
+      setError("Failed to update password");
     } finally {
       setIsLoading(false);
     }
