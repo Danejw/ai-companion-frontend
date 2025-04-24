@@ -1,26 +1,30 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react";
-import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera, Volume2, ThumbsUp, ThumbsDown } from "lucide-react"; // Added ThumbsUp and ThumbsDown icons
+import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera, Volume2, ThumbsUp, ThumbsDown, Square } from "lucide-react"; // Added Square icon for stop button
 import { AudioMessage, FeedbackMessage, GPSMessage, ImageMessage, LocalLingoMessage, OrchestrateMessage, RawMessage, TextMessage, TimeMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { submitFeedback } from "@/lib/api/feedback";
-import { textToSpeech } from "@/lib/api/voice"; // Import textToSpeech function
+import { textToSpeech } from "@/lib/api/voice"; // Import the refactored textToSpeech function
 import AudioVisualizer from "../Visualizer";
 import { Button } from "../ui/button";
 import { useUIStore } from '@/store'; // Import the store
 import { MarkdownRenderer } from "../MarkdownRenderer";
-import { submitFinetuneFeedback } from "@/lib/api/finetune_feedback"; // Import the new function
-import { FinetuneFeedbackPayload } from "@/lib/api/finetune_feedback";
-import { ja } from "date-fns/locale";
+import { submitFinetuneFeedback, FinetuneFeedbackPayload } from "@/lib/api/finetune_feedback"; // Import the new function
 
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
 // Simple Spinner component reused
 const Spinner = () => <Loader2 className="h-4 w-4 animate-spin" />;
+
+// Define a type for conversation messages
+interface ConversationMessage {
+    type: 'user' | 'ai';
+    content: string;
+}
 
 declare global {
     interface Window {
@@ -55,6 +59,11 @@ export default function InteractionHubVoice() {
     const [voiceModeEnabled] = useState(false);
     const [isConnecting, setIsConnecting] = useState(false);
     const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
+    const [conversationHistory, setConversationHistory] = useState<ConversationMessage[]>([]); // <-- New state for history
+
+    // New states for audio playback control
+    const [currentlyPlayingIndex, setCurrentlyPlayingIndex] = useState<number | null>(null);
+    const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
 
     // Refs
     const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -74,7 +83,7 @@ export default function InteractionHubVoice() {
     const [lastUserInput, setLastUserInput] = useState(""); // Cache the last user input for feedback
 
     // Text Output
-    const [aiResponse, setAiResponse] = useState('');
+    const [thinkResponse, setThinkResponse] = useState('');
     const [lastAiResponse, setLastAiResponse] = useState('');
     const [feedbackSubmittedResponses, setFeedbackSubmittedResponses] = useState<Set<string>>(new Set());
 
@@ -105,7 +114,19 @@ export default function InteractionHubVoice() {
         if (scrollViewportRef.current) {
             scrollViewportRef.current.scrollTop = scrollViewportRef.current.scrollHeight;
         }
-    }, [aiResponse]); // Make sure this triggers on every aiResponse change
+    }, [conversationHistory, thinkResponse]); // Trigger scroll on history and current AI response changes
+
+    // Effect to clean up audio when component unmounts or WS disconnects
+    useEffect(() => {
+        // Stop audio if connection closes or component unmounts
+        return () => {
+            if (currentAudio) {
+                currentAudio.pause();
+                setCurrentAudio(null);
+                setCurrentlyPlayingIndex(null);
+            }
+        };
+    }, [currentAudio]); // Depend on currentAudio
 
     // Effect to handle captured images from sessionStorage
     useEffect(() => {
@@ -122,10 +143,7 @@ export default function InteractionHubVoice() {
         };
         
         window.addEventListener('imageCaptured', handleImageCaptured as EventListener);
-        
-        // We no longer need the interval check or focus/storage events
-        // since we're using custom events for direct communication
-        
+
         return () => {
             window.removeEventListener('imageCaptured', handleImageCaptured as EventListener);
         };
@@ -136,6 +154,7 @@ export default function InteractionHubVoice() {
         if (connected) { sendRawMode(); }
     }, [isRawMode, connected]);
 
+    // NEW: Effect to send local lingo status when it changes and connection is active
     useEffect(() => {
         if (connected) { sendLocalLingoMessage(); }
     }, [useLocalLingo, connected]);
@@ -155,7 +174,10 @@ export default function InteractionHubVoice() {
         if (!messageToSend && capturedImages.length === 0) return; // Prevent empty messages
     
         try {
+            setThinkResponse(''); // Clear the current AI response area immediately
             if (messageToSend) {
+                // Add user message to history
+                setConversationHistory(prev => [...prev, { type: 'user', content: messageToSend }]);
                 // Cache the user input before sending
                 setLastUserInput(messageToSend);
                 
@@ -189,6 +211,8 @@ export default function InteractionHubVoice() {
         if (userTranscript) {
             setLastUserInput(userTranscript);
         }
+
+        setThinkResponse('');
         
         const audioMsg: AudioMessage = { type: "audio", audio: base64Audio, voice: selectedVoice };
         ws.current?.send(JSON.stringify(audioMsg));
@@ -202,7 +226,7 @@ export default function InteractionHubVoice() {
         const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: userTranscript, extract: extractKnowledge, summarize: summarizeFrequency }
         ws.current?.send(JSON.stringify(orchestrationMessage));
         
-        setShowFeedbackButtons(false); // Hide feedback buttons while waiting for new response
+        setShowFeedbackButtons(false);
     }
 
 
@@ -312,7 +336,7 @@ export default function InteractionHubVoice() {
     // Handle finetune feedback submission
     const handleFinetuneFeedback = async (isPositive: boolean) => {
         
-        console.log(lastUserInput, userTranscript, aiResponse);
+        console.log(lastUserInput, userTranscript);
         
         // Use the cached user input instead of the current inputText
         if (!lastUserInput && !userTranscript) {
@@ -320,13 +344,13 @@ export default function InteractionHubVoice() {
             return;
         }
 
-        if (!aiResponse) {
+        if (!thinkResponse) {
             toast.error("No AI response to provide feedback on");
             return;
         }
 
         // Check if feedback has already been submitted for this response
-        if (feedbackSubmittedResponses.has(aiResponse)) {
+        if (feedbackSubmittedResponses.has(thinkResponse)) {
             toast.info("Feedback already submitted for this response");
             return;
         }
@@ -338,7 +362,7 @@ export default function InteractionHubVoice() {
 
             const payload: FinetuneFeedbackPayload = {
                 message_input: lastUserInput || userTranscript,
-                message_output: aiResponse,
+                message_output: lastAiResponse,
                 feedback_type: isPositive
             };
 
@@ -347,7 +371,7 @@ export default function InteractionHubVoice() {
             // Mark this response as having received feedback
             setFeedbackSubmittedResponses(prev => {
                 const newSet = new Set(prev);
-                newSet.add(aiResponse);
+                newSet.add(lastAiResponse);
                 return newSet;
             });
 
@@ -376,8 +400,10 @@ export default function InteractionHubVoice() {
             toast.info("Connecting...");
             
             // Reset states when starting a new connection
+            setConversationHistory([]);
             setLastUserInput('');
-            setAiResponse('');
+            setThinkResponse('');
+            setLastAiResponse('');
             setFeedbackSubmittedResponses(new Set()); // Reset the feedback tracking
 
             const session = await getSession();
@@ -410,7 +436,7 @@ export default function InteractionHubVoice() {
                 toast.success("Connected successfully!");
                 sendGPS();
                 sendTime();
-                setShowFeedbackButtons(true);
+                setShowFeedbackButtons(false); // Initially hide feedback buttons on new connection
                 sendLocalLingoMessage();
 
                 // Make the WebSocket available globally
@@ -425,7 +451,11 @@ export default function InteractionHubVoice() {
                 setIsWaitingForResponse(false);
                 setLastUserInput(''); // Clear cached input when disconnected
                 setFeedbackSubmittedResponses(new Set()); // Reset the feedback tracking
+                setConversationHistory([]); 
+                setThinkResponse(''); 
+                setLastAiResponse('');
                 toast.info("Disconnected...");
+                stopCurrentAudio();
             };
 
                 ws.current.onerror = (error) => {
@@ -439,19 +469,34 @@ export default function InteractionHubVoice() {
                 
                     // Responses
                 if (msg.type === "user_transcript") {
-                    setMessages((prev) => [...prev, `🧍 You said: ${msg.text}`]);
+
                     setUserTranscript(msg.text);
-                    setLastUserInput(msg.text); // Cache the user transcript for feedback
+                    setLastUserInput(msg.text); 
+                    setConversationHistory(prev => [...prev, { type: 'user', content: msg.text }]);
                 }
 
-                    else if (msg.type === "ai_transcript" || msg.type === "ai_response" || msg.type === "message_output_item") {                        
-                        // Only consider it a new response that needs feedback if text has changed
-                        if (msg.text !== aiResponse) {
-                            setAiResponse(msg.text);
+                    else if (msg.type === "ai_transcript" || msg.type === "ai_response" || msg.type === "message_output_item") {
+                        const isFinalChunk = msg.type === "ai_response";
+
+                        if (isFinalChunk) {
+                            setConversationHistory(prev => {
+                                const lastMessage = prev[prev.length - 1];
+                        
+                                if (lastMessage && lastMessage.type === 'ai') {
+                                    if (lastMessage.content !== msg.text) {
+                                        return [...prev.slice(0, -1), { type: 'ai', content: msg.text }];
+                                    }
+                                    return prev;
+                                } else {
+                                    // Add a new AI message to history
+                                    return [...prev, { type: 'ai', content: msg.text }];
+                                }
+                            });
                             setLastAiResponse(msg.text);
                             setIsWaitingForResponse(false);
-                            setInputText('');
-                            setShowFeedbackButtons(true);
+                        } else {
+                            setIsWaitingForResponse(false);
+                            setShowFeedbackButtons(false);
                         }
                     }
 
@@ -490,30 +535,36 @@ export default function InteractionHubVoice() {
 
                     else if (msg.type === "image_analysis") {
                         // Do something here
+                        setThinkResponse(msg.text);
                     }
 
                     else if (msg.type === "info") {
-                        toast.info(msg.text);
+                        //toast.info(msg.text);
+                        setThinkResponse(msg.text);
                     }
 
                     // Info Events
                     else if (msg.type === "tool_call_item") {
-                    setToolcalls(msg.text);
-                        toast.info(msg.text);
+                        setToolcalls(msg.text);
+                        //toast.info(msg.text);
+                        setThinkResponse(msg.text);
                     }
 
                     else if (msg.type === "tool_call_output_item") {
                         setToolresults(msg.text);
-                        toast.info(truncateText(msg.text));
+                        //toast.info(truncateText(msg.text));
+                        setThinkResponse(msg.text);
                     }
 
                     else if (msg.type === "agent_updated") {
                         setAgentUpdated(msg.text);
-                        toast.info(msg.text);
+                        //toast.info(msg.text);
+                        setThinkResponse(msg.text);
                     }
 
                     else if (msg.type === "orchestration") {
-                        toast.info("Status " + msg.status);
+                        //toast.info("Status " + msg.status);
+                        setThinkResponse(msg.text);
                     }
                     
                     // Actions
@@ -526,16 +577,14 @@ export default function InteractionHubVoice() {
                     }
 
                     else if (msg.type === "text_action") {
-                        toast.info("Text recieved " + msg.status);
+                        //toast.info("Text recieved " + msg.status);
                     }
 
                     else if (msg.type === "audio_action") {
-                        toast.info("Audio recieved " + msg.status);
+                        //toast.info("Audio recieved " + msg.status);
                     }
 
                     else if (msg.type === "ui_action") {
-                        console.log("ui action:", msg.action);
-
                         if (msg.action === 'toggle_credits') {
                             toggleCreditsOverlay(true);
                             console.log("Credits Overlay Opened");
@@ -576,6 +625,18 @@ export default function InteractionHubVoice() {
                         }
 
                         toast.info(msg.action);
+                    }
+
+                    else if (msg.type === "feedback_action") {
+                        setThinkResponse(msg.status);
+                    }
+                        
+                    else if (msg.type === "local_lingo_action") {
+                        setThinkResponse(msg.status);
+                    }
+
+                    else if (msg.type === "raw_action") {
+                        setThinkResponse(msg.status);
                     }
 
                     else if (msg.type === "error") {
@@ -657,11 +718,8 @@ export default function InteractionHubVoice() {
     };
 
     const disconnectSocket = () => {
+        stopCurrentAudio(); // Stop audio before closing
         ws.current?.close();
-        setConnected(false);
-        setIsListening(false);
-        setLastUserInput(''); // Clear cached input when manually disconnected
-        setFeedbackSubmittedResponses(new Set()); // Reset the feedback tracking
     };
 
 
@@ -702,16 +760,81 @@ export default function InteractionHubVoice() {
         ws.current?.send(JSON.stringify(timeMsg));
     };
 
-    // Add this function inside your component
-    const handleSpeakResponse = async () => {
-        if (!aiResponse) return;
-        
+    // Function to stop currently playing audio
+    const stopCurrentAudio = () => {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0; // Reset playback position
+             // Clean up event listener to prevent memory leaks
+            currentAudio.onended = null;
+            // Revoke the object URL when stopping or changing audio
+            URL.revokeObjectURL(currentAudio.src); 
+            setCurrentAudio(null);
+        }
+        setCurrentlyPlayingIndex(null);
+    };
+
+    // Function to handle playing/fetching audio for a message
+    const handleSpeakResponse = async (textToSpeak: string, index: number) => {
+        if (!textToSpeak) return;
+
+        // If clicking the button for the currently playing audio, stop it.
+        if (currentlyPlayingIndex === index && currentAudio) {
+            stopCurrentAudio();
+            return;
+        }
+
+        // Stop any currently playing audio before starting new
+        stopCurrentAudio();
+
+        let audioUrl: string | null = null; // Keep track of the URL for cleanup
+
         try {
-            toast.info("Speaking response with " + selectedVoice + "...");
-            await textToSpeech(aiResponse, selectedVoice);
-        } catch (error) {
+            toast.info("Generating audio...");
+            setCurrentlyPlayingIndex(index); // Indicate loading state for this index
+
+            // Use the imported textToSpeech function to get the audio URL
+            audioUrl = await textToSpeech(textToSpeak, selectedVoice);
+
+            if (!audioUrl) {
+                throw new Error("Failed to get audio URL from textToSpeech function");
+            }
+
+            const newAudio = new Audio(audioUrl);
+            setCurrentAudio(newAudio); // Store the new audio object
+
+            newAudio.onended = () => {
+                console.log("Audio ended naturally.");
+                stopCurrentAudio(); // Reset state and revoke URL
+            };
+
+            newAudio.onerror = (e) => {
+                console.error("Audio playback error:", e);
+                toast.error("Failed to play audio");
+                stopCurrentAudio(); // Reset state and revoke URL
+            }
+
+            // Use a promise to wait for the audio to be ready to play
+            await new Promise<void>((resolve, reject) => {
+                newAudio.oncanplaythrough = () => resolve();
+                newAudio.onerror = (e) => { // Also reject on error during loading
+                     console.error("Audio loading error:", e);
+                     reject(new Error("Failed to load audio"));
+                }
+            });
+            
+            await newAudio.play();
+            toast.dismiss(); // Dismiss "Generating audio..." toast
+            toast.success("Speaking...");
+
+        } catch (error: any) {
             console.error("Failed to speak response:", error);
-            toast.error("Failed to speak response");
+            toast.error(error.message || "Failed to generate or play audio");
+            stopCurrentAudio(); // Reset state on fetch/setup error
+             // Ensure URL is revoked even if audio object wasn't fully set up
+            if (audioUrl) {
+                URL.revokeObjectURL(audioUrl);
+            }
         }
     };
 
@@ -739,131 +862,144 @@ export default function InteractionHubVoice() {
 
 
                     {/* Scrollable Content Area */}
-                    <div className="w-full flex flex-col max-h-[600px] overflow-y-auto scrollbar-hide" ref={scrollViewportRef}>
+                    <div className="w-full flex flex-col max-h-[600px] overflow-y-auto scrollbar-hide pb-4" ref={scrollViewportRef}>
 
-                        {/* Audio Visualizer - always at bottom center */}
+                        {/* Audio Visualizer */}
                         <div className="flex items-center justify-center p-2 w-full">
                             <AudioVisualizer />
                         </div>
 
-                        {/* Text content with streaming effect */}
-                        <div className="flex flex-col items-center justify-center text-center text-gray-700 mb-4 px-4 break-words whitespace-pre-wrap">
-                            {!aiResponse ? (
-                                <p className="opacity-90">How are you today?</p>
-                            ) : (
-                                <>
-                                    <div className="prose prose-sm text-left w-full max-w-none animate-in fade-in duration-500 ease-out relative">
-                                        <MarkdownRenderer>{aiResponse}</MarkdownRenderer>
-
-                                        {/* Combined feedback and speak button row */}
-                                        <div className="relative w-full mt-4 flex justify-between items-center">
-                                            {/* Thumbs up/down on the left */}
-                                            {showFeedbackButtons && aiResponse && !feedbackSubmittedResponses.has(aiResponse) && (
-                                                <div className="flex items-center gap-1 text-gray-400">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="p-1 h-6 w-6 flex items-center justify-center"
-                                                        onClick={() => handleFinetuneFeedback(true)}
-                                                        disabled={isSubmittingFinetuneFeedback}
-                                                        title="Helpful"
-                                                    >
-                                                        {isSubmittingFinetuneFeedback ? <Spinner /> : <ThumbsUp size={10} />}                  
-                                                    </Button>
-                                                    <span className="text-gray-400">/</span>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="p-1 h-6 w-6 flex items-center justify-center"
-                                                        onClick={() => handleFinetuneFeedback(false)}
-                                                        disabled={isSubmittingFinetuneFeedback}
-                                                        title="Not Helpful"
-                                                    >
-                                                        {isSubmittingFinetuneFeedback ? <Spinner /> : <ThumbsDown size={10} />}
-                                                    </Button>
-                                                </div>
-                                            )}
-                                            
-                                            {/* Text-to-Speech Button on the right */}
+                        {/* Conversation History */}
+                        <div className="w-full px-4 space-y-3 mb-4">
+                            {conversationHistory.map((message, index) => (
+                                <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                    <div className={`relative group rounded-lg p-2 px-3 max-w-[85%] text-sm shadow-sm ${message.type === 'user' ? 'bg-accent/10 text-accent-foreground' : 'bg-secondary text-secondary-foreground'}`}>
+                                        <MarkdownRenderer>{message.content}</MarkdownRenderer>
+                                        
+                                        {/* Speak/Stop button for AI messages */}
+                                        {message.type === 'ai' && (
                                             <Button
                                                 variant="ghost"
-                                                size="sm"
-                                                className="px-2 py-0 text-xs flex items-center gap-1 text-gray-400"
-                                                onClick={handleSpeakResponse}
-                                                title="Speak this response"
+                                                size="icon"
+                                                className="absolute -bottom-2 -right-2 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                                                // Call handleSpeakResponse if not playing, stopCurrentAudio if playing
+                                                onClick={() => currentlyPlayingIndex === index ? stopCurrentAudio() : handleSpeakResponse(message.content, index)}
+                                                title={currentlyPlayingIndex === index ? "Stop Speaking" : "Speak this response"}
                                             >
-                                                <Volume2 size={16} />
+                                                {currentlyPlayingIndex === index ? (
+                                                    currentAudio ? <Square size={12} /> : <Loader2 size={12} className="animate-spin" /> // Show spinner while loading
+                                                ) : (
+                                                    <Volume2 size={12} />
+                                                )}
                                             </Button>
-                                        </div>
+                                        )}
+
+                                        {/* Feedback buttons for AI messages - using lastAiResponse for consistency */}
+                                        {message.type === 'ai' && index === conversationHistory.length - 1 && lastAiResponse && showFeedbackButtons && !feedbackSubmittedResponses.has(lastAiResponse) && (
+                                            <div className="absolute -bottom-3 -left-0 flex items-center gap-0 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="p-1 h-5 w-5 flex items-center justify-center rounded-full hover:bg-green-100"
+                                                    onClick={() => handleFinetuneFeedback(true)}
+                                                    disabled={isSubmittingFinetuneFeedback}
+                                                    title="Helpful"
+                                                >
+                                                    {isSubmittingFinetuneFeedback ? <Spinner /> : <ThumbsUp size={10} className="text-green-600" />}
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="p-1 h-5 w-5 flex items-center justify-center rounded-full hover:bg-red-100"
+                                                    onClick={() => handleFinetuneFeedback(false)}
+                                                    disabled={isSubmittingFinetuneFeedback}
+                                                    title="Not Helpful"
+                                                >
+                                                    {isSubmittingFinetuneFeedback ? <Spinner /> : <ThumbsDown size={10} className="text-red-600" />}
+                                                </Button>
+                                            </div>
+                                        )}
                                     </div>
+                                </div>
+                            ))}
+                        </div>
 
-                                    {/* Feedback button */}
-                                    {aiResponse && !isFeedbackMode && (
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="mt-4 text-xs flex items-center gap-1 text-gray-400 hover:text-gray-500"
-                                            onClick={handleToggleFeedbackMode}
-                                        >
-                                            <MessageSquarePlus size={14} />
-                                            Give feedback
-                                        </Button>
-                                    )}
 
-                                    {/* Feedback form */}
-                                    {isFeedbackMode && (
-                                        <div className="w-full max-w-md mt-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                                            <Textarea
-                                                value={feedbackText}
-                                                onChange={(e) => setFeedbackText(e.target.value)}
-                                                placeholder="Tell us what you think about this response..."
-                                                className="w-full min-h-[100px] p-3 mb-2 text-sm border-none"
-                                                disabled={isSubmittingFeedback}
-                                            />
-                                            <div className="flex justify-end px-1 mb-2">
-                                                <label htmlFor="teachAi" className="relative inline-flex items-center cursor-pointer group">
-                                                    <input
-                                                        type="checkbox"
-                                                        id="teachAi"
-                                                        checked={teachAi}
-                                                        onChange={(e) => setTeachAi(e.target.checked)}
-                                                        disabled={isSubmittingFeedback}
-                                                        className="sr-only peer"
-                                                    />
-                                                    <div className="w-10 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-accent transition-all duration-300"></div>
-                                                    <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-all duration-300 peer-checked:translate-x-5"></div>
-                                                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-all text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-md border border-gray-300 shadow">
-                                                        Teach the AI with this feedback
-                                                    </div>
-                                                </label>
-                                            </div>
-                                            <div className="flex justify-center gap-2">
-                                                <Button
-                                                    variant="outline"
-                                                    className="hover:text-white"
-                                                    size="sm"
-                                                    onClick={handleCancelFeedback}
-                                                    disabled={isSubmittingFeedback}
-                                                >
-                                                    Cancel
-                                                </Button>
-                                                <Button
-                                                    variant="default"
-                                                    size="sm"
-                                                    onClick={() => handleSubmitFeedback(teachAi)}
-                                                    disabled={isSubmittingFeedback}
-                                                >
-                                                    {isSubmittingFeedback ? <Spinner /> : 'Submit Feedback'}
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </>
+                        {/* Thinking text */}
+                        <div className="flex flex-col items-center justify-center text-center text-gray-700 mb-4 px-4 break-words whitespace-pre-wrap min-h-[20px]"> {/* Adjusted min-height */}
+                             {isWaitingForResponse && ( // Show "Thinking..." if waiting and no thinkResponse yet
+                                <div className="flex items-center justify-center text-gray-500 text-sm">
+                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                    <span>Thinking...{thinkResponse}</span>
+                                </div>
                             )}
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Feedback button */}
+             {/* Only show general feedback if an AI response exists and we are not in feedback mode */}
+             {lastAiResponse && !isFeedbackMode && (
+                 <Button
+                     variant="ghost"
+                     size="sm"
+                     className="text-xs flex items-center text-gray-400 hover:text-gray-500"
+                     onClick={handleToggleFeedbackMode}
+                 >
+                     <MessageSquarePlus size={14} />
+                     Give general feedback
+                 </Button>
+             )}
+
+            {/* Feedback form */}
+            {isFeedbackMode && (
+                <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <Textarea
+                        value={feedbackText}
+                        onChange={(e) => setFeedbackText(e.target.value)}
+                        placeholder="Tell us what you think about this response..."
+                        className="w-full min-h-[100px] p-3 mb-2 text-sm border-none"
+                        disabled={isSubmittingFeedback}
+                    />
+                    <div className="flex justify-end px-1">
+                        <label htmlFor="teachAi" className="relative inline-flex items-center cursor-pointer group">
+                            <input
+                                type="checkbox"
+                                id="teachAi"
+                                checked={teachAi}
+                                onChange={(e) => setTeachAi(e.target.checked)}
+                                disabled={isSubmittingFeedback}
+                                className="sr-only peer"
+                            />
+                            <div className="w-10 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-accent transition-all duration-300"></div>
+                            <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-all duration-300 peer-checked:translate-x-5"></div>
+                            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-all text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-md border border-gray-300 shadow">
+                                Teach the AI with this feedback
+                            </div>
+                        </label>
+                    </div>
+                    <div className="flex justify-center gap-2">
+                        <Button
+                            variant="outline"
+                            className="hover:text-white"
+                            size="sm"
+                            onClick={handleCancelFeedback}
+                            disabled={isSubmittingFeedback}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => handleSubmitFeedback(teachAi)}
+                            disabled={isSubmittingFeedback}
+                        >
+                            {isSubmittingFeedback ? <Spinner /> : 'Submit Feedback'}
+                        </Button>
+                    </div>
+                </div>
+            )}
 
 
             {/* Input Area - DO NOT CHANGE */}
@@ -881,25 +1017,25 @@ export default function InteractionHubVoice() {
                             {isListening ? <Ear className="h-5 w-5" /> : <EarOff className="h-5 w-5" />}
                         </Button>
 
-            {/* Text Input Area */}
+                        {/* Text Input Area */}
                         <form onSubmit={handleSendText} className="flex-1 flex">
-                <Textarea
-                    ref={textareaRef}
-                    placeholder="Ask anything..."
-                                className="w-full focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none resize-none min-h-[40px] max-h-[200px] text-md bg-transparent rounded-lg px-4 py-2 border-none scrollbar-hide overflow-y-scroll"
-                    rows={1}
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                                        e.preventDefault()
-                                        handleSendText()
-                        }
-                    }}
+                            <Textarea
+                                ref={textareaRef}
+                                placeholder="Ask anything..."
+                                            className="w-full focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none resize-none min-h-[40px] max-h-[200px] text-md bg-transparent rounded-lg px-4 py-2 border-none scrollbar-hide overflow-y-scroll"
+                                rows={1}
+                                value={inputText}
+                                onChange={(e) => setInputText(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                                    e.preventDefault()
+                                                    handleSendText()
+                                    }
+                                }}
                                 disabled={isListening}
-                />
-                            <button type="submit" disabled={isListening} className="hidden" />
-            </form>
+                            />
+                                <button type="submit" disabled={isListening} className="hidden" />
+                        </form>
 
                         {/* Send Button */}
                         <Button
@@ -1021,13 +1157,9 @@ export default function InteractionHubVoice() {
                         <X className="h-4 w-4 text-white" />
                     </Button>
                 )}
-
-
             </div>
 
             
-
-
             {/* Disclaimer Area - DO NOT CHANGE */}
             <div className="text-xs text-gray-600/60 text-center px-4 max-w-md mb-2">
                 <p>

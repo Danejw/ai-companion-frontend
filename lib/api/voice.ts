@@ -75,10 +75,5 @@ export const textToSpeech = async (text: string, voice: string) => {
     const audioUrl = URL.createObjectURL(audioBlob);
     console.log("Audio URL:", audioUrl);
 
-    const audio = new Audio(audioUrl);
-    audio.play().catch((err) => {
-        console.error("Playback error:", err);
-    });
-
     return audioUrl;
 };
