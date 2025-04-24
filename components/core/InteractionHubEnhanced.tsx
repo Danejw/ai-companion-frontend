@@ -74,10 +74,6 @@ export default function InteractionHubVoice() {
     const scrollViewportRef = useRef<HTMLDivElement>(null);
 
 
-
-    const [messages, setMessages] = useState<string[]>([]);
-
-
     // Text Input
     const [inputText, setInputText] = useState("");
     const [lastUserInput, setLastUserInput] = useState(""); // Cache the last user input for feedback
@@ -105,8 +101,7 @@ export default function InteractionHubVoice() {
     const [isSubmittingFinetuneFeedback, setIsSubmittingFinetuneFeedback] = useState(false);
 
 
-    // console.log(recording, messages, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated, lastAiResponse);
-    // console.log("Knolia is running");
+    console.log(recording, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated, lastAiResponse, showFeedbackButtons);
 
 
     // Add effect to scroll to bottom when content changes
@@ -114,7 +109,7 @@ export default function InteractionHubVoice() {
         if (scrollViewportRef.current) {
             scrollViewportRef.current.scrollTop = scrollViewportRef.current.scrollHeight;
         }
-    }, [conversationHistory, thinkResponse]); // Trigger scroll on history and current AI response changes
+    }, [conversationHistory, thinkResponse]);
 
     // Effect to clean up audio when component unmounts or WS disconnects
     useEffect(() => {
@@ -390,7 +385,8 @@ export default function InteractionHubVoice() {
         }
     };
 
-    const truncateText = (text: string, maxLength: number = 100) => {
+    const truncateText = (text: string | null | undefined, maxLength: number = 20) => {
+        if (!text) return ""; // Return empty string for null/undefined
         if (text.length <= maxLength) return text;
         return text.slice(0, maxLength) + '...';
     };
@@ -537,7 +533,7 @@ export default function InteractionHubVoice() {
 
                     else if (msg.type === "image_analysis") {
                         // Do something here
-                        setThinkResponse(msg.text);
+                    setThinkResponse(msg.text);
                     }
 
                     else if (msg.type === "info") {
@@ -850,18 +846,15 @@ export default function InteractionHubVoice() {
     const sendLocalLingoMessage = () => {
         const localLingoMsg: LocalLingoMessage = { type: "local_lingo", local_lingo: useLocalLingo };
         ws.current?.send(JSON.stringify(localLingoMsg))
-
-        console.log("Local Lingo Message Sent:", JSON.stringify(localLingoMsg));
     }
 
     return (
         <div className="flex flex-col items-center gap-6 w-full max-w-xl px-4">
            
             {/*AI Response Area */}
-            <div className="w-full h-100% flex flex-col rounded-lg overflow-hidden">
+            <div className="w-full h-100% flex flex-col rounded-lg overflow-hidden text-gray-700">
                 {/* Main content container with bottom alignment */}
                 <div className="flex-1 flex flex-col justify-end items-center">
-
 
                     {/* Scrollable Content Area */}
                     <div className="w-full flex flex-col max-h-[600px] overflow-y-auto scrollbar-hide pb-4" ref={scrollViewportRef}>
@@ -876,8 +869,9 @@ export default function InteractionHubVoice() {
                             {conversationHistory.map((message, index) => (
                                 <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start mb-10 '}` }>
                                     <div className={`relative group rounded-lg p-2 px-3 max-w-[85%] text-sm shadow-md 
-                                        ${message.type === 'user' ? 'bg-accent/10 text-accent-foreground hover:bg-accent/20' : 'bg-secondary text-secondary-foreground hover:bg-secondary/90'} 
-                                        transition-all duration-300 hover:shadow-xl hover:scale-[1.05] cursor-pointer`}>
+                                        ${message.type === 'user' ? 'bg-accent/10 text-accent-foreground hover:bg-accent/20' 
+                                            : 'bg-secondary text-secondary-foreground hover:bg-secondary/90'} 
+                                        transition-all duration-300 hover:shadow-xl hover:scale-[1.05] cursor-pointer scale-in animate-in fade-in slide-in-from-bottom-4 text-gray-700`}>
                                         <MarkdownRenderer>{message.content}</MarkdownRenderer>
                                         
                                         {/* Speak/Stop button for AI messages */}
@@ -932,7 +926,7 @@ export default function InteractionHubVoice() {
                              {isWaitingForResponse && ( // Show "Thinking..." if waiting and no thinkResponse yet
                                 <div className="flex items-center justify-center text-gray-500 text-sm">
                                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                    <span>Thinking...{thinkResponse}</span>
+                                    <span>Thinking... {truncateText(thinkResponse)}</span>
                                 </div>
                             )}
                         </div>
@@ -1007,7 +1001,7 @@ export default function InteractionHubVoice() {
             {/* Input Area - DO NOT CHANGE */}
             {connected && (
                 <>
-                    <div className={`flex w-full items-start gap-2 rounded-4xl border p-2 shadow-sm bg-background transition-opacity ${isListening ? 'opacity-70 cursor-not-allowed' : 'opacity-100'}`}>
+                    <div className={`flex w-full items-start gap-2 rounded-4xl border p-2 shadow-lg bg-background transition-opacity ${isListening ? 'opacity-70 cursor-not-allowed' : 'opacity-100'}`}>
                         <Button
                             variant="ghost"
                             size="icon"
