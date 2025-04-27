@@ -936,7 +936,7 @@ export default function InteractionHubVoice() {
 
             {/* Feedback button */}
              {/* Only show general feedback if an AI response exists and we are not in feedback mode */}
-             {lastAiResponse && !isFeedbackMode && (
+             {/* {lastAiResponse && !isFeedbackMode && (
                  <Button
                      variant="ghost"
                      size="sm"
@@ -946,10 +946,10 @@ export default function InteractionHubVoice() {
                      <MessageSquarePlus size={14} />
                      Give feedback
                  </Button>
-             )}
+             )} */}
 
             {/* Feedback form */}
-            {isFeedbackMode && (
+            {/* {isFeedbackMode && (
                 <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-300">
                     <Textarea
                         value={feedbackText}
@@ -995,7 +995,7 @@ export default function InteractionHubVoice() {
                         </Button>
                     </div>
                 </div>
-            )}
+            )} */}
 
 
             {/* Input Area - DO NOT CHANGE */}
