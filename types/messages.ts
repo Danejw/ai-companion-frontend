@@ -43,9 +43,12 @@ export type UIActionMessage = {
     params?: Record<string, string>;
 };
 
-export type RawMessage = {
-    type: "raw_mode";
-    is_raw: boolean;
+export type PersonalityMessage = {
+    type: "personality";
+    empathy: number;
+    directness: number;
+    warmth: number;
+    challenge: number;
 };
 
 export type LocalLingoMessage = {
@@ -72,6 +75,6 @@ export type WebSocketMessage =
     | TimeMessage
     | UIActionMessage
     | TextMessage
-    | RawMessage
+    | PersonalityMessage
     | LocalLingoMessage
     | OrchestrateMessage;

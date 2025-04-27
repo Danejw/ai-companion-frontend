@@ -2,16 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera, Volume2, ThumbsUp, ThumbsDown, Pause } from "lucide-react"; 
-import { AudioMessage, FeedbackMessage, GPSMessage, ImageMessage, LocalLingoMessage, OrchestrateMessage, RawMessage, TextMessage, TimeMessage } from "@/types/messages";
+import { AudioMessage, FeedbackMessage, GPSMessage, ImageMessage, LocalLingoMessage, OrchestrateMessage, PersonalityMessage, TextMessage, TimeMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { submitFeedback } from "@/lib/api/feedback";
 import { textToSpeech } from "@/lib/api/voice"; // Import the refactored textToSpeech function
-import AudioVisualizer from "../Visualizer";
-import { Button } from "../ui/button";
+import AudioVisualizer from "@/components/Visualizer";
+import { Button } from "@/components/ui/button";
 import { useUIStore } from '@/store'; // Import the store
-import { MarkdownRenderer } from "../MarkdownRenderer";
+import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { submitFinetuneFeedback, FinetuneFeedbackPayload } from "@/lib/api/finetune_feedback"; // Import the new function
 
 
@@ -38,8 +38,11 @@ export default function InteractionHubVoice() {
         extractKnowledge,
         summarizeFrequency,
         selectedVoice,
-        isRawMode,
         useLocalLingo,
+        empathy,
+        directness,
+        warmth,
+        challenge,
     } = useUIStore();
     
     const toggleCreditsOverlay = useUIStore((state) => state.toggleCreditsOverlay);
@@ -144,10 +147,12 @@ export default function InteractionHubVoice() {
         };
     }, []);
 
-    // NEW: Effect to send raw mode status when it changes and connection is active
+    // NEW: Effect to send personality status when it changes and connection is active
     useEffect(() => {
-        if (connected) { sendRawMode(); }
-    }, [isRawMode, connected]);
+        if (connected) {
+            sendPersonality();
+        }
+    }, [empathy, directness, warmth, challenge, connected]);
 
     // NEW: Effect to send local lingo status when it changes and connection is active
     useEffect(() => {
@@ -403,7 +408,8 @@ export default function InteractionHubVoice() {
             setThinkResponse('');
             setLastAiResponse('');
             setFeedbackSubmittedResponses(new Set()); // Reset the feedback tracking
-
+            sendPersonality();
+            
             const session = await getSession();
             const accessToken = session?.user?.accessToken;
 
@@ -836,17 +842,21 @@ export default function InteractionHubVoice() {
         }
     };
 
-    // Send raw mode message
-    const sendRawMode = () => {
-        const rawModeMsg: RawMessage = { type: "raw_mode", is_raw: isRawMode };
-        //console.log("Sending raw mode message:", JSON.stringify(rawModeMsg));
-        ws.current?.send(JSON.stringify(rawModeMsg));
+    const sendPersonality = () => {
+        const personalityMsg: PersonalityMessage = {
+            type: "personality",
+            empathy,
+            directness,
+            warmth,
+            challenge
+        };
+        ws.current?.send(JSON.stringify(personalityMsg));
     };
 
     const sendLocalLingoMessage = () => {
         const localLingoMsg: LocalLingoMessage = { type: "local_lingo", local_lingo: useLocalLingo };
         ws.current?.send(JSON.stringify(localLingoMsg))
-    }
+    };
 
     return (
         <div className="flex flex-col items-center gap-6 w-full max-w-xl px-4">

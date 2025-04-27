@@ -43,10 +43,16 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
         setSummarizeFrequency,
         selectedVoice,
         setSelectedVoice,
-        isRawMode,
-        toggleRawMode,
         useLocalLingo,
-        toggleLocalLingo
+        toggleLocalLingo,
+        empathy,
+        directness,
+        warmth,
+        challenge,
+        setEmpathy,
+        setDirectness,
+        setWarmth,
+        setChallenge
     } = useUIStore();
 
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -191,27 +197,59 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
 
                     <Separator className="my-6" />
 
-                    {/* Raw Mode Setting */}
-                    <div className="space-y-5">
+                    {/* Personality Settings */}
+                    <div className="space-y-6">
                         <h3 className="text-lg font-medium flex items-center">
-                            <Angry className="mr-3 h-5 w-5" /> Raw Mode
+                            🧠 Personality Settings
                         </h3>
 
-                        <div className="flex items-center justify-between px-2">
-                            <div className="space-y-2">
-                                <Label htmlFor="raw-mode" className="text-base">Raw Mode</Label>
-                                <p className="text-sm text-muted-foreground">
-                                    Gives unfiltered, objective answers. May be blunt or uncomfortable. <br />
-                                    <span className="text-xs text-red-500">Use at your own risk.</span>
-                                </p>
+                        <div className="space-y-5 px-2">
+                            <div>
+                                <Label className="text-base">Empathy</Label>
+                                <Slider
+                                    min={0}
+                                    max={5}
+                                    step={1}
+                                    value={[empathy]}
+                                    onValueChange={(value) => setEmpathy(value[0])}
+                                />
                             </div>
-                            <Switch
-                                id="raw-mode"
-                                checked={isRawMode}
-                                onCheckedChange={toggleRawMode}
-                            />
+
+                            <div>
+                                <Label className="text-base">Directness</Label>
+                                <Slider
+                                    min={0}
+                                    max={5}
+                                    step={1}
+                                    value={[directness]}
+                                    onValueChange={(value) => setDirectness(value[0])}
+                                />
+                            </div>
+
+                            <div>
+                                <Label className="text-base">Warmth</Label>
+                                <Slider
+                                    min={0}
+                                    max={5}
+                                    step={1}
+                                    value={[warmth]}
+                                    onValueChange={(value) => setWarmth(value[0])}
+                                />
+                            </div>
+
+                            <div>
+                                <Label className="text-base">Challenge</Label>
+                                <Slider
+                                    min={0}
+                                    max={5}
+                                    step={1}
+                                    value={[challenge]}
+                                    onValueChange={(value) => setChallenge(value[0])}
+                                />
+                            </div>
                         </div>
                     </div>
+
 
                     <Separator className="my-6" />
 

@@ -11,8 +11,19 @@ interface UIState {
     // isInfoOpen: boolean;
     isCaptureOpen: boolean;
     isNotificationsOpen: boolean;
-    isRawMode: boolean;
     useLocalLingo: boolean
+
+
+    // Personality settings
+    empathy: number;
+    directness: number;
+    warmth: number;
+    challenge: number;
+
+    setEmpathy: (value: number) => void;
+    setDirectness: (value: number) => void;
+    setWarmth: (value: number) => void;
+    setChallenge: (value: number) => void;
 
     // Add state for confirmation modal later
     // confirmationAction: null | object;
@@ -25,7 +36,6 @@ interface UIState {
     // toggleInfoOverlay: (isOpen: boolean) => void;
     toggleCaptureOverlay: (isOpen: boolean) => void;
     toggleNotificationsOverlay: (isOpen: boolean) => void;
-    toggleRawMode: (isOn: boolean) => void;
     toggleLocalLingo: (isOn: boolean) => void;
 
     // setConfirmationAction: (action: object | null) => void;
@@ -55,8 +65,13 @@ export const useUIStore = create<UIState>()(
             // isInfoOpen: false,
             isCaptureOpen: false,
             isNotificationsOpen: false,
-            isRawMode: false,
             useLocalLingo: false,
+
+            // Personality settings
+            empathy: 0,
+            directness: 0,
+            warmth: 0,
+            challenge: 0,
 
             // confirmationAction: null,
 
@@ -116,13 +131,15 @@ export const useUIStore = create<UIState>()(
                 isNotificationsOpen: isOpen !== undefined ? isOpen : !state.isNotificationsOpen
             })),
 
-            toggleRawMode: (isRaw) => set((state) => ({
-                isRawMode: isRaw !== undefined ? isRaw : !state.isRawMode
-            })),
-
             toggleLocalLingo: (useLocalLingo) => set((state) => ({
                 useLocalLingo: useLocalLingo !== undefined ? useLocalLingo : !state.useLocalLingo
             })),
+
+            setEmpathy: (value) => set({ empathy: value }),
+            setDirectness: (value) => set({ directness: value }),
+            setWarmth: (value) => set({ warmth: value }),
+            setChallenge: (value) => set({ challenge: value }),
+            
         }),
         {
             name: 'ui-settings', // Storage key
@@ -131,8 +148,13 @@ export const useUIStore = create<UIState>()(
                 extractKnowledge: state.extractKnowledge,
                 summarizeFrequency: state.summarizeFrequency,
                 selectedVoice: state.selectedVoice, // Add voice to persisted settings
-                isRawMode: state.isRawMode,
                 useLocalLingo: state.useLocalLingo,
+
+                // Personality settings
+                empathy: state.empathy,
+                directness: state.directness,
+                warmth: state.warmth,
+                challenge: state.challenge,
             }),
         }
     )
