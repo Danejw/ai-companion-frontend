@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react";
-import { Ear, EarOff, Loader2, MessageSquarePlus, Mic, Power, Send, X, Camera, Volume2, ThumbsUp, ThumbsDown, Pause } from "lucide-react"; 
+import { Ear, EarOff, Loader2, Mic, Power, Send, X, Camera, Volume2, ThumbsUp, ThumbsDown, Pause } from "lucide-react"; 
 import { AudioMessage, FeedbackMessage, GPSMessage, ImageMessage, LocalLingoMessage, OrchestrateMessage, PersonalityMessage, TextMessage, TimeMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
@@ -104,7 +104,7 @@ export default function InteractionHubVoice() {
     const [isSubmittingFinetuneFeedback, setIsSubmittingFinetuneFeedback] = useState(false);
 
 
-    console.log(recording, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated, lastAiResponse, showFeedbackButtons);
+    console.log(recording, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated, lastAiResponse, showFeedbackButtons, isFeedbackMode, isSubmittingFeedback, isSubmittingFinetuneFeedback, teachAi, setTeachAi);
 
 
     // Add effect to scroll to bottom when content changes
