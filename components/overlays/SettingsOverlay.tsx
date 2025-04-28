@@ -19,15 +19,15 @@ import { Loader2 } from "lucide-react";
 
 // Voice options array
 const voiceOptions = [
-    { id: 'alloy', name: 'Alloy', description: 'Female' },
-    { id: 'ash', name: 'Ash', description: 'Male' },
-    { id: 'coral', name: 'Coral', description: 'Female' },
-    { id: 'echo', name: 'Echo', description: 'Female' },
-    { id: 'fable', name: 'Fable', description: 'Female' },
-    { id: 'onyx', name: 'Onyx', description: 'Male' },
-    { id: 'nova', name: 'Nova', description: 'Female' },
-    { id: 'sage', name: 'Sage', description: 'Female' },
-    { id: 'shimmer', name: 'Shimmer', description: 'Female' },
+    { id: 'alloy', name: 'Ashley', description: 'Female' },
+    { id: 'ash', name: 'Aiden', description: 'Male' },
+    { id: 'coral', name: 'Britney', description: 'Female' },
+    { id: 'echo', name: 'Charlie', description: 'Male' },
+    { id: 'fable', name: 'Diana', description: 'Female' },
+    { id: 'onyx', name: 'Eric', description: 'Male' },
+    { id: 'nova', name: 'Fiona', description: 'Female' },
+    { id: 'sage', name: 'George', description: 'Male' },
+    { id: 'shimmer', name: 'Hannah', description: 'Female' },
 ];
 
 interface SettingsOverlayProps {

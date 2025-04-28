@@ -879,9 +879,9 @@ export default function InteractionHubVoice() {
                             {conversationHistory.map((message, index) => (
                                 <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start mb-10 '}` }>
                                     <div className={`relative group rounded-lg p-2 px-3 max-w-[85%] text-sm shadow-md 
-                                        ${message.type === 'user' ? 'bg-accent/10 text-accent-foreground hover:bg-accent/20' 
-                                            : 'bg-secondary text-secondary-foreground hover:bg-secondary/90'} 
-                                        transition-all duration-300 hover:shadow-xl hover:scale-[1.05] cursor-pointer scale-in animate-in fade-in slide-in-from-bottom-4 text-gray-700`}>
+                                        ${message.type === 'user' ? 'bg-accent/20 text-accent-foreground hover:bg-secondary/50' 
+                                            : 'bg-secondary/20 text-secondary-foreground hover:bg-secondary/50'} 
+                                        transition-all duration-300 hover:shadow-xl hover:scale-[1.05] cursor-pointer scale-in animate-in fade-in slide-in-from-bottom-4 text-gray-700 filter-blur-lg`}>
                                         <MarkdownRenderer>{message.content}</MarkdownRenderer>
                                         
                                         {/* Speak/Stop button for AI messages */}
