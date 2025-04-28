@@ -301,37 +301,37 @@ export default function InteractionHubVoice() {
 
 
     // Handler for toggling feedback mode
-    const handleToggleFeedbackMode = () => {
-            setIsFeedbackMode(true);
-            setFeedbackText('');
-    };
+    // const handleToggleFeedbackMode = () => {
+    //         setIsFeedbackMode(true);
+    //         setFeedbackText('');
+    // };
 
     // Handler for submitting feedback
-    const handleSubmitFeedback = async (teachAi: boolean) => {
-            if (!feedbackText.trim()) {
-                toast.error("Please enter feedback before submitting.");
-                return;
-            }
+    // const handleSubmitFeedback = async (teachAi: boolean) => {
+    //         if (!feedbackText.trim()) {
+    //             toast.error("Please enter feedback before submitting.");
+    //             return;
+    //         }
 
-            try {
-                setIsSubmittingFeedback(true);
-                await submitFeedback(feedbackText, teachAi);
-                setIsFeedbackMode(false);
-                setFeedbackText('');
-                toast.success("Thank you for your feedback!");
-            } catch (error) {
-                console.error("Error submitting feedback:", error);
-                toast.error("Failed to submit feedback. Please try again.");
-            } finally {
-                setIsSubmittingFeedback(false);
-            }
-    };
+    //         try {
+    //             setIsSubmittingFeedback(true);
+    //             await submitFeedback(feedbackText, teachAi);
+    //             setIsFeedbackMode(false);
+    //             setFeedbackText('');
+    //             toast.success("Thank you for your feedback!");
+    //         } catch (error) {
+    //             console.error("Error submitting feedback:", error);
+    //             toast.error("Failed to submit feedback. Please try again.");
+    //         } finally {
+    //             setIsSubmittingFeedback(false);
+    //         }
+    // };
 
     // Handler for canceling feedback
-    const handleCancelFeedback = () => {
-            setIsFeedbackMode(false);
-            setFeedbackText('');
-    };
+    // const handleCancelFeedback = () => {
+    //         setIsFeedbackMode(false);
+    //         setFeedbackText('');
+    // };
 
     // Handle finetune feedback submission
     const handleFinetuneFeedback = async (isPositive: boolean) => {
@@ -669,7 +669,7 @@ export default function InteractionHubVoice() {
                     }
 
                     else {
-                        console.log("Unhandled message type:", msg);
+                        // console.log("Unhandled message type:", msg);
                     }
 
                 };
