@@ -6,7 +6,7 @@ import { AudioMessage, FeedbackMessage, GPSMessage, ImageMessage, LocalLingoMess
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { submitFeedback } from "@/lib/api/feedback";
+// import { submitFeedback } from "@/lib/api/feedback";
 import { textToSpeech } from "@/lib/api/voice"; // Import the refactored textToSpeech function
 import AudioVisualizer from "@/components/Visualizer";
 import { Button } from "@/components/ui/button";
@@ -96,15 +96,15 @@ export default function InteractionHubVoice() {
     const [capturedImages, setCapturedImages] = useState<{id: string, data: string}[]>([]);
 
     // Feedback
-    const [isFeedbackMode, setIsFeedbackMode] = useState(false);
-    const [feedbackText, setFeedbackText] = useState('');
-    const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+    // const [isFeedbackMode, setIsFeedbackMode] = useState(false);
+    // const [feedbackText, setFeedbackText] = useState('');
+    // const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
     const [teachAi, setTeachAi] = useState(false);
     const [showFeedbackButtons, setShowFeedbackButtons] = useState(true);
     const [isSubmittingFinetuneFeedback, setIsSubmittingFinetuneFeedback] = useState(false);
 
 
-    console.log(recording, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated, lastAiResponse, showFeedbackButtons, isFeedbackMode, isSubmittingFeedback, isSubmittingFinetuneFeedback, teachAi, setTeachAi);
+    console.log(recording, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated, lastAiResponse, showFeedbackButtons, isSubmittingFinetuneFeedback, teachAi, setTeachAi);
 
 
     // Add effect to scroll to bottom when content changes
