@@ -1,0 +1,25 @@
+# Knolia
+
+> Knolia is a personalized AI companion designed for conversation and reflection. It learns from your conversations to provide a more personalized experience over time, helping you explore your thoughts and feelings in a safe, private space where you can speak freely and feel heard.
+
+## Welcome Experience
+
+- [Speak to Knolia Now](/) - Start a conversation with your AI companion that listens and understands you deeply
+- [How It Works](/how-it-works) - Learn how Knolia builds memory of meaning, learns what matters to you, and connects your thoughts
+- [Memory Graph](/memory) - Visualize how Knolia remembers and connects your conversations over time
+
+## Core Features
+
+- [Memory System] - Knolia builds a memory of meaning, remembering your story as it evolves over time
+- [Personalization] - It learns your communication style, topics of interest, and reflects your unique way of thinking
+- [Pattern Recognition] - Finds patterns and connections across your conversations, offering insights when they matter most
+
+## Additional Resources
+
+- [Privacy & Security](/privacy) - Learn how we keep your conversations private and secure
+- [Terms of Service](/terms) - Review our terms of service and usage guidelines
+- [Contact Us](/contact) - Get in touch with our team for support or questions
+
+---
+
+*Private. Secure. Nothing you say is used to sell, track, or judge. This space is yours.*
