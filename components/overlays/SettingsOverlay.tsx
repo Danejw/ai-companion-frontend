@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { Settings, Brain, RefreshCw, Volume2, Languages } from 'lucide-react';
+import { Settings, Brain, RefreshCw, Volume2, Languages, Activity, Waypoints } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Button } from '../ui/button';
@@ -57,7 +57,8 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
         toggleOptedInToConnect,
         isOptedInToCare,
         isOptedInToConnect,
-        toggleConnectFormOverlay
+        toggleConnectFormOverlay,
+        userConnectProfile
     } = useUIStore();
 
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -90,7 +91,7 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent side="right" className="sm:max-w-md flex flex-col overflow-y-auto">
+            <SheetContent side="right" className="sm:max-w-md flex flex-col overflow-y-auto scrollbar-hide">
                 <SheetHeader className="border-b pb-6 pt-2">
                     <SheetTitle className="flex items-center text-xl">
                         <Settings className="mr-3 h-5 w-5" /> Settings
@@ -104,12 +105,16 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
                     {/* Opted in to Care */}
                     <div className="space-y-5">
                         <h3 className="text-lg font-medium flex items-center">
-                            <Brain className="mr-3 h-5 w-5" /> Opted in to Care
+                            <Activity className="mr-3 h-5 w-5" /> Care
+                            <span className="ml-3 px-2 py-0.5 rounded-full text-xs font-semibold bg-accent text-white">
+                                Coming Soon
+                            </span>
                         </h3>
-                        
+
+                                                
                         <div className="flex items-center justify-between px-2">
                             <div className="space-y-2">
-                                <Label htmlFor="opted-in-to-care" className="text-base">Opted in to Care</Label>
+                                <Label htmlFor="opted-in-to-care" className="text-base">Opt in</Label>
                                 <p className="text-sm text-muted-foreground">
                                     Create a profile to connect with therapists.
                                 </p>
@@ -127,12 +132,15 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
                     {/* Opted in to Connect */}
                     <div className="space-y-5">
                         <h3 className="text-lg font-medium flex items-center">
-                            <Brain className="mr-3 h-5 w-5" /> Opted in to Connect
+                            <Waypoints className="mr-3 h-5 w-5" /> Connect
+                            <span className="ml-3 px-2 py-0.5 rounded-full text-xs font-semibold bg-accent text-white">
+                                Coming Soon
+                            </span>
                         </h3>
                         
                         <div className="flex items-center justify-between px-2">
                             <div className="space-y-2">
-                                <Label htmlFor="opted-in-to-connect" className="text-base">Opted in to Connect</Label>
+                                <Label htmlFor="opted-in-to-connect" className="text-base">Opt in</Label>
                                 <p className="text-sm text-muted-foreground">
                                     Create a profile to connect with other users.
                                 </p>
@@ -143,16 +151,18 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
                                     checked={isOptedInToConnect}
                                     onCheckedChange={toggleOptedInToConnect}
                                 />
-                                <Button
-                                    size="sm"
-                                    variant="secondary"
-                                    onClick={() => toggleConnectFormOverlay(true)}
-                                    className="ml-4"
-                                >
-                                    Edit Connect Profile
-                                </Button>
                             </div>
                         </div>
+                        {userConnectProfile && (
+                            <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => toggleConnectFormOverlay(true)}
+                                className="ml-4"
+                            >
+                                Edit Connect Profile
+                            </Button>
+                        )}
                     </div>
 
                     <Separator className="my-6" />

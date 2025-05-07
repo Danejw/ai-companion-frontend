@@ -114,7 +114,7 @@ export default function ConnectProfileOverlay({ open, onOpenChange }: ConnectPro
             <span className="ml-2">Generating your profile...</span>
           </div>
         ) : (
-        <div className="flex-1 py-8 space-y-6 overflow-y-auto">
+        <div className="flex-1 py-8 space-y-6 overflow-y-auto scrollbar-hide">
 
             <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
