@@ -52,7 +52,12 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
         setEmpathy,
         setDirectness,
         setWarmth,
-        setChallenge
+        setChallenge,
+        toggleOptedInToCare,
+        toggleOptedInToConnect,
+        isOptedInToCare,
+        isOptedInToConnect,
+        toggleConnectFormOverlay
     } = useUIStore();
 
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -96,6 +101,62 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
                 </SheetHeader>
 
                 <div className="flex-1 py-8 mx-8 px-1 space-y-10">
+                    {/* Opted in to Care */}
+                    <div className="space-y-5">
+                        <h3 className="text-lg font-medium flex items-center">
+                            <Brain className="mr-3 h-5 w-5" /> Opted in to Care
+                        </h3>
+                        
+                        <div className="flex items-center justify-between px-2">
+                            <div className="space-y-2">
+                                <Label htmlFor="opted-in-to-care" className="text-base">Opted in to Care</Label>
+                                <p className="text-sm text-muted-foreground">
+                                    Create a profile to connect with therapists.
+                                </p>
+                            </div>
+                            <Switch 
+                                id="opted-in-to-care"
+                                checked={isOptedInToCare}
+                                onCheckedChange={toggleOptedInToCare}
+                            />
+                        </div>
+                    </div>
+
+                    <Separator className="my-6" />
+
+                    {/* Opted in to Connect */}
+                    <div className="space-y-5">
+                        <h3 className="text-lg font-medium flex items-center">
+                            <Brain className="mr-3 h-5 w-5" /> Opted in to Connect
+                        </h3>
+                        
+                        <div className="flex items-center justify-between px-2">
+                            <div className="space-y-2">
+                                <Label htmlFor="opted-in-to-connect" className="text-base">Opted in to Connect</Label>
+                                <p className="text-sm text-muted-foreground">
+                                    Create a profile to connect with other users.
+                                </p>
+                            </div>
+                            <div className="flex items-center">
+                                <Switch 
+                                    id="opted-in-to-connect"
+                                    checked={isOptedInToConnect}
+                                    onCheckedChange={toggleOptedInToConnect}
+                                />
+                                <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    onClick={() => toggleConnectFormOverlay(true)}
+                                    className="ml-4"
+                                >
+                                    Edit Connect Profile
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <Separator className="my-6" />
+
                     {/* Knowledge Extraction Setting */}
                     <div className="space-y-5">
                         <h3 className="text-lg font-medium flex items-center">
@@ -106,7 +167,7 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
                             <div className="space-y-2">
                                 <Label htmlFor="extract-knowledge" className="text-base">Extract Knowledge</Label>
                                 <p className="text-sm text-muted-foreground">
-                                    Automatically extract knowledge from your messages
+                                    Automatically create memories from your messages.
                                 </p>
                             </div>
                             <Switch 

@@ -1,6 +1,7 @@
 // store/index.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { generateUserConnectProfile, deleteUserConnectProfile, UserConnectProfile } from '@/lib/api/connect';
 
 interface UIState {
     isHistoryOpen: boolean;
@@ -11,8 +12,13 @@ interface UIState {
     // isInfoOpen: boolean;
     isCaptureOpen: boolean;
     isNotificationsOpen: boolean;
-    useLocalLingo: boolean
+    isConnectFormOpen: boolean;
+    useLocalLingo: boolean;
 
+    // MCP
+    isOptedInToCare: boolean;
+    isOptedInToConnect: boolean;
+    userConnectProfile: UserConnectProfile | null;
 
     // Personality settings
     empathy: number;
@@ -25,8 +31,6 @@ interface UIState {
     setWarmth: (value: number) => void;
     setChallenge: (value: number) => void;
 
-    // Add state for confirmation modal later
-    // confirmationAction: null | object;
 
     toggleHistoryOverlay: (isOpen?: boolean) => void;
     toggleCreditsOverlay: (isOpen?: boolean) => void;
@@ -36,9 +40,12 @@ interface UIState {
     // toggleInfoOverlay: (isOpen: boolean) => void;
     toggleCaptureOverlay: (isOpen: boolean) => void;
     toggleNotificationsOverlay: (isOpen: boolean) => void;
+    toggleConnectFormOverlay: (isOpen: boolean) => void;
     toggleLocalLingo: (isOn: boolean) => void;
 
-    // setConfirmationAction: (action: object | null) => void;
+    toggleOptedInToCare: (isOptedInToCare: boolean) => void;
+    toggleOptedInToConnect: (isOptedInToConnect: boolean) => void;
+    setUserConnectProfile: (profile: UserConnectProfile | null) => void;
 
     // NEW: Settings for message processing
     extractKnowledge: boolean;
@@ -65,6 +72,7 @@ export const useUIStore = create<UIState>()(
             // isInfoOpen: false,
             isCaptureOpen: false,
             isNotificationsOpen: false,
+            isConnectFormOpen: false,
             useLocalLingo: false,
 
             // Personality settings
@@ -73,7 +81,10 @@ export const useUIStore = create<UIState>()(
             warmth: 0,
             challenge: 0,
 
-            // confirmationAction: null,
+            // MCP
+            isOptedInToCare: false,
+            isOptedInToConnect: false,
+            userConnectProfile: null,
 
             // Settings values
             extractKnowledge: true,
@@ -131,6 +142,10 @@ export const useUIStore = create<UIState>()(
                 isNotificationsOpen: isOpen !== undefined ? isOpen : !state.isNotificationsOpen
             })),
 
+            toggleConnectFormOverlay: (isOpen) => set((state) => ({
+                isConnectFormOpen: isOpen !== undefined ? isOpen : !state.isConnectFormOpen
+            })),
+
             toggleLocalLingo: (useLocalLingo) => set((state) => ({
                 useLocalLingo: useLocalLingo !== undefined ? useLocalLingo : !state.useLocalLingo
             })),
@@ -140,6 +155,43 @@ export const useUIStore = create<UIState>()(
             setWarmth: (value) => set({ warmth: value }),
             setChallenge: (value) => set({ challenge: value }),
             
+            // MCP
+            toggleOptedInToCare: (isOptedIn?: boolean) => set((state) => ({
+                isOptedInToCare: isOptedIn !== undefined ? isOptedIn : !state.isOptedInToCare
+            })),
+
+            toggleOptedInToConnect: async (isOptedIn?: boolean) => {
+                const newValue = isOptedIn !== undefined ? isOptedIn : !get().isOptedInToConnect;
+                
+                // Print out the toggle value
+                console.log('Connect toggle value changed to:', newValue);
+                
+                set({ isOptedInToConnect: newValue });
+                
+                if (newValue) {
+                    try {
+                        console.log('Generating profile...');
+                        //const profile = await generateUserConnectProfile();
+                        //console.log('Generated profile:', profile);
+                        set({ 
+                            //userConnectProfile: profile,
+                            isConnectFormOpen: true,
+                        });
+                    } catch (error) {
+                        console.error('Failed to generate profile:', error);
+                    }
+                } else {
+                    try {
+                        await deleteUserConnectProfile();
+                        console.log('Profile deleted successfully');
+                        set({ userConnectProfile: null });
+                    } catch (error) {
+                        console.error('Failed to delete profile:', error);
+                    }
+                }
+            },
+            
+            setUserConnectProfile: (profile) => set({ userConnectProfile: profile }),
         }),
         {
             name: 'ui-settings', // Storage key
@@ -155,6 +207,11 @@ export const useUIStore = create<UIState>()(
                 directness: state.directness,
                 warmth: state.warmth,
                 challenge: state.challenge,
+
+                // MCP
+                isOptedInToCare: state.isOptedInToCare,
+                isOptedInToConnect: state.isOptedInToConnect,
+                userConnectProfile: state.userConnectProfile,
             }),
         }
     )

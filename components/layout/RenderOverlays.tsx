@@ -17,6 +17,7 @@ import KnowledgeOverlay from '@/components/overlays/KnowledgeOverlay';
 import SettingsOverlay from '@/components/overlays/SettingsOverlay';
 import CaptureOverlay from '@/components/overlays/CaptureOverlay';
 import PushNotificationOverlay from '@/components/overlays/PushNotificationsOverlay';
+import ConnectProfileOverlay from '@/components/overlays/ConnectProfileOverlay';
 
 // import SettingsOverlay from '@/components/overlays/SettingsOverlay'; // Uncomment when ready
 
@@ -30,6 +31,7 @@ export function RenderOverlays() {
     // const isInfoOpen = useUIStore((state) => state.isInfoOpen);
     const isCaptureOpen = useUIStore((state) => state.isCaptureOpen);
     const isNotificationsOpen = useUIStore((state) => state.isNotificationsOpen);
+    const isConnectFormOpen = useUIStore((state) => state.isConnectFormOpen);
 
     const toggleAuthOverlay = useUIStore((state) => state.toggleAuthOverlay);
     const toggleCreditsOverlay = useUIStore((state) => state.toggleCreditsOverlay);
@@ -39,7 +41,7 @@ export function RenderOverlays() {
     // const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
     const toggleCaptureOverlay = useUIStore((state) => state.toggleCaptureOverlay);
     const toggleNotificationsOverlay = useUIStore((state) => state.toggleNotificationsOverlay);
-
+    const toggleConnectFormOverlay = useUIStore((state) => state.toggleConnectFormOverlay);
 
     // Get session status
     const { status } = useSession(); // Only need status here
@@ -76,7 +78,7 @@ export function RenderOverlays() {
             {/* <InfoOverlay open={isInfoOpen} onOpenChange={toggleInfoOverlay} /> */}
             <CaptureOverlay open={isCaptureOpen} onOpenChange={toggleCaptureOverlay} />
             <PushNotificationOverlay open={isNotificationsOpen} onOpenChange={toggleNotificationsOverlay} />
-            
+            <ConnectProfileOverlay open={isConnectFormOpen} onOpenChange={toggleConnectFormOverlay} />
             {/* <SettingsOverlay open={isSettingsOpen} onOpenChange={toggleSettingsOverlay} /> */}
         </>
     );
