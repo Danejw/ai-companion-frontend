@@ -3,6 +3,8 @@
 import { useEffect } from 'react'
 import Background from '@/components/Background'
 import InteractionHubEnhanced from '@/components/core/InteractionHubEnhanced'
+import { useUIStore } from '@/store'
+import { Button } from '@/components/ui/button'
 
 
 export default function Home() {
@@ -16,6 +18,8 @@ export default function Home() {
     }
   }, [])
 
+  const togglePhq4Overlay = useUIStore((state) => state.togglePhq4Overlay)
+
   return (
     <div className="relative h-screen w-full">
 
@@ -28,6 +32,16 @@ export default function Home() {
       <div className="absolute bottom-18 w-full left-1/2 transform -translate-x-1/2 z-0 max-w-xl px-4">
         <InteractionHubEnhanced />
       </div>
+
+      {/* PHQ-4 Overlay */}
+      {/* button to toggle the phq4 overlay */}
+      <Button 
+        variant="default"
+        className="absolute top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-md"
+        onClick={() => togglePhq4Overlay(true)}
+      >
+        Open PHQ-4
+      </Button>
     </div>
   )
 }

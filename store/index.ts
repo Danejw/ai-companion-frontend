@@ -15,6 +15,9 @@ interface UIState {
     isConnectFormOpen: boolean;
     useLocalLingo: boolean;
 
+    // PHQ-4
+    isPhq4Open: boolean;
+
     // MCP
     isOptedInToCare: boolean;
     isOptedInToConnect: boolean;
@@ -47,6 +50,8 @@ interface UIState {
     toggleOptedInToConnect: (isOptedInToConnect: boolean) => void;
     setUserConnectProfile: (profile: UserConnectProfile | null) => void;
 
+    togglePhq4Overlay: (isOpen: boolean) => void;
+
     // NEW: Settings for message processing
     extractKnowledge: boolean;
     summarizeFrequency: number; // 0 = never, 1 = always, higher numbers for less frequency
@@ -74,6 +79,9 @@ export const useUIStore = create<UIState>()(
             isNotificationsOpen: false,
             isConnectFormOpen: false,
             useLocalLingo: false,
+
+            // PHQ-4
+            isPhq4Open: false,
 
             // Personality settings
             empathy: 0,
@@ -192,6 +200,11 @@ export const useUIStore = create<UIState>()(
             },
             
             setUserConnectProfile: (profile) => set({ userConnectProfile: profile }),
+
+            // PHQ-4
+            togglePhq4Overlay: (isOpen) => set((state) => ({
+                isPhq4Open: isOpen !== undefined ? isOpen : !state.isPhq4Open
+            })),
         }),
         {
             name: 'ui-settings', // Storage key
