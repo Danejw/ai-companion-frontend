@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { Settings, Brain, RefreshCw, Volume2, Languages, Activity, Waypoints } from 'lucide-react';
+import { Settings, Brain, RefreshCw, Volume2, Languages, Activity, Waypoints, FlaskConical } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Button } from '../ui/button';
@@ -58,7 +58,9 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
         isOptedInToCare,
         isOptedInToConnect,
         toggleConnectFormOverlay,
-        userConnectProfile
+        userConnectProfile,
+        toggleOptedInToPilot,
+        isOptedInToPilot,
     } = useUIStore();
 
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -163,6 +165,31 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
                                 Edit Connect Profile
                             </Button>
                         )}
+                    </div>
+
+                    <Separator className="my-6" />
+
+                    {/* Opted in to Pilot */}
+                    <div className="space-y-5">
+                        <h3 className="text-lg font-medium flex items-center">
+                            <FlaskConical  className="mr-3 h-5 w-5" /> Pilot
+                        </h3>
+                        
+                        <div className="flex items-center justify-between px-2">
+                            <div className="space-y-2">
+                                <Label htmlFor="opted-in-to-pilot" className="text-base">Opt in</Label>
+                                <p className="text-sm text-muted-foreground">
+                                    Optin to the pilot program.
+                                </p>
+                            </div>
+                            <div className="flex items-center">
+                                <Switch 
+                                    id="opted-in-to-pilot"
+                                    checked={isOptedInToPilot}
+                                    onCheckedChange={toggleOptedInToPilot}
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     <Separator className="my-6" />

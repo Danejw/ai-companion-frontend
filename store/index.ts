@@ -2,6 +2,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { generateUserConnectProfile, deleteUserConnectProfile, UserConnectProfile } from '@/lib/api/connect';
+import { optInToPilot } from "@/lib/api/account";
+import { toast } from 'sonner';
 
 interface UIState {
     isHistoryOpen: boolean;
@@ -15,6 +17,7 @@ interface UIState {
     isConnectFormOpen: boolean;
     useLocalLingo: boolean;
 
+
     // PHQ-4
     isPhq4Open: boolean;
 
@@ -22,6 +25,9 @@ interface UIState {
     isOptedInToCare: boolean;
     isOptedInToConnect: boolean;
     userConnectProfile: UserConnectProfile | null;
+
+    // pilot
+    isOptedInToPilot: boolean;
 
     // Personality settings
     empathy: number;
@@ -49,6 +55,8 @@ interface UIState {
     toggleOptedInToCare: (isOptedInToCare: boolean) => void;
     toggleOptedInToConnect: (isOptedInToConnect: boolean) => void;
     setUserConnectProfile: (profile: UserConnectProfile | null) => void;
+
+    toggleOptedInToPilot: (isOptedInToPilot: boolean) => void;
 
     togglePhq4Overlay: (isOpen: boolean) => void;
 
@@ -81,6 +89,7 @@ export const useUIStore = create<UIState>()(
             useLocalLingo: false,
 
             // PHQ-4
+            isOptedInToPilot: false,
             isPhq4Open: false,
 
             // Personality settings
@@ -201,6 +210,18 @@ export const useUIStore = create<UIState>()(
             
             setUserConnectProfile: (profile) => set({ userConnectProfile: profile }),
 
+            toggleOptedInToPilot: async (isOptedInToPilot?: boolean) => {
+                const newValue = isOptedInToPilot !== undefined ? isOptedInToPilot : !get().isOptedInToPilot;
+                set({ isOptedInToPilot: newValue });
+                try {
+                    await optInToPilot(newValue);
+                } catch (error) {
+                    // Optionally revert state or show a toast
+                    set({ isOptedInToPilot: !newValue });
+                    toast.error("Failed to update pilot program status");
+                }
+            },
+
             // PHQ-4
             togglePhq4Overlay: (isOpen) => set((state) => ({
                 isPhq4Open: isOpen !== undefined ? isOpen : !state.isPhq4Open
@@ -225,6 +246,9 @@ export const useUIStore = create<UIState>()(
                 isOptedInToCare: state.isOptedInToCare,
                 isOptedInToConnect: state.isOptedInToConnect,
                 userConnectProfile: state.userConnectProfile,
+
+                // pilot
+                isOptedInToPilot: state.isOptedInToPilot,
             }),
         }
     )

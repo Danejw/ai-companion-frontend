@@ -17,6 +17,20 @@ export interface ResetPasswordResponse {
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const session = await getSession();
+  const accessToken = session?.user?.accessToken; // Adjust path if necessary
+  const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+  };
+
+  if (accessToken) {
+      headers['Authorization'] = `Bearer ${accessToken}`;
+  } else {
+      console.warn('--- WARN: getAuthHeaders - No Access Token Found for request ---');
+  }
+  return headers;
+}
 
 /**
  * Delete a user account
@@ -104,3 +118,38 @@ export async function changePassword(token: string, new_password: string): Promi
         throw new Error("Failed to change password");
     }
 }
+  
+export async function optInToPilot(isOptedInToPilot: boolean)
+{
+  const headers = await getAuthHeaders();
+  const url = `${BACKEND_URL}/profiles/set_user_pilot`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify({ is_pilot: isOptedInToPilot }),
+  });
+    
+  if (response.ok) {
+    return await response.json();
+  }
+
+  return response.json();
+} 
+
+export async function getPilotStatus() : Promise<boolean>
+{
+  const headers = await getAuthHeaders();
+  const url = `${BACKEND_URL}/profiles/get_user_pilot`;
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: headers,
+  });
+
+  if (response.ok) {
+    return await response.json();
+  }
+
+  return response.json();
+} 
