@@ -1,5 +1,8 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Phq4Questionnaire, QuestionnaireStage, QuestionnaireResponses } from "@/components/Phq4Questionaire";
+import { Phq4Questionnaire, QuestionnaireResponses } from "@/components/Phq4Questionaire";
+import { QuestionnaireStage } from "@/store";
+
+
 
 // Overlay component that adapts for pre and post
 export default function Phq4Overlay({ isOpen, stage, onClose, onSubmit }: { isOpen: boolean, stage: QuestionnaireStage, onClose: () => void, onSubmit: (responses: QuestionnaireResponses) => void }) {

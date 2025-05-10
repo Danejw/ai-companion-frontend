@@ -46,3 +46,16 @@ export async function submitPhq4Response(response: Phq4Questionaire): Promise<Ph
   
     return res.json();
   }
+
+export async function getPhq4History(): Promise<Phq4Questionaire[]> {
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${BACKEND_URL}/phq4/get_responses`, {
+        headers: headers,
+    });
+
+    if (!res.ok) {
+        throw new Error("Failed to get PHQ-4 history");
+    }
+
+    return res.json();
+}

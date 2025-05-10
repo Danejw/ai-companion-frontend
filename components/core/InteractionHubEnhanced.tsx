@@ -44,6 +44,7 @@ export default function InteractionHubVoice() {
         warmth,
         challenge,
         isOptedInToConnect,
+        checkPhq4Overlay,
     } = useUIStore();
     
     const toggleCreditsOverlay = useUIStore((state) => state.toggleCreditsOverlay);
@@ -200,6 +201,7 @@ export default function InteractionHubVoice() {
 
                 const orchestrationMessage: OrchestrateMessage = { type: "orchestrate", user_input: messageToSend, extract: extractKnowledge, summarize: summarizeFrequency };
                 ws.current?.send(JSON.stringify(orchestrationMessage));
+
             }
 
             // Clear images after sending
@@ -207,6 +209,8 @@ export default function InteractionHubVoice() {
             setIsWaitingForResponse(true);
             setInputText('');
             setShowFeedbackButtons(false); // Hide feedback buttons while waiting for new response
+            
+            await checkPhq4Overlay(25);
 
         } catch (error) {
             console.error("Streaming error:", error);

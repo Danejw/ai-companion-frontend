@@ -55,7 +55,7 @@ export function Phq4Questionnaire({ onSubmit, stage, onClose }: Phq4Questionnair
   
     return (
       <div className="space-y-3">
-        <h2 className="text-2xl font-bold text-gray-900 text-center">{stage === 'pre' ? 'Pre-Pilot Check-In' : 'Post-Pilot Reflection'}</h2>
+        <h2 className="text-2xl font-bold text-gray-900 text-center">Pilot Program Check-In</h2>
         <p className="text-gray-600 text-base italic mb-4 text-center">
           {stage === 'pre'
             ? "Quick set of questions to understand how you've been feeling."

@@ -147,9 +147,32 @@ export async function getPilotStatus() : Promise<boolean>
     headers: headers,
   });
 
-  if (response.ok) {
-    return await response.json();
+  if (!response.ok) {
+    throw new Error("Failed to fetch pilot status");
   }
 
-  return response.json();
+  return await response.json() as boolean;
 } 
+
+
+interface UserCreditsUsedResponse {
+  user_id: string;
+  credits_used: number;
+}
+
+export async function getUserCreditsUsed(): Promise<UserCreditsUsedResponse>
+{
+  const headers = await getAuthHeaders();
+  const url = `${BACKEND_URL}/profiles/credits_used`;
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: headers,
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch user profile");
+  }
+
+  return await response.json() as UserCreditsUsedResponse;
+}

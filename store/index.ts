@@ -2,8 +2,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { generateUserConnectProfile, deleteUserConnectProfile, UserConnectProfile } from '@/lib/api/connect';
-import { optInToPilot } from "@/lib/api/account";
+import { optInToPilot, getUserCreditsUsed, getPilotStatus } from "@/lib/api/account";
 import { toast } from 'sonner';
+import { getPhq4History } from "@/lib/api/pqh4";
+
+export type QuestionnaireStage = "pre" | "post";
 
 interface UIState {
     isHistoryOpen: boolean;
@@ -20,6 +23,8 @@ interface UIState {
 
     // PHQ-4
     isPhq4Open: boolean;
+    phq4Stage: QuestionnaireStage;
+    lastCreditsChecked: number | null;
 
     // MCP
     isOptedInToCare: boolean;
@@ -71,6 +76,8 @@ interface UIState {
     // Voice settings
     selectedVoice: string;
     setSelectedVoice: (voice: string) => void;
+
+    checkPhq4Overlay: (creditInterval: number) => Promise<void>;
 }
 
 export const useUIStore = create<UIState>()(
@@ -91,6 +98,8 @@ export const useUIStore = create<UIState>()(
             // PHQ-4
             isOptedInToPilot: false,
             isPhq4Open: false,
+            phq4Stage: "pre",
+            lastCreditsChecked: null,
 
             // Personality settings
             empathy: 0,
@@ -226,6 +235,37 @@ export const useUIStore = create<UIState>()(
             togglePhq4Overlay: (isOpen) => set((state) => ({
                 isPhq4Open: isOpen !== undefined ? isOpen : !state.isPhq4Open
             })),
+
+            checkPhq4Overlay: async (creditInterval: number) => {
+                const [creditsUsedData, phq4History, isPilot] = await Promise.all([
+                    getUserCreditsUsed(),
+                    getPhq4History(),
+                    getPilotStatus(),
+                ]);
+                
+                if (!isPilot) {
+                    set({ isPhq4Open: false });
+                    return;
+                }
+                const creditsUsed = creditsUsedData.credits_used;
+                const lastCreditsChecked = get().lastCreditsChecked;
+
+                if (
+                    creditsUsed > 0 &&
+                    creditsUsed % creditInterval === 0 &&
+                    creditsUsed !== lastCreditsChecked
+                ) {
+                    let nextStage: QuestionnaireStage = "pre";
+                    if (phq4History.length > 0 && phq4History[phq4History.length - 1].stage === "pre") {
+                        nextStage = "post";
+                    }
+                    set({
+                        phq4Stage: nextStage,
+                        isPhq4Open: true,
+                        lastCreditsChecked: creditsUsed,
+                    });
+                }
+            },
         }),
         {
             name: 'ui-settings', // Storage key
