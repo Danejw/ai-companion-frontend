@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { generateUserConnectProfile, deleteUserConnectProfile, UserConnectProfile } from '@/lib/api/connect';
-import { optInToPilot, getUserCreditsUsed, getPilotStatus } from "@/lib/api/account";
+import { optInToPilot, getUserCreditsUsed, getPilotStatus, getUserUnlockCare, getUserUnlockConnect } from "@/lib/api/account";
 import { toast } from 'sonner';
 import { getPhq4History } from "@/lib/api/pqh4";
 
@@ -16,7 +16,8 @@ interface UIState {
     isKnowledgeOpen: boolean;
     // isInfoOpen: boolean;
     isCaptureOpen: boolean;
-    isNotificationsOpen: boolean;
+    isPushNotificationsOpen: boolean;
+    isInfoNotificationOpen: boolean;
     isConnectFormOpen: boolean;
     useLocalLingo: boolean;
 
@@ -24,12 +25,15 @@ interface UIState {
     // PHQ-4
     isPhq4Open: boolean;
     phq4Stage: QuestionnaireStage;
-    lastCreditsChecked: number | null;
+    lastCreditsUsed: number | null;
 
     // MCP
+    didUnlockCare: boolean;
+    didUnlockConnect: boolean;
     isOptedInToCare: boolean;
     isOptedInToConnect: boolean;
     userConnectProfile: UserConnectProfile | null;
+
 
     // pilot
     isOptedInToPilot: boolean;
@@ -53,10 +57,13 @@ interface UIState {
     toggleKnowledgeOverlay: (isOpen: boolean) => void;
     // toggleInfoOverlay: (isOpen: boolean) => void;
     toggleCaptureOverlay: (isOpen: boolean) => void;
-    toggleNotificationsOverlay: (isOpen: boolean) => void;
+    togglePushNotificationsOverlay: (isOpen: boolean) => void;
+    toggleInfoNotificationOverlay: (isOpen: boolean) => void;
     toggleConnectFormOverlay: (isOpen: boolean) => void;
     toggleLocalLingo: (isOn: boolean) => void;
 
+    setDidUnlockCare: (didUnlockCare: boolean) => void;
+    setDidUnlockConnect: (didUnlockConnect: boolean) => void;
     toggleOptedInToCare: (isOptedInToCare: boolean) => void;
     toggleOptedInToConnect: (isOptedInToConnect: boolean) => void;
     setUserConnectProfile: (profile: UserConnectProfile | null) => void;
@@ -78,6 +85,10 @@ interface UIState {
     setSelectedVoice: (voice: string) => void;
 
     checkPhq4Overlay: (creditInterval: number) => Promise<void>;
+
+    syncLastCreditsUsed: () => Promise<number>;
+    syncCareUnlock: () => Promise<boolean>;
+    syncConnectUnlock: () => Promise<boolean>;
 }
 
 export const useUIStore = create<UIState>()(
@@ -91,7 +102,8 @@ export const useUIStore = create<UIState>()(
             isKnowledgeOpen: false,
             // isInfoOpen: false,
             isCaptureOpen: false,
-            isNotificationsOpen: false,
+            isPushNotificationsOpen: false,
+            isInfoNotificationOpen: false,
             isConnectFormOpen: false,
             useLocalLingo: false,
 
@@ -99,7 +111,7 @@ export const useUIStore = create<UIState>()(
             isOptedInToPilot: false,
             isPhq4Open: false,
             phq4Stage: "pre",
-            lastCreditsChecked: null,
+            lastCreditsUsed: null,
 
             // Personality settings
             empathy: 0,
@@ -108,6 +120,8 @@ export const useUIStore = create<UIState>()(
             challenge: 0,
 
             // MCP
+            didUnlockCare: false,
+            didUnlockConnect: false,
             isOptedInToCare: false,
             isOptedInToConnect: false,
             userConnectProfile: null,
@@ -164,8 +178,12 @@ export const useUIStore = create<UIState>()(
                 isCaptureOpen: isOpen !== undefined ? isOpen : !state.isCaptureOpen
             })),
 
-            toggleNotificationsOverlay: (isOpen) => set((state) => ({
-                isNotificationsOpen: isOpen !== undefined ? isOpen : !state.isNotificationsOpen
+            togglePushNotificationsOverlay: (isOpen) => set((state) => ({
+                isPushNotificationsOpen: isOpen !== undefined ? isOpen : !state.isPushNotificationsOpen
+            })),
+
+            toggleInfoNotificationOverlay: (isOpen) => set((state) => ({
+                isInfoNotificationOpen: isOpen !== undefined ? isOpen : !state.isInfoNotificationOpen
             })),
 
             toggleConnectFormOverlay: (isOpen) => set((state) => ({
@@ -182,6 +200,9 @@ export const useUIStore = create<UIState>()(
             setChallenge: (value) => set({ challenge: value }),
             
             // MCP
+            setDidUnlockCare: (didUnlockCare: boolean) => set({ didUnlockCare }),
+            setDidUnlockConnect: (didUnlockConnect: boolean) => set({ didUnlockConnect }),
+
             toggleOptedInToCare: (isOptedIn?: boolean) => set((state) => ({
                 isOptedInToCare: isOptedIn !== undefined ? isOptedIn : !state.isOptedInToCare
             })),
@@ -248,12 +269,12 @@ export const useUIStore = create<UIState>()(
                     return;
                 }
                 const creditsUsed = creditsUsedData.credits_used;
-                const lastCreditsChecked = get().lastCreditsChecked;
+                const lastCreditsUsed = get().lastCreditsUsed;
 
                 if (
                     creditsUsed > 0 &&
                     creditsUsed % creditInterval === 0 &&
-                    creditsUsed !== lastCreditsChecked
+                    creditsUsed !== lastCreditsUsed
                 ) {
                     let nextStage: QuestionnaireStage = "pre";
                     if (phq4History.length > 0 && phq4History[phq4History.length - 1].stage === "pre") {
@@ -262,8 +283,46 @@ export const useUIStore = create<UIState>()(
                     set({
                         phq4Stage: nextStage,
                         isPhq4Open: true,
-                        lastCreditsChecked: creditsUsed,
+                        lastCreditsUsed: creditsUsed,
                     });
+                }
+            },
+
+            syncLastCreditsUsed: async () => {
+                try {
+                    const { credits_used } = await getUserCreditsUsed();
+                    set({ lastCreditsUsed: credits_used });
+                    return credits_used;
+                } catch (error) {
+                    console.error('Failed to sync credits used:', error);
+                    return 0;
+                }
+            },
+
+            syncCareUnlock: async () => {
+                try {
+                    // Care
+                    const didUnlockCare = await getUserUnlockCare();
+                    console.log('didUnlockCare', didUnlockCare);
+                    set({ didUnlockCare });
+                    return didUnlockCare;
+
+                } catch (error) {
+                    console.error('Failed to check care feature unlocks:', error);
+                    return false;
+                }
+            },
+
+            syncConnectUnlock: async () => {
+                try {
+                    // Connect
+                    const didUnlockConnect = await getUserUnlockConnect();
+                    console.log('didUnlockConnect', didUnlockConnect);
+                    set({ didUnlockConnect });
+                    return didUnlockConnect;
+                } catch (error) {
+                    console.error('Failed to check connect feature unlocks:', error);
+                    return false;
                 }
             },
         }),
@@ -283,12 +342,16 @@ export const useUIStore = create<UIState>()(
                 challenge: state.challenge,
 
                 // MCP
+                didUnlockCare: state.didUnlockCare,
+                didUnlockConnect: state.didUnlockConnect,
                 isOptedInToCare: state.isOptedInToCare,
                 isOptedInToConnect: state.isOptedInToConnect,
                 userConnectProfile: state.userConnectProfile,
 
                 // pilot
                 isOptedInToPilot: state.isOptedInToPilot,
+
+                lastCreditsUsed: state.lastCreditsUsed,
             }),
         }
     )

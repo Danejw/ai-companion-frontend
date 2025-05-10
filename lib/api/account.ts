@@ -176,3 +176,37 @@ export async function getUserCreditsUsed(): Promise<UserCreditsUsedResponse>
 
   return await response.json() as UserCreditsUsedResponse;
 }
+
+export async function getUserUnlockCare() : Promise<boolean>
+{
+  const headers = await getAuthHeaders();
+  const url = `${BACKEND_URL}/profiles/get_user_unlocked_care`;
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: headers,
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch user unlock care");
+  } 
+
+  return await response.json() as boolean;
+}
+
+export async function getUserUnlockConnect() : Promise<boolean>
+{
+  const headers = await getAuthHeaders();
+  const url = `${BACKEND_URL}/profiles/get_user_unlocked_connect`;
+  
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: headers,
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch user unlock connect");
+  } 
+
+  return await response.json() as boolean;
+}

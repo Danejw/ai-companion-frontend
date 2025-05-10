@@ -45,6 +45,9 @@ export default function InteractionHubVoice() {
         challenge,
         isOptedInToConnect,
         checkPhq4Overlay,
+        syncLastCreditsUsed,
+        syncCareUnlock,
+        syncConnectUnlock,
     } = useUIStore();
     
     const toggleCreditsOverlay = useUIStore((state) => state.toggleCreditsOverlay);
@@ -53,7 +56,8 @@ export default function InteractionHubVoice() {
     const toggleHistoryOverlay = useUIStore((state) => state.toggleHistoryOverlay);
     const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
     // const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
-    const toggleNotificationsOverlay = useUIStore((state) => state.toggleNotificationsOverlay);
+    const togglePushNotificationsOverlay = useUIStore((state) => state.togglePushNotificationsOverlay);
+    const toggleInfoNotificationOverlay = useUIStore((state) => state.toggleInfoNotificationOverlay);
     const toggleCaptureOverlay = useUIStore((state) => state.toggleCaptureOverlay);
 
 
@@ -168,6 +172,20 @@ export default function InteractionHubVoice() {
         }
     }, [isOptedInToConnect]);
 
+    // Check feature unlocks
+    useEffect(() => {
+        const checkUnlocks = async () => {
+            const credits_used = await syncLastCreditsUsed();
+            const didUnlockCare = await syncCareUnlock();
+            const didUnlockConnect = await syncConnectUnlock();
+
+            console.log('credits_used', credits_used);
+            console.log('didUnlockCare', didUnlockCare);
+            console.log('didUnlockConnect', didUnlockConnect);
+        };
+        checkUnlocks();
+    }, []);
+    
     // Function to remove an image when clicked
     const removeImage = (id: string) => {
         setCapturedImages(prev => prev.filter(img => img.id !== id));
@@ -635,9 +653,9 @@ export default function InteractionHubVoice() {
                             toggleCaptureOverlay(true);
                             console.log("Capture Overlay Opened");
                         }
-                        else if (msg.action === 'toggle_notifications') {
-                            toggleNotificationsOverlay(true);
-                            console.log("Notifications Overlay Opened");
+                        else if (msg.action === 'toggle_push_notification') {
+                            togglePushNotificationsOverlay(true);
+                            console.log("Push Notifications Overlay Opened");
                         }
 
                         toast.info(msg.action);
@@ -1209,3 +1227,4 @@ export default function InteractionHubVoice() {
         </div>
     );
 }
+

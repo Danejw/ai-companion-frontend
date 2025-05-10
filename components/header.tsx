@@ -18,7 +18,7 @@ export default function Header() {
     const toggleHistoryOverlay = useUIStore((state) => state.toggleHistoryOverlay);
     const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
     // onst toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
-    const toggleNotificationsOverlay = useUIStore((state) => state.toggleNotificationsOverlay);
+    const togglePushNotificationsOverlay = useUIStore((state) => state.togglePushNotificationsOverlay);
     
     // Add state for mobile detection
     const [isMounted, setIsMounted] = useState(false);
@@ -120,7 +120,7 @@ export default function Header() {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        onClick={() => toggleNotificationsOverlay(true)}
+                                        onClick={() => togglePushNotificationsOverlay(true)}
                                         title="Notifications"
                                     >
                                         <Bell className="h-4 w-4" />
@@ -206,7 +206,7 @@ export default function Header() {
                                                 size="sm" 
                                                 className="justify-start" 
                                                 onClick={() => {
-                                                    toggleNotificationsOverlay(true);
+                                                    togglePushNotificationsOverlay(true);
                                                 }}
                                             >
                                                 <Bell className="h-4 w-4 mr-2" />

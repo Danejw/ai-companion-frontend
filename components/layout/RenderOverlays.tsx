@@ -17,6 +17,7 @@ import KnowledgeOverlay from '@/components/overlays/KnowledgeOverlay';
 import SettingsOverlay from '@/components/overlays/SettingsOverlay';
 import CaptureOverlay from '@/components/overlays/CaptureOverlay';
 import PushNotificationOverlay from '@/components/overlays/PushNotificationsOverlay';
+import InfoNotificationOverlay from '@/components/overlays/InfoNotificationOverlay';
 import ConnectProfileOverlay from '@/components/overlays/ConnectProfileOverlay';
 import Phq4Overlay from '@/components/overlays/Phq4Overlay';
 
@@ -31,7 +32,8 @@ export function RenderOverlays() {
     const isKnowledgeOpen = useUIStore((state) => state.isKnowledgeOpen);
     // const isInfoOpen = useUIStore((state) => state.isInfoOpen);
     const isCaptureOpen = useUIStore((state) => state.isCaptureOpen);
-    const isNotificationsOpen = useUIStore((state) => state.isNotificationsOpen);
+    const isPushNotificationsOpen = useUIStore((state) => state.isPushNotificationsOpen);
+    const isInfoNotificationOpen = useUIStore((state) => state.isInfoNotificationOpen);
     const isConnectFormOpen = useUIStore((state) => state.isConnectFormOpen);
     const isPhq4Open = useUIStore((state) => state.isPhq4Open);
 
@@ -42,7 +44,8 @@ export function RenderOverlays() {
     const toggleKnowledgeOverlay = useUIStore((state) => state.toggleKnowledgeOverlay);
     // const toggleInfoOverlay = useUIStore((state) => state.toggleInfoOverlay);
     const toggleCaptureOverlay = useUIStore((state) => state.toggleCaptureOverlay);
-    const toggleNotificationsOverlay = useUIStore((state) => state.toggleNotificationsOverlay);
+    const togglePushNotificationsOverlay = useUIStore((state) => state.togglePushNotificationsOverlay);
+    const toggleInfoNotificationOverlay = useUIStore((state) => state.toggleInfoNotificationOverlay);
     const toggleConnectFormOverlay = useUIStore((state) => state.toggleConnectFormOverlay);
     const togglePhq4Overlay = useUIStore((state) => state.togglePhq4Overlay);
 
@@ -80,7 +83,7 @@ export function RenderOverlays() {
             <KnowledgeOverlay open={isKnowledgeOpen} onOpenChange={toggleKnowledgeOverlay} />
             {/* <InfoOverlay open={isInfoOpen} onOpenChange={toggleInfoOverlay} /> */}
             <CaptureOverlay open={isCaptureOpen} onOpenChange={toggleCaptureOverlay} />
-            <PushNotificationOverlay open={isNotificationsOpen} onOpenChange={toggleNotificationsOverlay} />
+            <PushNotificationOverlay open={isPushNotificationsOpen} onOpenChange={togglePushNotificationsOverlay} />
             <ConnectProfileOverlay open={isConnectFormOpen} onOpenChange={toggleConnectFormOverlay} />
             <Phq4Overlay isOpen={isPhq4Open} stage="pre" onClose={() => togglePhq4Overlay(false)} onSubmit={() => {}} />
             {/* <SettingsOverlay open={isSettingsOpen} onOpenChange={toggleSettingsOverlay} /> */}

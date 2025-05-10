@@ -58,6 +58,8 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
         isOptedInToCare,
         isOptedInToConnect,
         toggleConnectFormOverlay,
+        didUnlockCare,
+        didUnlockConnect,
         userConnectProfile,
         toggleOptedInToPilot,
         isOptedInToPilot,
@@ -104,70 +106,6 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
                 </SheetHeader>
 
                 <div className="flex-1 py-8 mx-8 px-1 space-y-10">
-                    {/* Opted in to Care */}
-                    <div className="space-y-5">
-                        <h3 className="text-lg font-medium flex items-center">
-                            <Activity className="mr-3 h-5 w-5" /> Care
-                            <span className="ml-3 px-2 py-0.5 rounded-full text-xs font-semibold bg-accent text-white">
-                                Coming Soon
-                            </span>
-                        </h3>
-
-                                                
-                        <div className="flex items-center justify-between px-2">
-                            <div className="space-y-2">
-                                <Label htmlFor="opted-in-to-care" className="text-base">Opt in</Label>
-                                <p className="text-sm text-muted-foreground">
-                                    Create a profile to connect with therapists.
-                                </p>
-                            </div>
-                            <Switch 
-                                id="opted-in-to-care"
-                                checked={isOptedInToCare}
-                                onCheckedChange={toggleOptedInToCare}
-                            />
-                        </div>
-                    </div>
-
-                    <Separator className="my-6" />
-
-                    {/* Opted in to Connect */}
-                    <div className="space-y-5">
-                        <h3 className="text-lg font-medium flex items-center">
-                            <Waypoints className="mr-3 h-5 w-5" /> Connect
-                            <span className="ml-3 px-2 py-0.5 rounded-full text-xs font-semibold bg-accent text-white">
-                                Coming Soon
-                            </span>
-                        </h3>
-                        
-                        <div className="flex items-center justify-between px-2">
-                            <div className="space-y-2">
-                                <Label htmlFor="opted-in-to-connect" className="text-base">Opt in</Label>
-                                <p className="text-sm text-muted-foreground">
-                                    Create a profile to connect with other users.
-                                </p>
-                            </div>
-                            <div className="flex items-center">
-                                <Switch 
-                                    id="opted-in-to-connect"
-                                    checked={isOptedInToConnect}
-                                    onCheckedChange={toggleOptedInToConnect}
-                                />
-                            </div>
-                        </div>
-                        {userConnectProfile && (
-                            <Button
-                                size="sm"
-                                variant="secondary"
-                                onClick={() => toggleConnectFormOverlay(true)}
-                                className="ml-4"
-                            >
-                                Edit Connect Profile
-                            </Button>
-                        )}
-                    </div>
-
-                    <Separator className="my-6" />
 
                     {/* Opted in to Pilot */}
                     <div className="space-y-5">
@@ -190,9 +128,76 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
                                 />
                             </div>
                         </div>
+                        <Separator className="my-6" />
                     </div>
 
-                    <Separator className="my-6" />
+                    {/* Opted in to Care */}
+                    {didUnlockConnect && (
+                        <div className="space-y-5">
+                            <h3 className="text-lg font-medium flex items-center">
+                                <Activity className="mr-3 h-5 w-5" /> Care
+                                <span className="ml-3 px-2 py-0.5 rounded-full text-xs font-semibold bg-accent text-white">
+                                    Coming Soon
+                                </span>
+                            </h3>
+
+                                                    
+                            <div className="flex items-center justify-between px-2">
+                                <div className="space-y-2">
+                                    <Label htmlFor="opted-in-to-care" className="text-base">Opt in</Label>
+                                    <p className="text-sm text-muted-foreground">
+                                        Create a profile to connect with therapists.
+                                    </p>
+                                </div>
+                                <Switch 
+                                    id="opted-in-to-care"
+                                    checked={isOptedInToCare}
+                                    onCheckedChange={toggleOptedInToCare}
+                                />
+                            </div>
+                            <Separator className="my-6" />
+                        </div>
+                    )}
+
+                    {/* Opted in to Connect */}
+                    {didUnlockConnect && (
+                        <div className="space-y-5">
+                            <h3 className="text-lg font-medium flex items-center">
+                                <Waypoints className="mr-3 h-5 w-5" /> Connect
+                                <span className="ml-3 px-2 py-0.5 rounded-full text-xs font-semibold bg-accent text-white">
+                                    Coming Soon
+                                </span>
+                            </h3>
+                            
+                            <div className="flex items-center justify-between px-2">
+                                <div className="space-y-2">
+                                    <Label htmlFor="opted-in-to-connect" className="text-base">Opt in</Label>
+                                    <p className="text-sm text-muted-foreground">
+                                        Create a profile to connect with other users.
+                                    </p>
+                                </div>
+                                <div className="flex items-center">
+                                    <Switch 
+                                        id="opted-in-to-connect"
+                                        checked={isOptedInToConnect}
+                                        onCheckedChange={toggleOptedInToConnect}
+                                    />
+                                </div>
+                            </div>
+                            {userConnectProfile && (
+                                <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    onClick={() => toggleConnectFormOverlay(true)}
+                                    className="ml-4"
+                                >
+                                    Edit Connect Profile
+                                </Button>
+                            )}
+                            <Separator className="my-6" />
+                        </div>
+                    )}
+
 
                     {/* Knowledge Extraction Setting */}
                     <div className="space-y-5">
@@ -213,9 +218,8 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
                                 onCheckedChange={toggleExtractKnowledge}
                             />
                         </div>
+                        <Separator className="my-6" />
                     </div>
-
-                    <Separator className="my-6" />
 
                     {/* Summarization Setting */}
                     <div className="space-y-6">
@@ -249,9 +253,8 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
                                 )}
                             </div>
                         </div>
+                        <Separator className="my-6" />
                     </div>
-
-                    <Separator className="my-6" />
 
                     {/* Voice Settings */}
                     <div className="space-y-6">
@@ -291,9 +294,8 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
                                 </div>
                             </RadioGroup>
                         </div>
+                        <Separator className="my-6" />
                     </div>
-
-                    <Separator className="my-6" />
 
                     {/* Personality Settings */}
                     <div className="space-y-6">
@@ -346,10 +348,8 @@ export default function SettingsOverlay({ open, onOpenChange }: SettingsOverlayP
                                 />
                             </div>
                         </div>
+                        <Separator className="my-6" />
                     </div>
-
-
-                    <Separator className="my-6" />
 
                     {/* Local Lingo Moe Setting */}
                         <div className="space-y-5">
