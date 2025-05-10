@@ -33,15 +33,17 @@ export default function Home() {
         <InteractionHubEnhanced />
       </div>
 
-      {/* PHQ-4 Overlay */}
-      {/* button to toggle the phq4 overlay */}
-      <Button 
-        variant="default"
-        className="absolute top-4 right-4 px-4 py-2 rounded-md"
-        onClick={() => togglePhq4Overlay(true)}
-      >
-        Open PHQ-4
-      </Button>
+      <div className="absolute top-4 right-4">
+        {/* PHQ-4 Overlay */}
+        {/* button to toggle the phq4 overlay */}
+        <Button 
+          variant="default"
+          className="absolute top-4 right-4 px-4 py-2 rounded-md"
+          onClick={() => togglePhq4Overlay(true)}
+        >
+          Open PHQ-4
+        </Button>
+      </div>
     </div>
   )
 }

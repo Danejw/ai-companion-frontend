@@ -68,6 +68,13 @@ export type OrchestrateMessage = {
     summarize?: number;
 };
 
+// Improv
+export type ImprovMessage = {
+    type: "improv";
+    improv_form_name: string;
+    user_input: string;
+}
+
 export type WebSocketMessage =
     | AudioMessage
     | ImageMessage
@@ -77,4 +84,5 @@ export type WebSocketMessage =
     | TextMessage
     | PersonalityMessage
     | LocalLingoMessage
+    | ImprovMessage
     | OrchestrateMessage;

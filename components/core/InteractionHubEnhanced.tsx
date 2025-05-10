@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react";
-import { Ear, EarOff, Loader2, Mic, Power, Send, X, Camera, Volume2, ThumbsUp, ThumbsDown, Pause } from "lucide-react"; 
+import { Ear, EarOff, Loader2, Mic, Power, Send, X, Camera, Volume2, ThumbsUp, ThumbsDown, Pause, Plus } from "lucide-react"; 
 import { AudioMessage, FeedbackMessage, GPSMessage, ImageMessage, LocalLingoMessage, OrchestrateMessage, PersonalityMessage, TextMessage, TimeMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
@@ -43,6 +43,7 @@ export default function InteractionHubVoice() {
         directness,
         warmth,
         challenge,
+        isOptedInToConnect,
     } = useUIStore();
     
     const toggleCreditsOverlay = useUIStore((state) => state.toggleCreditsOverlay);
@@ -158,6 +159,13 @@ export default function InteractionHubVoice() {
     useEffect(() => {
         if (connected) { sendLocalLingoMessage(); }
     }, [useLocalLingo, connected]);
+
+    // On optin start improv
+    useEffect(() => {
+        if (isOptedInToConnect) {
+            sendImprovMessage();
+        }
+    }, [isOptedInToConnect]);
 
     // Function to remove an image when clicked
     const removeImage = (id: string) => {
@@ -858,6 +866,16 @@ export default function InteractionHubVoice() {
         ws.current?.send(JSON.stringify(localLingoMsg))
     };
 
+    
+    const sendImprovMessage = () => {
+        if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+            ws.current.send(JSON.stringify({ type: "improv", improv_form_name: "connect", user_input: inputText }));
+        } else {
+            toast.error("WebSocket is not connected.");
+        }
+    };
+
+
     return (
         <div className="flex flex-col items-center gap-6 w-full max-w-xl px-4">
            
@@ -1152,6 +1170,7 @@ export default function InteractionHubVoice() {
                     </Button>
                 )} */}
 
+
                 {/* Disconnect button - Right Side */}
                 {connected && (
                     <Button
@@ -1173,6 +1192,16 @@ export default function InteractionHubVoice() {
                     Use at your own discretion.
                 </p>
             </div>
+
+            {/* Improv Button */}
+            {/*<Button
+                variant="default"
+                size="icon"
+                className="rounded-full"
+                onClick={sendImprovMessage}
+            >
+                <Plus className="h-5 w-5" />
+            </Button> */}
         </div>
     );
 }
