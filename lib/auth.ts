@@ -1,6 +1,7 @@
 // lib/auth.ts
 import { type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { createClient } from '@supabase/supabase-js';
 
 // Fetch Supabase URL and Anon Key from environment variables
@@ -26,10 +27,7 @@ export const authOptions: NextAuthOptions = {
             name: 'Credentials',
             // `credentials` is used to generate a form on the built-in sign-in page.
             // You can specify which fields should be submitted. The property names MUST match
-            // what you expect in the `authorize` function's `credentials` object.
-            
-
-            
+            // what you expect in the `authorize` function's `credentials` object.       
             credentials: {
                 email: { label: "Email", type: "email", placeholder: "your@email.com" },
                 password: { label: "Password", type: "password" }
@@ -82,17 +80,18 @@ export const authOptions: NextAuthOptions = {
                     return null; // Return null on any unexpected error
                 }
             }
-        })
-        // You can add other providers here later (e.g., Google, GitHub)
-        // import GoogleProvider from "next-auth/providers/google";
-        // GoogleProvider({ clientId: process.env.GOOGLE_CLIENT_ID!, clientSecret: process.env.GOOGLE_CLIENT_SECRET! }),
+        }),
+        GoogleProvider({
+            clientId: process.env.NEXT_GOOGLE_CLIENT_ID!,
+            clientSecret: process.env.NEXT_GOOGLE_CLIENT_SECRET!,
+        }),
     ],
 
     // Callbacks are functions executed at specific points in the auth flow
     callbacks: {
         // The `jwt` callback is invoked when a JWT is created or updated.
         // `user` is only passed on initial sign-in.
-        async jwt({ token, user }) {
+        async jwt({ token, user, account }) {
             // If `user` object exists (passed from authorize on successful login),
             // persist its details (like the id) to the JWT token.
             if (user) {
@@ -102,6 +101,28 @@ export const authOptions: NextAuthOptions = {
                 }
                 // Add any other properties from the user object you returned in authorize
                 // token.role = user.role;
+            }
+
+            // Handle OAuth sign in with Google -> exchange id_token for Supabase session
+            if (account && account.provider === 'google' && account.id_token) {
+                try {
+                    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+                        auth: { persistSession: false }
+                    });
+                    const { data, error } = await supabase.auth.signInWithIdToken({
+                        provider: 'google',
+                        token: account.id_token as string,
+                    });
+                    if (!error && data.user && data.session) {
+                        token.id = data.user.id;
+                        token.email = data.user.email;
+                        token.accessToken = data.session.access_token;
+                    } else if (error) {
+                        console.error('Supabase OAuth Sign-In Error:', error.message);
+                    }
+                } catch (err) {
+                    console.error('Error exchanging Google token with Supabase:', err);
+                }
             }
             return token; // The token is then encrypted and stored in the session cookie
         },

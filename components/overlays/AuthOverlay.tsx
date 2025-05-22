@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner'; // For feedback
-import { Loader2 } from 'lucide-react'; // Example icons
+import { Loader2, Chrome } from 'lucide-react'; // Example icons
 import { sendPasswordReset } from "@/lib/api/account";
 
 // Simple Spinner component (or use one from a library)
@@ -166,21 +166,21 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
         }
     };
 
-    // const handleOAuthSignIn = async (provider: 'google' /* | 'github' | etc */) => {
-    //     setIsLoading(true);
-    //     setError(null); // Clear previous errors
-    //     try {
-    //         await signIn(provider, { callbackUrl: '/app' }); // Redirect to app after successful OAuth
-    //         // On success, NextAuth redirects, overlay will close as page changes/refreshes
-    //     } catch (err) {
-    //         console.error("OAuth signin error:", err);
-    //         const message = `Failed to sign in with ${provider}.`;
-    //         setError(message);
-    //         toast.error('OAuth Sign In Failed', { description: message });
-    //         setIsLoading(false); // Only reached if signIn itself throws before redirect
-    //     }
-    //     // Don't set isLoading false here if successful, as redirect should happen
-    // };
+    const handleOAuthSignIn = async (provider: 'google') => {
+        setIsLoading(true);
+        setError(null); // Clear previous errors
+        try {
+            await signIn(provider, { callbackUrl: '/' }); // Redirect to app after successful OAuth
+            // On success, NextAuth handles the redirect
+        } catch (err) {
+            console.error("OAuth signin error:", err);
+            const message = `Failed to sign in with ${provider}.`;
+            setError(message);
+            toast.error('OAuth Sign In Failed', { description: message });
+            setIsLoading(false); // Only reached if signIn itself throws before redirect
+        }
+        // Don't set isLoading false here if successful, as redirect should happen
+    };
 
     // --- Use Props for the Dialog ---
     return (
@@ -246,10 +246,35 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
                             </Button>
                         </form>
 
-                        <div className="relative my-6">
-                            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-                            <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Or</span></div>
+
+                        {/* OAuth Separator */}
+                        <div className="relative my-4">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-background px-2 text-muted-foreground">
+                                    Or continue with
+                                </span>
+                            </div>
                         </div>
+
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full"
+                            onClick={() => handleOAuthSignIn('google')}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <Spinner />
+                            ) : (
+                                <>
+                                    <Chrome className="mr-2 h-4 w-4" />
+                                    Sign in with Google
+                                </>
+                            )}
+                        </Button>
 
                         <Button 
                             variant="ghost" 
@@ -259,21 +284,6 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
                         >
                             {isLoading ? <Spinner /> : 'Reset Password'}
                         </Button>
-
-                        {/* OAuth Separator */}
-                        {/* <div className="relative my-6">
-                            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-                            <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Or continue with</span></div>
-                        </div> */}
-
-                        {/* OAuth Buttons */}
-                        {/* <div className="grid grid-cols-1 gap-2">
-                            <Button variant="outline" 
-                            onClick={() => handleOAuthSignIn('google')} 
-                            disabled={isLoading}>
-                                {isLoading ? <Spinner /> : <ChromeIcon className="mr-2 h-4 w-4" />} Google
-                            </Button>
-                        </div> */}
                     </TabsContent>
 
                     {/* --- SIGN UP TAB --- */}
@@ -314,16 +324,16 @@ export default function AuthOverlay({ open, onOpenChange }: AuthOverlayProps) {
                         </form>
 
                         {/* OAuth Options on Signup Tab */}
-                        {/* <div className="relative my-6">
+                        <div className="relative my-6">
                             <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
                             <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Or sign up with</span></div>
                         </div>
 
                         <div className="grid grid-cols-1 gap-2">
                             <Button variant="outline" onClick={() => handleOAuthSignIn('google')} disabled={isLoading}>
-                                {isLoading ? <Spinner /> : <ChromeIcon className="mr-2 h-4 w-4" />} Google
+                                {isLoading ? <Spinner /> : <Chrome className="mr-2 h-4 w-4" />} Google
                             </Button>
-                        </div> */}
+                        </div>
 
                     </TabsContent>
                 </Tabs>

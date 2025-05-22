@@ -1,45 +1,24 @@
-# AI Companion Frontend
+# Codebase Overview
 
-This project is a Next.js based web application called **Knolia**. It provides a conversational interface to an AI companion. The application connects to a backend service via REST APIs and WebSockets, allowing users to chat with an AI that learns from their conversations.
+This project is a Next.js (React) frontend for **Knolia**, a personalized AI companion application. It communicates with a backend service to provide voice and text conversations, manage user accounts, and store conversation history.
 
 ## Purpose
-- Offer a "personalized AI companion" experience.
-- Manage user authentication, sessions and settings.
-- Provide an interactive UI with overlays for login, settings, credits, etc.
+- Offer a web interface where users can chat with the AI via text or voice.
+- Handle authentication using NextAuth and Supabase.
+- Interact with a backend API for orchestration, voice processing, and knowledge extraction.
 
-## Tech Stack
-- **Next.js 15** with the `/app` directory architecture.
-- **React** and **TypeScript** for UI components.
-- **Tailwind CSS** for styling.
-- **NextAuth** with **Supabase** credentials for authentication.
-- **Zustand** store for client side state management.
-- Communication with the backend via `fetch` and WebSockets defined in `lib/api` and components like `InteractionHubEnhanced`.
+## Project Structure
+- `app/(app)` – Main application routes (home page and layout).
+- `app/(info)` – Informational pages such as privacy policy, terms, contact, and a welcome page.
+- `components/` – Reusable React components (headers, footers, UI elements, and core interaction components).
+- `lib/` – Helper modules including API wrappers (`lib/api/*`), authentication setup (`lib/auth.ts`), and utility functions.
+- `store/` – Zustand store for UI state and user preferences.
+- `types/` – TypeScript type definitions for message payloads and NextAuth session extensions.
+- `public/` – Static assets (images, manifest, service worker, etc.).
+- `info/` – Reference material in Markdown/PDF used by the project.
 
-## Repository Structure
-- `app/` – Next.js pages and API routes. Notably:
-  - `(app)/` – main layout and landing page (`layout.tsx`, `page.tsx`).
-  - `(info)/` – informational pages like welcome, privacy, terms, etc.
-  - `api/` – Next.js API routes (e.g. authentication).
-- `components/` – React components including overlays, UI elements, and the interaction hub.
-- `lib/` – Helper libraries and API wrappers. Contains authentication setup (`lib/auth.ts`) and various API functions under `lib/api`.
-- `store/` – Zustand store (`store/index.ts`) managing UI state and user preferences.
-- `hooks/` – Reusable React hooks.
-- `types/` – TypeScript type definitions.
-- `public/` – Static assets.
+## Getting Started
+- `npm run dev` – Start the development server.
+- Environment variables (Supabase, backend URL, etc.) must be configured for API calls and authentication.
 
-## How it Works
-1. **Authentication** – Users authenticate using credentials. `lib/auth.ts` configures NextAuth with Supabase and stores tokens in the session.
-2. **Main Page** – `app/(app)/page.tsx` renders the background, the main interaction hub, and disables scrolling while active.
-3. **Interaction** – `components/core/InteractionHubEnhanced.tsx` manages WebSocket connections to the backend, handles speech recognition, audio playback, and conversation state.
-4. **Overlays** – `components/layout/RenderOverlays.tsx` renders modal overlays (login, settings, credits, etc.) controlled by the Zustand store.
-5. **State Management** – `store/index.ts` stores UI flags (open/close state of overlays, user preferences, pilot program status, etc.) and persists selected fields to `localStorage` via the `persist` middleware.
-
-## Development
-```bash
-npm install       # install dependencies
-npm run dev       # start the development server
-npm run lint      # run ESLint
-npm run build     # create a production build
-```
-
-This file provides a high level view for contributors who are new to the project.
+This file serves as a short orientation for newcomers to understand the overall layout and goal of the repository.
