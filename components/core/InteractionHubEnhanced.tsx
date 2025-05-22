@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Ear, EarOff, Loader2, Mic, Power, Send, X, Camera, Volume2, ThumbsUp, ThumbsDown, Pause } from "lucide-react"; 
 import { AudioMessage, FeedbackMessage, GPSMessage, ImageMessage, LocalLingoMessage, OrchestrateMessage, PersonalityMessage, TextMessage, TimeMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
@@ -795,31 +795,39 @@ export default function InteractionHubVoice() {
         }
     };
 
-    const sendPersonality = () => {
-        const personalityMsg: PersonalityMessage = {
-            type: "personality",
-            empathy,
-            directness,
-            warmth,
-            challenge
-        };
-        ws.current?.send(JSON.stringify(personalityMsg));
-    };
-
-    const sendLocalLingoMessage = () => {
-        const localLingoMsg: LocalLingoMessage = { type: "local_lingo", local_lingo: useLocalLingo };
-        ws.current?.send(JSON.stringify(localLingoMsg))
-    };
-
-    
-    const sendImprovMessage = () => {
-        if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-            ws.current.send(JSON.stringify({ type: "improv", improv_form_name: "connect", user_input: inputText }));
-        } else {
-            toast.error("WebSocket is not connected.");
+    const sendPersonality = useCallback(() => {
+        if (ws.current?.readyState === WebSocket.OPEN) {
+            const personalityMessage: PersonalityMessage = {
+                type: "personality",
+                empathy,
+                directness,
+                warmth,
+                challenge
+            };
+            ws.current.send(JSON.stringify(personalityMessage));
         }
-    };
+    }, [empathy, directness, warmth, challenge]);
 
+    const sendLocalLingoMessage = useCallback(() => {
+        if (ws.current?.readyState === WebSocket.OPEN) {
+            const localLingoMessage: LocalLingoMessage = {
+                type: "local_lingo",
+                local_lingo: useLocalLingo
+            };
+            ws.current.send(JSON.stringify(localLingoMessage));
+        }
+    }, [useLocalLingo]);
+
+    const sendImprovMessage = useCallback(() => {
+        if (ws.current?.readyState === WebSocket.OPEN) {
+            const improvMessage: ImprovMessage = {
+                type: "improv",
+                improv_form_name: "connect",
+                user_input: lastUserInput
+            };
+            ws.current.send(JSON.stringify(improvMessage));
+        }
+    }, [lastUserInput]);
 
     // Add effect to scroll to bottom when content changes
     useEffect(() => {
@@ -866,12 +874,14 @@ export default function InteractionHubVoice() {
         if (connected) {
             sendPersonality();
         }
-    }, [empathy, directness, warmth, challenge, connected, sendPersonality]);
+    }, [connected, sendPersonality]);
 
     // NEW: Effect to send local lingo status when it changes and connection is active
     useEffect(() => {
-        if (connected) { sendLocalLingoMessage(); }
-    }, [useLocalLingo, connected, sendLocalLingoMessage]);
+        if (connected) {
+            sendLocalLingoMessage();
+        }
+    }, [connected, sendLocalLingoMessage]);
 
     // On optin start improv
     useEffect(() => {
