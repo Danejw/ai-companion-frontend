@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Ear, EarOff, Loader2, Mic, Power, Send, X, Camera, Volume2, ThumbsUp, ThumbsDown, Pause } from "lucide-react"; 
-import { AudioMessage, FeedbackMessage, GPSMessage, ImageMessage, LocalLingoMessage, OrchestrateMessage, PersonalityMessage, TextMessage, TimeMessage } from "@/types/messages";
+import { AudioMessage, FeedbackMessage, GPSMessage, ImageMessage, LocalLingoMessage, OrchestrateMessage, PersonalityMessage, TextMessage, TimeMessage, ImprovMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
