@@ -27,10 +27,7 @@ export const authOptions: NextAuthOptions = {
             name: 'Credentials',
             // `credentials` is used to generate a form on the built-in sign-in page.
             // You can specify which fields should be submitted. The property names MUST match
-            // what you expect in the `authorize` function's `credentials` object.
-            
-
-            
+            // what you expect in the `authorize` function's `credentials` object.       
             credentials: {
                 email: { label: "Email", type: "email", placeholder: "your@email.com" },
                 password: { label: "Password", type: "password" }
@@ -85,8 +82,8 @@ export const authOptions: NextAuthOptions = {
             }
         }),
         GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID!,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+            clientId: process.env.NEXT_GOOGLE_CLIENT_ID!,
+            clientSecret: process.env.NEXT_GOOGLE_CLIENT_SECRET!,
         }),
     ],
 
