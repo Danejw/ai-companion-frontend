@@ -20,7 +20,7 @@ interface ConnectProfileOverlayProps {
 export default function ConnectProfileOverlay({ open, onOpenChange }: ConnectProfileOverlayProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [newTag, setNewTag] = useState('');
+  // const [newTag, setNewTag] = useState('');
   
   const { userConnectProfile: storeProfile, setUserConnectProfile } = useUIStore();
   
