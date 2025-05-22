@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react";
-import { Ear, EarOff, Loader2, Mic, Power, Send, X, Camera, Volume2, ThumbsUp, ThumbsDown, Pause, Plus } from "lucide-react"; 
+import { Ear, EarOff, Loader2, Mic, Power, Send, X, Camera, Volume2, ThumbsUp, ThumbsDown, Pause } from "lucide-react"; 
 import { AudioMessage, FeedbackMessage, GPSMessage, ImageMessage, LocalLingoMessage, OrchestrateMessage, PersonalityMessage, TextMessage, TimeMessage } from "@/types/messages";
 import { getSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
@@ -106,67 +106,8 @@ export default function InteractionHubVoice() {
     const [isSubmittingFinetuneFeedback, setIsSubmittingFinetuneFeedback] = useState(false);
 
 
-    // console.log(recording, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated, lastAiResponse, showFeedbackButtons, isSubmittingFinetuneFeedback, teachAi, setTeachAi);
+    console.log(recording, setUserTranscript, aiTranscript, setAiTranscript, toolcalls, toolresults, agentUpdated, lastAiResponse, showFeedbackButtons, isSubmittingFinetuneFeedback, teachAi, setTeachAi);
 
-
-    // Add effect to scroll to bottom when content changes
-    useEffect(() => {
-        if (scrollViewportRef.current) {
-            scrollViewportRef.current.scrollTop = scrollViewportRef.current.scrollHeight;
-        }
-    }, [conversationHistory, thinkResponse]);
-
-    // Effect to clean up audio when component unmounts or WS disconnects
-    useEffect(() => {
-        // Stop audio if connection closes or component unmounts
-        return () => {
-            if (currentAudio) {
-                currentAudio.pause();
-                setCurrentAudio(null);
-                setCurrentlyPlayingIndex(null);
-            }
-        };
-    }, [currentAudio]); // Depend on currentAudio
-
-    // Effect to handle captured images from sessionStorage
-    useEffect(() => {
-        // Listen for custom event from CaptureOverlay
-        const handleImageCaptured = (event: CustomEvent) => {
-            const { imageId, imageData } = event.detail;
-            setCapturedImages(prev => [...prev, {
-                id: imageId,
-                data: imageData
-            }]);
-            
-            // Clear the storage immediately to prevent double adding
-            sessionStorage.removeItem('capturedImage');
-        };
-        
-        window.addEventListener('imageCaptured', handleImageCaptured as EventListener);
-
-        return () => {
-            window.removeEventListener('imageCaptured', handleImageCaptured as EventListener);
-        };
-    }, []);
-
-    // NEW: Effect to send personality status when it changes and connection is active
-    useEffect(() => {
-        if (connected) {
-            sendPersonality();
-        }
-    }, [empathy, directness, warmth, challenge, connected]);
-
-    // NEW: Effect to send local lingo status when it changes and connection is active
-    useEffect(() => {
-        if (connected) { sendLocalLingoMessage(); }
-    }, [useLocalLingo, connected]);
-
-    // On optin start improv
-    useEffect(() => {
-        if (isOptedInToConnect) {
-            sendImprovMessage();
-        }
-    }, [isOptedInToConnect]);
 
     // Function to remove an image when clicked
     const removeImage = (id: string) => {
@@ -878,6 +819,66 @@ export default function InteractionHubVoice() {
             toast.error("WebSocket is not connected.");
         }
     };
+
+
+    // Add effect to scroll to bottom when content changes
+    useEffect(() => {
+        if (scrollViewportRef.current) {
+            scrollViewportRef.current.scrollTop = scrollViewportRef.current.scrollHeight;
+        }
+    }, [conversationHistory, thinkResponse]);
+
+    // Effect to clean up audio when component unmounts or WS disconnects
+    useEffect(() => {
+        // Stop audio if connection closes or component unmounts
+        return () => {
+            if (currentAudio) {
+                currentAudio.pause();
+                setCurrentAudio(null);
+                setCurrentlyPlayingIndex(null);
+            }
+        };
+    }, [currentAudio]); // Depend on currentAudio
+
+    // Effect to handle captured images from sessionStorage
+    useEffect(() => {
+        // Listen for custom event from CaptureOverlay
+        const handleImageCaptured = (event: CustomEvent) => {
+            const { imageId, imageData } = event.detail;
+            setCapturedImages(prev => [...prev, {
+                id: imageId,
+                data: imageData
+            }]);
+            
+            // Clear the storage immediately to prevent double adding
+            sessionStorage.removeItem('capturedImage');
+        };
+        
+        window.addEventListener('imageCaptured', handleImageCaptured as EventListener);
+
+        return () => {
+            window.removeEventListener('imageCaptured', handleImageCaptured as EventListener);
+        };
+    }, []);
+
+    // NEW: Effect to send personality status when it changes and connection is active
+    useEffect(() => {
+        if (connected) {
+            sendPersonality();
+        }
+    }, [empathy, directness, warmth, challenge, connected, sendPersonality]);
+
+    // NEW: Effect to send local lingo status when it changes and connection is active
+    useEffect(() => {
+        if (connected) { sendLocalLingoMessage(); }
+    }, [useLocalLingo, connected, sendLocalLingoMessage]);
+
+    // On optin start improv
+    useEffect(() => {
+        if (isOptedInToConnect) {
+            sendImprovMessage();
+        }
+    }, [isOptedInToConnect, sendImprovMessage]);
 
 
     return (

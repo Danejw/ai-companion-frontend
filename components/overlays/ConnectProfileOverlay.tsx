@@ -8,8 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { useUIStore } from '@/store';
 import { generateUserConnectProfile, submitUserConnectProfile, UserConnectProfile } from '@/lib/api/connect';
@@ -39,16 +37,6 @@ export default function ConnectProfileOverlay({ open, onOpenChange }: ConnectPro
     location: '',
   });
 
-  useEffect(() => {
-    if (open) {
-      if (storeProfile) {
-        setProfile(storeProfile);
-      } else {
-        loadProfile();
-      }
-    }
-  }, [open, storeProfile]);
-
   const loadProfile = async () => {
     setIsLoading(true);
     try {
@@ -63,6 +51,18 @@ export default function ConnectProfileOverlay({ open, onOpenChange }: ConnectPro
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (open) {
+      if (storeProfile) {
+        setProfile(storeProfile);
+      } else {
+        loadProfile();
+      }
+    }
+  }, [open, storeProfile, loadProfile]);
+
+
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -79,22 +79,22 @@ export default function ConnectProfileOverlay({ open, onOpenChange }: ConnectPro
     }
   };
 
-  const addTag = () => {
-    if (newTag.trim() && !profile.personality_tags.includes(newTag.trim())) {
-      setProfile({
-        ...profile,
-        personality_tags: [...profile.personality_tags, newTag.trim()]
-      });
-      setNewTag('');
-    }
-  };
+  // const addTag = () => {
+  //   if (newTag.trim() && !profile.personality_tags.includes(newTag.trim())) {
+  //     setProfile({
+  //       ...profile,
+  //       personality_tags: [...profile.personality_tags, newTag.trim()]
+  //     });
+  //     setNewTag('');
+  //   }
+  // };
 
-  const removeTag = (tag: string) => {
-    setProfile({
-      ...profile,
-      personality_tags: profile.personality_tags.filter(t => t !== tag)
-    });
-  };
+  // const removeTag = (tag: string) => {
+  //   setProfile({
+  //     ...profile,
+  //     personality_tags: profile.personality_tags.filter(t => t !== tag)
+  //   });
+  // };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
