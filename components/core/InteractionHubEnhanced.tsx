@@ -44,6 +44,8 @@ export default function InteractionHubVoice() {
         warmth,
         challenge,
         isOptedInToConnect,
+        startFlowId,
+        setStartFlowId,
         checkPhq4Overlay,
     } = useUIStore();
     
@@ -818,16 +820,20 @@ export default function InteractionHubVoice() {
         }
     }, [useLocalLingo]);
 
-    const sendImprovMessage = useCallback(() => {
+    const sendFlowMessage = useCallback((flow: string) => {
         if (ws.current?.readyState === WebSocket.OPEN) {
-            const improvMessage: ImprovMessage = {
+            const message: ImprovMessage = {
                 type: "improv",
-                improv_form_name: "connect",
-                user_input: lastUserInput
+                improv_form_name: flow,
+                user_input: `Start the ${flow} flow`
             };
-            ws.current.send(JSON.stringify(improvMessage));
+            ws.current.send(JSON.stringify(message));
         }
     }, [lastUserInput]);
+
+    const sendImprovMessage = useCallback(() => {
+        sendFlowMessage("connect");
+    }, [sendFlowMessage]);
 
     // Add effect to scroll to bottom when content changes
     useEffect(() => {
@@ -876,7 +882,7 @@ export default function InteractionHubVoice() {
         }
     }, [connected, sendPersonality]);
 
-    // NEW: Effect to send local lingo status when it changes and connection is active
+    // Effect to send local lingo status when it changes and connection is active
     useEffect(() => {
         if (connected) {
             sendLocalLingoMessage();
@@ -889,6 +895,14 @@ export default function InteractionHubVoice() {
             sendImprovMessage();
         }
     }, [isOptedInToConnect, sendImprovMessage]);
+
+    // Trigger selected flow
+    useEffect(() => {
+        if (startFlowId) {
+            sendFlowMessage(startFlowId);
+            setStartFlowId(null);
+        }
+    }, [startFlowId, sendFlowMessage, setStartFlowId]);
 
 
     return (

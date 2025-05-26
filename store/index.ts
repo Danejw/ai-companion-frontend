@@ -18,6 +18,8 @@ interface UIState {
     isCaptureOpen: boolean;
     isNotificationsOpen: boolean;
     isConnectFormOpen: boolean;
+    isFlowSelectOpen: boolean;
+    startFlowId: string | null;
     useLocalLingo: boolean;
 
 
@@ -55,6 +57,8 @@ interface UIState {
     toggleCaptureOverlay: (isOpen: boolean) => void;
     toggleNotificationsOverlay: (isOpen: boolean) => void;
     toggleConnectFormOverlay: (isOpen: boolean) => void;
+    toggleFlowSelectOverlay: (isOpen?: boolean) => void;
+    setStartFlowId: (flowId: string | null) => void;
     toggleLocalLingo: (isOn: boolean) => void;
 
     toggleOptedInToCare: (isOptedInToCare: boolean) => void;
@@ -93,6 +97,8 @@ export const useUIStore = create<UIState>()(
             isCaptureOpen: false,
             isNotificationsOpen: false,
             isConnectFormOpen: false,
+            isFlowSelectOpen: false,
+            startFlowId: null,
             useLocalLingo: false,
 
             // PHQ-4
@@ -171,6 +177,12 @@ export const useUIStore = create<UIState>()(
             toggleConnectFormOverlay: (isOpen) => set((state) => ({
                 isConnectFormOpen: isOpen !== undefined ? isOpen : !state.isConnectFormOpen
             })),
+
+            toggleFlowSelectOverlay: (isOpen) => set((state) => ({
+                isFlowSelectOpen: isOpen !== undefined ? isOpen : !state.isFlowSelectOpen
+            })),
+
+            setStartFlowId: (flowId) => set({ startFlowId: flowId }),
 
             toggleLocalLingo: (useLocalLingo) => set((state) => ({
                 useLocalLingo: useLocalLingo !== undefined ? useLocalLingo : !state.useLocalLingo
