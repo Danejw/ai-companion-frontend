@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '
 import { Button } from '@/components/ui/button';
 import { getMultistepFlows } from '@/lib/api/flows';
 import { useUIStore } from '@/store';
+import { toast } from 'sonner';
 
 interface FlowSelectOverlayProps {
   open: boolean;
@@ -20,9 +21,12 @@ export default function FlowSelectOverlay({ open, onOpenChange }: FlowSelectOver
     enabled: open,
   });
 
-  const handleSelect = (id: string) => {
+  const handleSelect = (id: string, flowName?: string) => {
     setStartFlowId(id);
     onOpenChange(false);
+    
+    // Provide user feedback that the flow is starting
+    toast.info(`Starting flow: ${flowName || id}`);
   };
 
   return (
@@ -37,7 +41,12 @@ export default function FlowSelectOverlay({ open, onOpenChange }: FlowSelectOver
           {error && <p className="text-destructive">Failed to load flows</p>}
           {data &&
             Object.entries(data).map(([id, flow]: [string, any]) => (
-              <Button key={id} variant="outline" className="w-full justify-start" onClick={() => handleSelect(id)}>
+              <Button 
+                key={id} 
+                variant="outline" 
+                className="w-full justify-start" 
+                onClick={() => handleSelect(id, flow?.name || flow?.title)}
+              >
                 {flow?.name || flow?.title || id}
               </Button>
             ))}

@@ -825,7 +825,7 @@ export default function InteractionHubVoice() {
             const message: ImprovMessage = {
                 type: "improv",
                 improv_form_name: flow,
-                user_input: lastUserInput
+                user_input: `Start the ${flow} flow`
             };
             ws.current.send(JSON.stringify(message));
         }
@@ -882,7 +882,7 @@ export default function InteractionHubVoice() {
         }
     }, [connected, sendPersonality]);
 
-    // NEW: Effect to send local lingo status when it changes and connection is active
+    // Effect to send local lingo status when it changes and connection is active
     useEffect(() => {
         if (connected) {
             sendLocalLingoMessage();

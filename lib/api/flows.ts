@@ -14,7 +14,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
 
 export async function getMultistepFlows(): Promise<Record<string, any>> {
   const headers = await getAuthHeaders();
-  const res = await fetch(`${BACKEND_URL}/flows`, { headers });
+  const res = await fetch(`${BACKEND_URL}/multistep/flows`, { headers });
   if (!res.ok) {
     throw new Error('Failed to fetch flows');
   }
